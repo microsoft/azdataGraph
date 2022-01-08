@@ -4615,7 +4615,7 @@ mxGraph.prototype.insertEdge = function(parent, id, value, source, target, style
  * are set when the edge is added to the model.
  * 
  */
-mxGraph.prototype.createEdge = function(parent, id, value, source, target, style)
+mxGraph.prototype.createEdge = function(parent, id, value, source, target, style='startArrow=classic;endArrow=none')
 {
 	// Creates the edge
 	var edge = new mxCell(value, new mxGeometry(), style);

@@ -124,7 +124,7 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
                         iconName = 'azdataQueryplan-' +  icons[rand];
                     }
                     vertex = graph.insertVertex(parent, null, node, 20, 20, 70, 70, iconName);
-                    graph.insertEdge(parent, null, '', entry.vertex, vertex, 'startArrow=classic;endArrow=none');
+                    graph.insertEdge(parent, null, '', entry.vertex, vertex);
                     stack.push(
                         { 
                             vertex: vertex,
