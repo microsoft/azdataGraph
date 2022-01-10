@@ -4608,31 +4608,6 @@ mxGraph.prototype.insertEdge = function(parent, id, value, source, target, style
 };
 
 /**
- * Function: insertInvertedEdge
- * 
- * Adds a new edge into the given parent <mxCell> using value as the user
- * object and the given source and target as the terminals of the new edge.
- * The id and style are used for the respective properties of the new
- * <mxCell>, which is returned.
- *
- * Parameters:
- * 
- * parent - <mxCell> that specifies the parent of the new edge.
- * id - Optional string that defines the Id of the new edge.
- * value - JavaScript object to be used as the user object.
- * source - <mxCell> that defines the source of the edge.
- * target - <mxCell> that defines the target of the edge.
- * style - Optional string that defines the cell style.
- */
- mxGraph.prototype.insertInvertedEdge = function(parent, id, value, source, target, style)
- {
-	 var terminalStyle = 'startArrow=classic;endArrow=none';
-	 var edge = this.createEdge(parent, id, value, source, target, terminalStyle + style);
-	 
-	 return this.addEdge(edge, parent, source, target);
- };
-
-/**
  * Function: createEdge
  * 
  * Hook method that creates the new edge for <insertEdge>. This
