@@ -1,3 +1,4 @@
+const JUSTIFY_TEXT = 'display: flex; justify-content: space-between;';
 const BOLD_TEXT = 'font-weight: bold;'
 const LINE_HEIGHT = 'padding-top: .13em; line-height: .1em;'
 const TOP_BOTTOM_MARGIN = "margin-top: .75em; margin-bottom: -.5em;"
@@ -131,20 +132,20 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
                     let edgeInfo = {
                         label:'',
                         metrics: [{
-                            'name': `<div style=\"${LINE_HEIGHT}\"><span style=\"${BOLD_TEXT}\">Estimated Number of Rows Per Execution</span>`,
-                            'value': `${Math.floor(Math.random() * 500)}<hr style=\"${TOP_BOTTOM_MARGIN}\"/></div>`,
+                            'name': `<div style=\"${LINE_HEIGHT}\"><div style=\"${JUSTIFY_TEXT}\"><span style=\"${BOLD_TEXT}\">Estimated Number of Rows Per Execution</span>`,
+                            'value': `<span>${Math.floor(Math.random() * 500)}</span></div><hr style=\"${TOP_BOTTOM_MARGIN}\"/></div>`,
                         },
                         {
-                            'name': `<div style=\"${LINE_HEIGHT}\"><span style=\"${BOLD_TEXT}\">Estimated Number of Rows for All Executions</span>`,
-                            'value': `${Math.floor(Math.random() * 2000)}<hr style=\"${TOP_BOTTOM_MARGIN}\"/></div>`
+                            'name': `<div style=\"${LINE_HEIGHT}\"><div style=\"${JUSTIFY_TEXT}\"><span style=\"${BOLD_TEXT}\">Estimated Number of Rows for All Executions</span>`,
+                            'value': `<span>${Math.floor(Math.random() * 2000)}</span></div><hr style=\"${TOP_BOTTOM_MARGIN}\"/></div>`
                         },
                         {
-                            'name': `<div style=\"${LINE_HEIGHT}\"><span style=\"${BOLD_TEXT}\">Estimated Row Size</span>`,
-                            'value': `${Math.floor(Math.random() * 700)}<hr style=\"${TOP_BOTTOM_MARGIN}\"/></div>`
+                            'name': `<div style=\"${LINE_HEIGHT}\"><div style=\"${JUSTIFY_TEXT}\"><span style=\"${BOLD_TEXT}\">Estimated Row Size</span>`,
+                            'value': `<span>${Math.floor(Math.random() * 700)} B</span></div><hr style=\"${TOP_BOTTOM_MARGIN}\"/></div>`
                         },
                         {
-                            'name': `<div style=\"${LINE_HEIGHT}\"><span style=\"${BOLD_TEXT}\">Estimated Data Size</span>`,
-                            'value': `${Math.floor(Math.random() * 700)} KB</div>`
+                            'name': `<div style=\"${LINE_HEIGHT}\"><div><div style=\"${JUSTIFY_TEXT}\"><span style=\"${BOLD_TEXT}\">Estimated Data Size</span>`,
+                            'value': `<span>${Math.floor(Math.random() * 700)} KB</span></div></div>`
                         }]
                     };
                     graph.insertInvertedEdge(parent, null, edgeInfo, entry.vertex, vertex);
