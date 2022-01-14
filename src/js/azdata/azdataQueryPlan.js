@@ -1,3 +1,5 @@
+const BOLD_TEXT = 'font-weight: bold;'
+
 function azdataQueryPlan(container, queryPlanGraph, iconPaths)
 {
     this.queryPlanGraph = queryPlanGraph;
@@ -127,19 +129,19 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
                     let edgeInfo = {
                         label:'',
                         metrics: [{
-                            'name': `Estimated Number of Rows Per Execution`,
+                            'name': `<span style=\"${BOLD_TEXT}\">Estimated Number of Rows Per Execution</span>`,
                             'value': `${Math.floor(Math.random() * 500)}`,
                         },
                         {
-                            'name': `Estimated Number of Rows for All Executions`,
+                            'name': `<span style=\"${BOLD_TEXT}\">Estimated Number of Rows for All Executions</span>`,
                             'value': `${Math.floor(Math.random() * 2000)}`
                         },
                         {
-                            'name': `Estimated Row Size`,
+                            'name': `<span style=\"${BOLD_TEXT}\">Estimated Row Size</span>`,
                             'value': `${Math.floor(Math.random() * 700)}`
                         },
                         {
-                            'name': `Estimated Data Size`,
+                            'name': `<span style=\"${BOLD_TEXT}\">Estimated Data Size</span>`,
                             'value': `${Math.floor(Math.random() * 700)} KB`
                         }]
                     };
