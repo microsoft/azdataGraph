@@ -1,3 +1,4 @@
+const WIDTH = 'width: 25em;'
 const JUSTIFY_TEXT = 'display: flex; justify-content: space-between;';
 const BOLD_TEXT = 'font-weight: bold;'
 const LINE_HEIGHT = 'padding-top: .13em; line-height: .1em;'
@@ -132,7 +133,7 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
                     let edgeInfo = {
                         label:'',
                         metrics: [{
-                            'name': `<div style=\"${LINE_HEIGHT}\"><div style=\"${JUSTIFY_TEXT}\"><span style=\"${BOLD_TEXT}\">Estimated Number of Rows Per Execution</span>`,
+                            'name': `<div style=\"${WIDTH}\"><div style=\"${LINE_HEIGHT}\"><div style=\"${JUSTIFY_TEXT}\"><span style=\"${BOLD_TEXT}\">Estimated Number of Rows Per Execution</span>`,
                             'value': `<span>${Math.floor(Math.random() * 500)}</span></div><hr style=\"${TOP_BOTTOM_MARGIN}\"/></div>`,
                         },
                         {
@@ -145,7 +146,7 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
                         },
                         {
                             'name': `<div style=\"${LINE_HEIGHT}\"><div><div style=\"${JUSTIFY_TEXT}\"><span style=\"${BOLD_TEXT}\">Estimated Data Size</span>`,
-                            'value': `<span>${Math.floor(Math.random() * 700)} KB</span></div></div>`
+                            'value': `<span>${Math.floor(Math.random() * 700)} KB</span></div></div></div>`
                         }]
                     };
                     graph.insertInvertedEdge(parent, null, edgeInfo, entry.vertex, vertex);
