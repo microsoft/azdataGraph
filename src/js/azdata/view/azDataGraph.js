@@ -4,6 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 /**
+ * Tooltip styles
+ * 
+ * TODO lewissanchez - find a better suited home for this.
+ */
+const JUSTIFY_TEXT = 'display: flex; justify-content: space-between;';
+const BOLD_TEXT = 'font-weight: bold;'
+const LINE_HEIGHT = 'padding-top: .13em; line-height: .5em;'
+
+/**
  * Class: azDataGraph
  * 
  * Constructor: azDataGraph
@@ -70,3 +79,40 @@ azDataGraph.prototype.insertInvertedEdge = function (parent, id, value, source, 
 
     return this.addEdge(edge, parent, source, target);
 };
+
+/**
+ * Function: getStyledTooltipForCell
+ * 
+ * Returns a string to be used as the tooltip for the given cell. The
+ * string contains HTML and styles that will resemble tooltips found in
+ * SSMS.
+ * 
+ * Parameters:
+ * cell - <mxCell> that specifies the cell the retrieved tooltip is for.
+ */
+azDataGraph.prototype.getStyledTooltipForCell = function(cell) {
+    let WIDTH = cell.edge ? 'width: 25em;' : 'width: 45em;';
+
+    if (cell.value != null && cell.value.metrics != null) {
+        var tooltip = `<div style=\"${WIDTH}\">`;
+
+        for (var i = 0; i < cell.value.metrics.length; ++i) {
+            tooltip += `<div style=\"${LINE_HEIGHT}\"><div style=\"${JUSTIFY_TEXT}\"><span style=\"${BOLD_TEXT}\">`;
+            tooltip += `${cell.value.metrics[i].name}</span>`;
+
+            tooltip += `<span>${cell.value.metrics[i].value}</span></div>`;
+
+            if (i < cell.value.metrics.length - 1) {
+                tooltip += `<hr />`;
+            }
+
+            tooltip += `</div>`
+        }
+
+        tooltip += '</div>';
+
+        return tooltip;
+    }
+
+    return azDataGraph.prototype.getTooltipForCell.apply(this, arguments); // "supercall"
+}

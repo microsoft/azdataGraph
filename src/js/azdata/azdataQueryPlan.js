@@ -1,9 +1,3 @@
-const WIDTH = 'width: 25em;'
-const JUSTIFY_TEXT = 'display: flex; justify-content: space-between;';
-const BOLD_TEXT = 'font-weight: bold;'
-const LINE_HEIGHT = 'padding-top: .13em; line-height: .1em;'
-const TOP_BOTTOM_MARGIN = "margin-top: .75em; margin-bottom: -.5em;"
-
 function azdataQueryPlan(container, queryPlanGraph, iconPaths)
 {
     this.queryPlanGraph = queryPlanGraph;
@@ -48,24 +42,7 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
         return false;
     };
 
-    graph.getTooltipForCell = function(cell)
-    {
-        if (cell.value != null && cell.value.metrics != null)
-        {
-            var tooltip = '';
-            for (var i = 0; i < cell.value.metrics.length; ++i)
-            {
-                tooltip += cell.value.metrics[i].name + ': ' + cell.value.metrics[i].value;
-                if (i != cell.value.metrics.length - 1)
-                {
-                    tooltip += '<br/>';
-                }
-            }
-            return tooltip;
-        }
-
-        return azDataGraph.prototype.getTooltipForCell.apply(this, arguments); // "supercall"
-    }
+    graph.getTooltipForCell = azDataGraph.prototype.getStyledTooltipForCell;
 
     var parent = graph.getDefaultParent();
     var layout = new mxHierarchicalLayout(graph, mxConstants.DIRECTION_WEST);
@@ -133,20 +110,20 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
                     let edgeInfo = {
                         label:'',
                         metrics: [{
-                            'name': `<div style=\"${WIDTH}\"><div style=\"${LINE_HEIGHT}\"><div style=\"${JUSTIFY_TEXT}\"><span style=\"${BOLD_TEXT}\">Estimated Number of Rows Per Execution</span>`,
-                            'value': `<span>${Math.floor(Math.random() * 500)}</span></div><hr style=\"${TOP_BOTTOM_MARGIN}\"/></div>`,
+                            'name': `Estimated Number of Rows Per Execution`,
+                            'value': `${Math.floor(Math.random() * 500)}`,
                         },
                         {
-                            'name': `<div style=\"${LINE_HEIGHT}\"><div style=\"${JUSTIFY_TEXT}\"><span style=\"${BOLD_TEXT}\">Estimated Number of Rows for All Executions</span>`,
-                            'value': `<span>${Math.floor(Math.random() * 2000)}</span></div><hr style=\"${TOP_BOTTOM_MARGIN}\"/></div>`
+                            'name': `Estimated Number of Rows for All Executions`,
+                            'value': `${Math.floor(Math.random() * 2000)}`
                         },
                         {
-                            'name': `<div style=\"${LINE_HEIGHT}\"><div style=\"${JUSTIFY_TEXT}\"><span style=\"${BOLD_TEXT}\">Estimated Row Size</span>`,
-                            'value': `<span>${Math.floor(Math.random() * 700)} B</span></div><hr style=\"${TOP_BOTTOM_MARGIN}\"/></div>`
+                            'name': `Estimated Row Size`,
+                            'value': `${Math.floor(Math.random() * 700)} B`
                         },
                         {
-                            'name': `<div style=\"${LINE_HEIGHT}\"><div><div style=\"${JUSTIFY_TEXT}\"><span style=\"${BOLD_TEXT}\">Estimated Data Size</span>`,
-                            'value': `<span>${Math.floor(Math.random() * 700)} KB</span></div></div></div>`
+                            'name': `Estimated Data Size`,
+                            'value': `${Math.floor(Math.random() * 700)} KB`
                         }]
                     };
                     graph.insertInvertedEdge(parent, null, edgeInfo, entry.vertex, vertex);
