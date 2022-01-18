@@ -4,15 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 /**
- * Tooltip styles
- * 
- * TODO lewissanchez - find a better suited home for this.
- */
-const JUSTIFY_TEXT = 'display: flex; justify-content: space-between;';
-const BOLD_TEXT = 'font-weight: bold;'
-const LINE_HEIGHT = 'padding-top: .13em; line-height: .5em;'
-
-/**
  * Class: azDataGraph
  * 
  * Constructor: azDataGraph
@@ -91,13 +82,16 @@ azDataGraph.prototype.insertInvertedEdge = function (parent, id, value, source, 
  * cell - <mxCell> that specifies the cell the retrieved tooltip is for.
  */
 azDataGraph.prototype.getStyledTooltipForCell = function(cell) {
-    let WIDTH = cell.edge ? 'width: 25em;' : 'width: 45em;';
+    const tooltipWidth = cell.edge ? 'width: 25em;' : 'width: 45em;';
+    const justifyText = 'display: flex; justify-content: space-between;';
+    const boldText = 'font-weight: bold;'
+    const tooltipLineHeight = 'padding-top: .13em; line-height: .5em;'
 
     if (cell.value != null && cell.value.metrics != null) {
-        var tooltip = `<div style=\"${WIDTH}\">`;
+        var tooltip = `<div style=\"${tooltipWidth}\">`;
 
         for (var i = 0; i < cell.value.metrics.length; ++i) {
-            tooltip += `<div style=\"${LINE_HEIGHT}\"><div style=\"${JUSTIFY_TEXT}\"><span style=\"${BOLD_TEXT}\">`;
+            tooltip += `<div style=\"${tooltipLineHeight}\"><div style=\"${justifyText}\"><span style=\"${boldText}\">`;
             tooltip += `${cell.value.metrics[i].name}</span>`;
 
             tooltip += `<span>${cell.value.metrics[i].value}</span></div>`;
