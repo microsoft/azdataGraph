@@ -126,9 +126,9 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
                             'value': `${Math.floor(Math.random() * 700)} KB`
                         }]
                     };
-                    graph.insertInvertedEdge(parent, null, edgeInfo, entry.vertex, vertex);
+                    graph.insertWeightedInvertedEdge(parent, null, edgeInfo, entry.vertex, vertex);
                     stack.push(
-                        { 
+                        {
                             vertex: vertex,
                             node: node
                         });

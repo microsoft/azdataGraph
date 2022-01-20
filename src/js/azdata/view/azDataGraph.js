@@ -65,10 +65,48 @@ azDataGraph.prototype.constructor = azDataGraph;
  * style - Optional string that defines the cell style.
  */
 azDataGraph.prototype.insertInvertedEdge = function (parent, id, value, source, target, style) {
-    var terminalStyle = 'startArrow=classic;endArrow=none';
+    var terminalStyle = 'startArrow=classic;endArrow=none;';
     var edge = this.createEdge(parent, id, value, source, target, terminalStyle + style);
 
     return this.addEdge(edge, parent, source, target);
+};
+
+/**
+ * Function: insertWeightedInvertedEdge
+ * 
+ * Adds a new edge into the given parent <mxCell> using value as the user
+ * object and the given source and target as the terminals of the new edge.
+ * The id and style are used for the respective properties of the new
+ * <mxCell>, which is returned.
+ *
+ * Parameters:
+ * 
+ * parent - <mxCell> that specifies the parent of the new edge.
+ * id - Optional string that defines the Id of the new edge.
+ * value - JavaScript object to be used as the user object.
+ * source - <mxCell> that defines the source of the edge.
+ * target - <mxCell> that defines the target of the edge.
+ * style - Optional string that defines the cell style.
+ */
+azDataGraph.prototype.insertWeightedInvertedEdge = function (parent, id, value, source, target, style) {
+    let edgeWeight = '';
+    
+    // TDDO lewissanchez - this will eventually be based on the data size for all rows.
+    let randValue = Math.floor(Math.random() * 3)
+    switch (randValue)
+    {
+        case 0:
+            edgeWeight = 'strokeWidth=1;';
+            break;
+        case 1:
+            edgeWeight = 'strokeWidth=1.75;';
+            break;
+        case 2:
+            edgeWeight = 'strokeWidth=2.5;';
+            break;
+    }
+    
+    return this.insertInvertedEdge(parent, id, value, source, target, edgeWeight + style);
 };
 
 /**
