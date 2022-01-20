@@ -1,4 +1,3 @@
-
 function azdataQueryPlan(container, queryPlanGraph, iconPaths)
 {
     this.queryPlanGraph = queryPlanGraph;
@@ -43,24 +42,7 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
         return false;
     };
 
-    graph.getTooltipForCell = function(cell)
-    {
-        if (cell.value != null && cell.value.metrics != null)
-        {
-            var tooltip = '';
-            for (var i = 0; i < cell.value.metrics.length; ++i)
-            {
-                tooltip += cell.value.metrics[i].name + ': ' + cell.value.metrics[i].value;
-                if (i != cell.value.metrics.length - 1)
-                {
-                    tooltip += '\n';
-                }
-            }
-            return tooltip;
-        }
-
-        return azDataGraph.prototype.getTooltipForCell.apply(this, arguments); // "supercall"
-    }
+    graph.getTooltipForCell = azDataGraph.prototype.getStyledTooltipForCell;
 
     var parent = graph.getDefaultParent();
     var layout = new mxHierarchicalLayout(graph, mxConstants.DIRECTION_WEST);
@@ -124,9 +106,29 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
                         iconName = 'azdataQueryplan-' +  icons[rand];
                     }
                     vertex = graph.insertVertex(parent, null, node, 20, 20, 70, 70, iconName);
-                    graph.insertInvertedEdge(parent, null, '', entry.vertex, vertex);
+
+                    let edgeInfo = {
+                        label:'',
+                        metrics: [{
+                            'name': `Estimated Number of Rows Per Execution`,
+                            'value': `${Math.floor(Math.random() * 500)}`,
+                        },
+                        {
+                            'name': `Estimated Number of Rows for All Executions`,
+                            'value': `${Math.floor(Math.random() * 2000)}`
+                        },
+                        {
+                            'name': `Estimated Row Size`,
+                            'value': `${Math.floor(Math.random() * 700)} B`
+                        },
+                        {
+                            'name': `Estimated Data Size`,
+                            'value': `${Math.floor(Math.random() * 700)} KB`
+                        }]
+                    };
+                    graph.insertWeightedInvertedEdge(parent, null, edgeInfo, entry.vertex, vertex);
                     stack.push(
-                        { 
+                        {
                             vertex: vertex,
                             node: node
                         });
