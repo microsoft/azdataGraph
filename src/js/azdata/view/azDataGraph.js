@@ -122,23 +122,46 @@ azDataGraph.prototype.insertWeightedInvertedEdge = function (parent, id, value, 
 azDataGraph.prototype.getStyledTooltipForCell = function(cell) {
     const tooltipWidth = cell.edge ? 'width: 25em;' : 'width: 45em;';
     const justifyText = 'display: flex; justify-content: space-between;';
-    const boldText = 'font-weight: bold;'
-    const tooltipLineHeight = 'padding-top: .13em; line-height: .5em;'
+    const boldText = 'font-weight: bold;';
+    const tooltipLineHeight = 'padding-top: .13em; line-height: .5em;';
+    const centerText = 'text-align: center;';
+    const headerBottomMargin = 'margin-bottom: 1.5em;';
+    const footerTopMargin = 'margin-top: 1.5em;';
 
     if (cell.value != null && cell.value.metrics != null) {
         var tooltip = `<div style=\"${tooltipWidth}\">`;
 
-        for (var i = 0; i < cell.value.metrics.length; ++i) {
-            tooltip += `<div style=\"${tooltipLineHeight}\"><div style=\"${justifyText}\"><span style=\"${boldText}\">`;
-            tooltip += `${cell.value.metrics[i].name}</span>`;
+        // tooltip heading for vertices only
+        if (!cell.edge) {
+            tooltip += `<div style=\"${centerText}\"><span style=\"${boldText}\">${cell.value.label}</span></div>`;
+            tooltip += `<div style=\"${headerBottomMargin}\"><span>[Description of operation here]</span></div>`;
+        }
 
-            tooltip += `<span>${cell.value.metrics[i].value}</span></div>`;
+        // tooltip body
+        let startIndex = cell.edge ? 0 : 1; // first index for vertices contains footer label, so we can skip for vertices.
+        for (var i = startIndex; i < cell.value.metrics.length; ++i) {
+            tooltip += `<div style=\"${tooltipLineHeight}\">`;
+
+            tooltip += `<div style=\"${justifyText}\">`;
+            tooltip += `<span style=\"${boldText}\">${cell.value.metrics[i].name}</span>`;
+            tooltip += `<span>${cell.value.metrics[i].value}</span>`;
+            tooltip += '</div>';
 
             if (i < cell.value.metrics.length - 1) {
                 tooltip += `<hr />`;
             }
 
             tooltip += `</div>`
+        }
+
+        // tooltip footer for vertices only
+        if (!cell.edge) {
+            tooltip += '<hr />';
+            tooltip += `<div style=\"${footerTopMargin}\"><span style=\"${boldText}\">${cell.value.metrics[0].name}</span></div>`;
+            tooltip += `<div><span>${cell.value.metrics[0].value}</span></div>`;
+            tooltip += `<div><span style=\"${boldText}\">Warnings</span></div>`;
+            tooltip += '<div><span>No join predicate</span></div>';
+            
         }
 
         tooltip += '</div>';
