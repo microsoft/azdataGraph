@@ -121,7 +121,7 @@ azDataGraph.prototype.insertWeightedInvertedEdge = function (parent, id, value, 
  */
 azDataGraph.prototype.getStyledTooltipForCell = function(cell) {
     const tooltipWidth = cell.edge ? 'width: 25em;' : 'width: 45em;';
-    const justifyText = 'display: flex; justify-content: space-between;';
+    const justifyContent = 'display: flex; justify-content: space-between;';
     const boldText = 'font-weight: bold;';
     const tooltipLineHeight = 'padding-top: .13em; line-height: .5em;';
     const centerText = 'text-align: center;';
@@ -142,7 +142,7 @@ azDataGraph.prototype.getStyledTooltipForCell = function(cell) {
         for (var i = startIndex; i < cell.value.metrics.length; ++i) {
             tooltip += `<div style=\"${tooltipLineHeight}\">`;
 
-            tooltip += `<div style=\"${justifyText}\">`;
+            tooltip += `<div style=\"${justifyContent}\">`;
             tooltip += `<span style=\"${boldText}\">${cell.value.metrics[i].name}</span>`;
             tooltip += `<span>${cell.value.metrics[i].value}</span>`;
             tooltip += '</div>';
