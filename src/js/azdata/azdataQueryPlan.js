@@ -161,5 +161,3 @@ azdataQueryPlan.prototype.destroy = function()
         this.container = null;
     }
 };
-
-azDataGraph.addListener
