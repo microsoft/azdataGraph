@@ -42,6 +42,16 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
         return false;
     };
 
+    graph.addListener(mxEvent.CLICK, function(sender, event) {
+        let selectedCell = event.getProperty('cell');
+        if (selectedCell.edge) {
+            console.log(`Edge clicked: ${selectedCell}`); // resplace with desired behavior
+        }
+        else if (selectedCell.vertex) {
+            console.log(`Vertex clicked: ${selectedCell}`); // replace with desired behavior
+        }
+    })
+
     graph.getTooltipForCell = azDataGraph.prototype.getStyledTooltipForCell;
 
     var parent = graph.getDefaultParent();
@@ -151,3 +161,5 @@ azdataQueryPlan.prototype.destroy = function()
         this.container = null;
     }
 };
+
+azDataGraph.addListener
