@@ -22,7 +22,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
 
     mxEvent.disableContextMenu(container);
 
-    var graph = new mxGraph(container);
+    var graph = new azDataGraph(container);
     graph.setPanning(true);
     graph.setTooltips(true);
 
@@ -31,7 +31,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
             return cell.value.label;
         }
 
-        return mxGraph.prototype.convertValueToString.apply(this, arguments); // "supercall"
+        return azDataGraph.prototype.convertValueToString.apply(this, arguments); // "supercall"
     };
 
     graph.isHtmlLabel = function (cell) {
@@ -42,20 +42,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
         return false;
     };
 
-    graph.getTooltipForCell = function (cell) {
-        if (cell.value != null && cell.value.metrics != null) {
-            var tooltip = '';
-            for (var i = 0; i < cell.value.metrics.length; ++i) {
-                tooltip += cell.value.metrics[i].name + ': ' + cell.value.metrics[i].value;
-                if (i != cell.value.metrics.length - 1) {
-                    tooltip += '\n';
-                }
-            }
-            return tooltip;
-        }
-
-        return mxGraph.prototype.getTooltipForCell.apply(this, arguments); // "supercall"
-    }
+    graph.getTooltipForCell = azDataGraph.prototype.getStyledTooltipForCell;
 
     var parent = graph.getDefaultParent();
     var layout = new azdataQueryPlanLayout(graph, mxConstants.DIRECTION_WEST);
@@ -115,7 +102,27 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
                     }
 
                     vertex = graph.insertVertex(parent, null, node, 20, 20, 70, 70, iconName);
-                    graph.insertEdge(parent, null, '', entry.vertex, vertex);
+
+                    let edgeInfo = {
+                        label: '',
+                        metrics: [{
+                            'name': `Estimated Number of Rows Per Execution`,
+                            'value': `${Math.floor(Math.random() * 500)}`,
+                        },
+                        {
+                            'name': `Estimated Number of Rows for All Executions`,
+                            'value': `${Math.floor(Math.random() * 2000)}`
+                        },
+                        {
+                            'name': `Estimated Row Size`,
+                            'value': `${Math.floor(Math.random() * 700)} B`
+                        },
+                        {
+                            'name': `Estimated Data Size`,
+                            'value': `${Math.floor(Math.random() * 700)} KB`
+                        }]
+                    };
+                    graph.insertWeightedInvertedEdge(parent, null, edgeInfo, entry.vertex, vertex);
                     stack.push(
                         {
                             vertex: vertex,
