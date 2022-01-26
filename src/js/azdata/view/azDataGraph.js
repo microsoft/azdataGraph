@@ -171,3 +171,32 @@ azDataGraph.prototype.getStyledTooltipForCell = function(cell) {
 
     return azDataGraph.prototype.getTooltipForCell.apply(this, arguments); // "supercall"
 }
+
+/**
+ * Function: graphClickEventHandler
+ * 
+ * Handles graph click events for edges and vertices.
+ * 
+ * (code)
+ * graph.addListener(mxEvent.CLICK, azDataGraph.prototype.graphClickEventHandler);
+ * (end)
+ * 
+ * Parameter:
+ * 
+ * sender - Optional sender argument. Default is this.
+ * event - The click caught by the graph listener.
+ */
+azDataGraph.prototype.graphClickEventHandler = function(sender, event) {
+    let selectedCell = event.getProperty('cell');
+    
+    if (selectedCell && selectedCell.edge) {
+        console.log(`Edge clicked: ${selectedCell}`); // replace with desired behavior
+
+        event.consume();
+    }
+    else if (selectedCell && selectedCell.vertex) {
+        console.log(`Vertex clicked: ${selectedCell}`); // replace with desired behavior
+
+        event.consume();
+    }
+}
