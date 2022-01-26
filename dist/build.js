@@ -759,6 +759,7 @@ if (mxForceIncludes || !(typeof module === 'object' && module.exports != null))
 	mxClient.include(mxClient.basePath+'/js/view/mxStyleRegistry.js');
 	mxClient.include(mxClient.basePath+'/js/view/mxGraphView.js');
 	mxClient.include(mxClient.basePath+'/js/view/mxGraph.js');
+	mxClient.include(mxClient.basePath+'/js/azdata/view/azDataGraph.js');
 	mxClient.include(mxClient.basePath+'/js/view/mxCellOverlay.js');
 	mxClient.include(mxClient.basePath+'/js/view/mxOutline.js');
 	mxClient.include(mxClient.basePath+'/js/view/mxMultiplicity.js');
@@ -68499,6 +68500,182 @@ mxGraph.prototype.destroy = function()
 
 __mxOutput.mxGraph = typeof mxGraph !== 'undefined' ? mxGraph : undefined;
 
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the Source EULA. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/**
+ * Class: azDataGraph
+ * 
+ * Constructor: azDataGraph
+ * 
+ * Constructs a new azDataGraph in the specified container. Model is an optional
+ * mxGraphModel. If no model is provided, a new mxGraphModel instance is 
+ * used as the model. The container must have a valid owner document prior 
+ * to calling this function in Internet Explorer. RenderHint is a string to
+ * affect the display performance and rendering in IE, but not in SVG-based 
+ * browsers. The parameter is mapped to <dialect>, which may 
+ * be one of <mxConstants.DIALECT_SVG> for SVG-based browsers, 
+ * <mxConstants.DIALECT_STRICTHTML> for fastest display mode,
+ * <mxConstants.DIALECT_PREFERHTML> for faster display mode,
+ * <mxConstants.DIALECT_MIXEDHTML> for fast and <mxConstants.DIALECT_VML> 
+ * for exact display mode (slowest). The dialects are defined in mxConstants.
+ * The default values are DIALECT_SVG for SVG-based browsers and
+ * DIALECT_MIXED for IE.
+ *
+ * Example:
+ * 
+ * To create a graph inside a DOM node with an id of graph:
+ * (code)
+ * var container = document.getElementById('graph');
+ * var graph = new azDataGraph(container);
+ * (end)
+ * 
+ * Parameters:
+ * 
+ * container - Optional DOM node that acts as a container for the graph.
+ * If this is null then the container can be initialized later using
+ * <init>.
+ * model - Optional <mxGraphModel> that constitutes the graph data.
+ * renderHint - Optional string that specifies the display accuracy and
+ * performance. Default is mxConstants.DIALECT_MIXEDHTML (for IE).
+ * stylesheet - Optional <mxStylesheet> to be used in the graph.
+ */
+function azDataGraph(container, model, renderHint, styleSheet) {
+    mxGraph.call(this, container, model, renderHint, styleSheet);
+}
+
+azDataGraph.prototype = Object.create(mxGraph.prototype);
+azDataGraph.prototype.constructor = azDataGraph;
+
+/**
+ * Function: insertInvertedEdge
+ * 
+ * Adds a new edge into the given parent <mxCell> using value as the user
+ * object and the given source and target as the terminals of the new edge.
+ * The id and style are used for the respective properties of the new
+ * <mxCell>, which is returned.
+ *
+ * Parameters:
+ * 
+ * parent - <mxCell> that specifies the parent of the new edge.
+ * id - Optional string that defines the Id of the new edge.
+ * value - JavaScript object to be used as the user object.
+ * source - <mxCell> that defines the source of the edge.
+ * target - <mxCell> that defines the target of the edge.
+ * style - Optional string that defines the cell style.
+ */
+azDataGraph.prototype.insertInvertedEdge = function (parent, id, value, source, target, style) {
+    var terminalStyle = 'startArrow=classic;endArrow=none;';
+    var edge = this.createEdge(parent, id, value, source, target, terminalStyle + style);
+
+    return this.addEdge(edge, parent, source, target);
+};
+
+/**
+ * Function: insertWeightedInvertedEdge
+ * 
+ * Adds a new edge into the given parent <mxCell> using value as the user
+ * object and the given source and target as the terminals of the new edge.
+ * The id and style are used for the respective properties of the new
+ * <mxCell>, which is returned.
+ *
+ * Parameters:
+ * 
+ * parent - <mxCell> that specifies the parent of the new edge.
+ * id - Optional string that defines the Id of the new edge.
+ * value - JavaScript object to be used as the user object.
+ * source - <mxCell> that defines the source of the edge.
+ * target - <mxCell> that defines the target of the edge.
+ * style - Optional string that defines the cell style.
+ */
+azDataGraph.prototype.insertWeightedInvertedEdge = function (parent, id, value, source, target, style) {
+    let edgeWeight = '';
+    
+    // TDDO lewissanchez - this will eventually be based on the data size for all rows.
+    let randValue = Math.floor(Math.random() * 3)
+    switch (randValue)
+    {
+        case 0:
+            edgeWeight = 'strokeWidth=1;';
+            break;
+        case 1:
+            edgeWeight = 'strokeWidth=1.75;';
+            break;
+        case 2:
+            edgeWeight = 'strokeWidth=2.5;';
+            break;
+    }
+    
+    return this.insertInvertedEdge(parent, id, value, source, target, edgeWeight + style);
+};
+
+/**
+ * Function: getStyledTooltipForCell
+ * 
+ * Returns a string to be used as the tooltip for the given cell. The
+ * string contains HTML and styles that will resemble tooltips found in
+ * SSMS.
+ * 
+ * Parameters:
+ * cell - <mxCell> that specifies the cell the retrieved tooltip is for.
+ */
+azDataGraph.prototype.getStyledTooltipForCell = function(cell) {
+    const tooltipWidth = cell.edge ? 'width: 25em;' : 'width: 45em;';
+    const justifyContent = 'display: flex; justify-content: space-between;';
+    const boldText = 'font-weight: bold;';
+    const tooltipLineHeight = 'padding-top: .13em; line-height: .5em;';
+    const centerText = 'text-align: center;';
+    const headerBottomMargin = 'margin-bottom: 1.5em;';
+    const footerTopMargin = 'margin-top: 1.5em;';
+
+    if (cell.value != null && cell.value.metrics != null) {
+        var tooltip = `<div style=\"${tooltipWidth}\">`;
+
+        // tooltip heading for vertices only
+        if (!cell.edge) {
+            tooltip += `<div style=\"${centerText}\"><span style=\"${boldText}\">${cell.value.label}</span></div>`;
+            tooltip += `<div style=\"${headerBottomMargin}\"><span>[Description of operation here]</span></div>`;
+        }
+
+        // tooltip body
+        let startIndex = cell.edge ? 0 : 1; // first index for vertices contains footer label, so we can skip for vertices.
+        for (var i = startIndex; i < cell.value.metrics.length; ++i) {
+            tooltip += `<div style=\"${tooltipLineHeight}\">`;
+
+            tooltip += `<div style=\"${justifyContent}\">`;
+            tooltip += `<span style=\"${boldText}\">${cell.value.metrics[i].name}</span>`;
+            tooltip += `<span>${cell.value.metrics[i].value}</span>`;
+            tooltip += '</div>';
+
+            if (i < cell.value.metrics.length - 1) {
+                tooltip += `<hr />`;
+            }
+
+            tooltip += `</div>`
+        }
+
+        // tooltip footer for vertices only
+        if (!cell.edge) {
+            tooltip += '<hr />';
+            tooltip += `<div style=\"${footerTopMargin}\"><span style=\"${boldText}\">${cell.value.metrics[0].name}</span></div>`;
+            tooltip += `<div><span>${cell.value.metrics[0].value}</span></div>`;
+            tooltip += `<div><span style=\"${boldText}\">Warnings</span></div>`;
+            tooltip += '<div><span>No join predicate</span></div>';
+            
+        }
+
+        tooltip += '</div>';
+
+        return tooltip;
+    }
+
+    return azDataGraph.prototype.getTooltipForCell.apply(this, arguments); // "supercall"
+}
+
+__mxOutput.azDataGraph = typeof azDataGraph !== 'undefined' ? azDataGraph : undefined;
+
 /**
  * Copyright (c) 2006-2015, JGraph Ltd
  * Copyright (c) 2006-2015, Gaudenz Alder
@@ -92552,7 +92729,6 @@ mxCodecRegistry.register(function()
 
 __mxOutput.mxEditorCodec = typeof mxEditorCodec !== 'undefined' ? mxEditorCodec : undefined;
 
-
 function azdataQueryPlan(container, queryPlanGraph, iconPaths)
 {
     this.queryPlanGraph = queryPlanGraph;
@@ -92573,7 +92749,7 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
 
     mxEvent.disableContextMenu(container);
 
-    var graph = new mxGraph(container);
+    var graph = new azDataGraph(container);
     graph.setPanning(true);
 	graph.setTooltips(true);        
 
@@ -92584,7 +92760,7 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
             return cell.value.label;
         }
 
-        return mxGraph.prototype.convertValueToString.apply(this, arguments); // "supercall"
+        return azDataGraph.prototype.convertValueToString.apply(this, arguments); // "supercall"
     };
 
     graph.isHtmlLabel = function(cell)
@@ -92597,24 +92773,7 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
         return false;
     };
 
-    graph.getTooltipForCell = function(cell)
-    {
-        if (cell.value != null && cell.value.metrics != null)
-        {
-            var tooltip = '';
-            for (var i = 0; i < cell.value.metrics.length; ++i)
-            {
-                tooltip += cell.value.metrics[i].name + ': ' + cell.value.metrics[i].value;
-                if (i != cell.value.metrics.length - 1)
-                {
-                    tooltip += '\n';
-                }
-            }
-            return tooltip;
-        }
-
-        return mxGraph.prototype.getTooltipForCell.apply(this, arguments); // "supercall"
-    }
+    graph.getTooltipForCell = azDataGraph.prototype.getStyledTooltipForCell;
 
     var parent = graph.getDefaultParent();
     var layout = new mxHierarchicalLayout(graph, mxConstants.DIRECTION_WEST);
@@ -92678,9 +92837,29 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
                         iconName = 'azdataQueryplan-' +  icons[rand];
                     }
                     vertex = graph.insertVertex(parent, null, node, 20, 20, 70, 70, iconName);
-                    graph.insertEdge(parent, null, '', entry.vertex, vertex);
+
+                    let edgeInfo = {
+                        label:'',
+                        metrics: [{
+                            'name': `Estimated Number of Rows Per Execution`,
+                            'value': `${Math.floor(Math.random() * 500)}`,
+                        },
+                        {
+                            'name': `Estimated Number of Rows for All Executions`,
+                            'value': `${Math.floor(Math.random() * 2000)}`
+                        },
+                        {
+                            'name': `Estimated Row Size`,
+                            'value': `${Math.floor(Math.random() * 700)} B`
+                        },
+                        {
+                            'name': `Estimated Data Size`,
+                            'value': `${Math.floor(Math.random() * 700)} KB`
+                        }]
+                    };
+                    graph.insertWeightedInvertedEdge(parent, null, edgeInfo, entry.vertex, vertex);
                     stack.push(
-                        { 
+                        {
                             vertex: vertex,
                             node: node
                         });
