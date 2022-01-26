@@ -747,6 +747,7 @@ if (mxForceIncludes || !(typeof module === 'object' && module.exports != null))
 	mxClient.include(mxClient.basePath+'/js/view/mxStyleRegistry.js');
 	mxClient.include(mxClient.basePath+'/js/view/mxGraphView.js');
 	mxClient.include(mxClient.basePath+'/js/view/mxGraph.js');
+	mxClient.include(mxClient.basePath+'/js/azdata/view/azDataGraph.js');
 	mxClient.include(mxClient.basePath+'/js/view/mxCellOverlay.js');
 	mxClient.include(mxClient.basePath+'/js/view/mxOutline.js');
 	mxClient.include(mxClient.basePath+'/js/view/mxMultiplicity.js');
