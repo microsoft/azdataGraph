@@ -18,7 +18,7 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
 
     mxEvent.disableContextMenu(container);
 
-    var graph = new azDataGraph(container);
+    var graph = new azdataGraph(container);
     graph.setPanning(true);
 	graph.setTooltips(true);        
 
@@ -29,7 +29,7 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
             return cell.value.label;
         }
 
-        return azDataGraph.prototype.convertValueToString.apply(this, arguments); // "supercall"
+        return azdataGraph.prototype.convertValueToString.apply(this, arguments); // "supercall"
     };
 
     graph.isHtmlLabel = function(cell)
@@ -42,9 +42,9 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
         return false;
     };
 
-    graph.addListener(mxEvent.CLICK, azDataGraph.prototype.graphClickEventHandler);
+    graph.addListener(mxEvent.CLICK, azdataGraph.prototype.graphClickEventHandler);
 
-    graph.getTooltipForCell = azDataGraph.prototype.getStyledTooltipForCell;
+    graph.getTooltipForCell = azdataGraph.prototype.getStyledTooltipForCell;
 
     var parent = graph.getDefaultParent();
     var layout = new mxHierarchicalLayout(graph, mxConstants.DIRECTION_WEST);

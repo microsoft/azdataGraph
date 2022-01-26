@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 /**
- * Class: azDataGraph
+ * Class: azdataGraph
  * 
- * Constructor: azDataGraph
+ * Constructor: azdataGraph
  * 
- * Constructs a new azDataGraph in the specified container. Model is an optional
+ * Constructs a new azdataGraph in the specified container. Model is an optional
  * mxGraphModel. If no model is provided, a new mxGraphModel instance is 
  * used as the model. The container must have a valid owner document prior 
  * to calling this function in Internet Explorer. RenderHint is a string to
@@ -27,7 +27,7 @@
  * To create a graph inside a DOM node with an id of graph:
  * (code)
  * var container = document.getElementById('graph');
- * var graph = new azDataGraph(container);
+ * var graph = new azdataGraph(container);
  * (end)
  * 
  * Parameters:
@@ -40,12 +40,12 @@
  * performance. Default is mxConstants.DIALECT_MIXEDHTML (for IE).
  * stylesheet - Optional <mxStylesheet> to be used in the graph.
  */
-function azDataGraph(container, model, renderHint, styleSheet) {
+function azdataGraph(container, model, renderHint, styleSheet) {
     mxGraph.call(this, container, model, renderHint, styleSheet);
 }
 
-azDataGraph.prototype = Object.create(mxGraph.prototype);
-azDataGraph.prototype.constructor = azDataGraph;
+azdataGraph.prototype = Object.create(mxGraph.prototype);
+azdataGraph.prototype.constructor = azdataGraph;
 
 /**
  * Function: insertInvertedEdge
@@ -64,7 +64,7 @@ azDataGraph.prototype.constructor = azDataGraph;
  * target - <mxCell> that defines the target of the edge.
  * style - Optional string that defines the cell style.
  */
-azDataGraph.prototype.insertInvertedEdge = function (parent, id, value, source, target, style) {
+azdataGraph.prototype.insertInvertedEdge = function (parent, id, value, source, target, style) {
     var terminalStyle = 'startArrow=classic;endArrow=none;';
     var edge = this.createEdge(parent, id, value, source, target, terminalStyle + style);
 
@@ -88,7 +88,7 @@ azDataGraph.prototype.insertInvertedEdge = function (parent, id, value, source, 
  * target - <mxCell> that defines the target of the edge.
  * style - Optional string that defines the cell style.
  */
-azDataGraph.prototype.insertWeightedInvertedEdge = function (parent, id, value, source, target, style) {
+azdataGraph.prototype.insertWeightedInvertedEdge = function (parent, id, value, source, target, style) {
     let edgeWeight = '';
     
     // TDDO lewissanchez - this will eventually be based on the data size for all rows.
@@ -119,7 +119,7 @@ azDataGraph.prototype.insertWeightedInvertedEdge = function (parent, id, value, 
  * Parameters:
  * cell - <mxCell> that specifies the cell the retrieved tooltip is for.
  */
-azDataGraph.prototype.getStyledTooltipForCell = function(cell) {
+azdataGraph.prototype.getStyledTooltipForCell = function(cell) {
     const tooltipWidth = cell.edge ? 'width: 25em;' : 'width: 45em;';
     const justifyContent = 'display: flex; justify-content: space-between;';
     const boldText = 'font-weight: bold;';
@@ -169,7 +169,7 @@ azDataGraph.prototype.getStyledTooltipForCell = function(cell) {
         return tooltip;
     }
 
-    return azDataGraph.prototype.getTooltipForCell.apply(this, arguments); // "supercall"
+    return azdataGraph.prototype.getTooltipForCell.apply(this, arguments); // "supercall"
 }
 
 /**
@@ -178,7 +178,7 @@ azDataGraph.prototype.getStyledTooltipForCell = function(cell) {
  * Handles graph click events for edges and vertices.
  * 
  * (code)
- * graph.addListener(mxEvent.CLICK, azDataGraph.prototype.graphClickEventHandler);
+ * graph.addListener(mxEvent.CLICK, azdataGraph.prototype.graphClickEventHandler);
  * (end)
  * 
  * Parameter:
@@ -186,7 +186,7 @@ azDataGraph.prototype.getStyledTooltipForCell = function(cell) {
  * sender - Optional sender argument. Default is this.
  * event - The click caught by the graph listener.
  */
-azDataGraph.prototype.graphClickEventHandler = function(sender, event) {
+azdataGraph.prototype.graphClickEventHandler = function(sender, event) {
     let selectedCell = event.getProperty('cell');
     
     if (selectedCell && selectedCell.edge) {
