@@ -9,6 +9,10 @@ function azdataQueryPlan(container, queryPlanGraph, iconPaths)
 
 azdataQueryPlan.prototype.init = function(container, iconPaths)
 {
+    let div = document.getElementById('graphContainer');
+    div.style.width = '100%';
+    div.style.height = '50%';
+    div.style.overflow = 'auto';
     this.container = container;
 
     mxEvent.addListener(window, 'unload', mxUtils.bind(this, function()
@@ -19,8 +23,13 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
     mxEvent.disableContextMenu(container);
 
     var graph = new azdataGraph(container);
+    graph.centerZoom = false;
+	graph.setTooltips(true);
+    graph.setEnabled(true);
+
+    graph.panningHandler.useLeftButtonForPanning = true;
     graph.setPanning(true);
-	graph.setTooltips(true);        
+    graph.resizeContainer = false;
 
     graph.convertValueToString = function(cell)
     {
@@ -42,7 +51,9 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
         return false;
     };
 
-    graph.addListener(mxEvent.CLICK, azdataGraph.prototype.graphClickEventHandler);
+    graph.addListener(mxEvent.CLICK, (sender, event) => {
+        azdataGraph.prototype.graphClickEventHandler(sender, event);
+    });
 
     graph.getTooltipForCell = azdataGraph.prototype.getStyledTooltipForCell;
 
@@ -72,6 +83,63 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
         graph.getStylesheet().putCellStyle('azdataQueryplan-' + iconName, style);
         icons.push(iconName);
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////
+    // temporary button logic to confirm zoom in and zoom out works.
+    
+    var buttons = document.createElement('div');
+	buttons.style.position = 'absolute';
+	buttons.style.overflow = 'visible';
+
+    var bs = graph.getBorderSizes();
+    buttons.style.top = (container.offsetTop + bs.y) + 'px';
+	buttons.style.left = (container.offsetLeft + bs.x) + 'px';
+    
+    var left = 0;
+	var bw = 16;
+	var bh = 16;
+
+    function addButton(label, funct)
+    {
+        var btn = document.createElement('div');
+        mxUtils.write(btn, label);
+        btn.style.position = 'absolute';
+        btn.style.backgroundColor = 'transparent';
+        btn.style.border = '1px solid gray';
+        btn.style.textAlign = 'center';
+        btn.style.fontSize = '10px';
+        btn.style.cursor = 'hand';
+        btn.style.width = bw + 'px';
+        btn.style.height = bh + 'px';
+        btn.style.left = left + 'px';
+        btn.style.top = '0px';
+        
+        mxEvent.addListener(btn, 'click', function(evt)
+        {
+            funct();
+            mxEvent.consume(evt);
+        });
+        
+        left += bw;
+        
+        buttons.appendChild(btn);
+    };
+
+    addButton('+', function()
+    {
+        graph.zoomIn();
+    });
+    
+    addButton('-', function()
+    {
+        graph.zoomOut();
+    });
+
+    if (container.nextSibling != null)
+    {
+        container.parentNode.insertBefore(buttons, container.nextSibling);
+    }
+////////////////////////////////////////////////////////////////////////////////////
 
     graph.getModel().beginUpdate();
     try
