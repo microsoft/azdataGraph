@@ -90,11 +90,10 @@ azdataGraph.prototype.insertInvertedEdge = function (parent, id, value, source, 
  */
 azdataGraph.prototype.insertWeightedInvertedEdge = function (parent, id, value, source, target, style) {
     let edgeWeight = '';
-    
+
     // TDDO lewissanchez - this will eventually be based on the data size for all rows.
     let randValue = Math.floor(Math.random() * 3)
-    switch (randValue)
-    {
+    switch (randValue) {
         case 0:
             edgeWeight = 'strokeWidth=1;';
             break;
@@ -105,7 +104,7 @@ azdataGraph.prototype.insertWeightedInvertedEdge = function (parent, id, value, 
             edgeWeight = 'strokeWidth=2.5;';
             break;
     }
-    
+
     return this.insertInvertedEdge(parent, id, value, source, target, edgeWeight + style);
 };
 
@@ -119,7 +118,7 @@ azdataGraph.prototype.insertWeightedInvertedEdge = function (parent, id, value, 
  * Parameters:
  * cell - <mxCell> that specifies the cell the retrieved tooltip is for.
  */
-azdataGraph.prototype.getStyledTooltipForCell = function(cell) {
+azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
     const tooltipWidth = cell.edge ? 'width: 25em;' : 'width: 45em;';
     const justifyContent = 'display: flex; justify-content: space-between;';
     const boldText = 'font-weight: bold;';
@@ -161,7 +160,7 @@ azdataGraph.prototype.getStyledTooltipForCell = function(cell) {
             tooltip += `<div><span>${cell.value.metrics[0].value}</span></div>`;
             tooltip += `<div><span style=\"${boldText}\">Warnings</span></div>`;
             tooltip += '<div><span>No join predicate</span></div>';
-            
+
         }
 
         tooltip += '</div>';
@@ -186,9 +185,8 @@ azdataGraph.prototype.getStyledTooltipForCell = function(cell) {
  * sender - Optional sender argument. Default is this.
  * event - The click caught by the graph listener.
  */
-azdataGraph.prototype.graphClickEventHandler = function(sender, event) {
+azdataGraph.prototype.graphClickEventHandler = function (sender, event) {
     let selectedCell = event.getProperty('cell');
-    
     if (selectedCell && selectedCell.edge) {
         console.log(`Edge clicked: ${selectedCell}`); // replace with desired behavior
 
@@ -199,4 +197,38 @@ azdataGraph.prototype.graphClickEventHandler = function(sender, event) {
 
         event.consume();
     }
+}
+
+/**
+ * Function: addZoomInListener
+ * 
+ * Adds the zoom in listener to the given element
+ * 
+ * Parameter:
+ * 
+ * element - The element to add the listener to.
+ */
+azdataGraph.prototype.addZoomInListener = function (element) {
+    let self = this;
+    mxEvent.addListener(element, 'click', (e) => {
+        azdataGraph.prototype.zoomIn.apply(self);
+        mxEvent.consume(e);
+    });
+}
+
+/**
+ * Function: addZoomOutListener
+ * 
+ * Adds the zoom out listener to the given element
+ * 
+ * Parameter
+ * 
+ * element - The element to add the listener to.
+ */
+azdataGraph.prototype.addZoomOutListener = function (element) {
+    let self = this;
+    mxEvent.addListener(element, 'click', (e) => {
+        azdataGraph.prototype.zoomOut.apply(self);
+        mxEvent.consume(e);
+    });
 }
