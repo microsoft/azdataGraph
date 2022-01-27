@@ -99,7 +99,7 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
 	var bw = 16;
 	var bh = 16;
 
-    function addButton(label, funct)
+    function addButton(label, eventCallback)
     {
         var btn = document.createElement('div');
         mxUtils.write(btn, label);
@@ -116,7 +116,7 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
         
         mxEvent.addListener(btn, 'click', function(evt)
         {
-            funct();
+            eventCallback();
             mxEvent.consume(evt);
         });
         
