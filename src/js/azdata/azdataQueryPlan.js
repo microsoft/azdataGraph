@@ -114,10 +114,10 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
         btn.style.left = left + 'px';
         btn.style.top = '0px';
         
-        mxEvent.addListener(btn, 'click', function(evt)
+        mxEvent.addListener(btn, 'click', (e) =>
         {
             eventCallback();
-            mxEvent.consume(evt);
+            mxEvent.consume(e);
         });
         
         left += bw;
@@ -125,12 +125,12 @@ azdataQueryPlan.prototype.init = function(container, iconPaths)
         buttons.appendChild(btn);
     };
 
-    addButton('+', function()
+    addButton('+', () =>
     {
         graph.zoomIn();
     });
     
-    addButton('-', function()
+    addButton('-', () =>
     {
         graph.zoomOut();
     });
