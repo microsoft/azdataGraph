@@ -267,10 +267,10 @@
 			let queryPlan = new azdataQueryPlan(container, graph, iconPaths);
 
 			let zoomInButton = document.getElementById('zoomInBtn');
-			queryPlan.registerZoomInListener(zoomInButton);
+			queryPlan.registerZoomInListener(zoomInButton, 'click');
 
 			let zoomOutButtom = document.getElementById('zoomOutBtn');
-			queryPlan.registerZoomOutListener(zoomOutButtom);
+			queryPlan.registerZoomOutListener(zoomOutButtom, 'click');
 		};
 	</script>
 </head>

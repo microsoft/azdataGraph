@@ -207,10 +207,11 @@ azdataGraph.prototype.graphClickEventHandler = function (sender, event) {
  * Parameter:
  * 
  * element - The element to add the listener to.
+ * eventType - the event type (i.e. 'click') that should trigger the callback
  */
-azdataGraph.prototype.addZoomInListener = function (element) {
+azdataGraph.prototype.addZoomInListener = function (element, eventType) {
     let self = this;
-    mxEvent.addListener(element, 'click', (e) => {
+    mxEvent.addListener(element, eventType, (e) => {
         azdataGraph.prototype.zoomIn.apply(self);
         mxEvent.consume(e);
     });
@@ -224,10 +225,11 @@ azdataGraph.prototype.addZoomInListener = function (element) {
  * Parameter
  * 
  * element - The element to add the listener to.
+ * eventType - The event type (i.e. 'click') that should trigger the callback
  */
-azdataGraph.prototype.addZoomOutListener = function (element) {
+azdataGraph.prototype.addZoomOutListener = function (element, eventType) {
     let self = this;
-    mxEvent.addListener(element, 'click', (e) => {
+    mxEvent.addListener(element, eventType, (e) => {
         azdataGraph.prototype.zoomOut.apply(self);
         mxEvent.consume(e);
     });

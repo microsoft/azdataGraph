@@ -141,12 +141,12 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     }
 };
 
-azdataQueryPlan.prototype.registerZoomInListener = function (element) {
-    this.graph.addZoomInListener(element);
+azdataQueryPlan.prototype.registerZoomInListener = function (element, eventType) {
+    this.graph.addZoomInListener(element, eventType);
 };
 
-azdataQueryPlan.prototype.registerZoomOutListener = function (element) {
-    this.graph.addZoomOutListener(element);
+azdataQueryPlan.prototype.registerZoomOutListener = function (element, eventType) {
+    this.graph.addZoomOutListener(element, eventType);
 };
 
 azdataQueryPlan.prototype.destroy = function () {
