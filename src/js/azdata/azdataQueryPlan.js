@@ -42,10 +42,6 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
         return false;
     };
 
-    graph.addListener(mxEvent.CLICK, (sender, event) => {
-        azdataGraph.prototype.graphClickEventHandler(sender, event);
-    });
-
     graph.getTooltipForCell = azdataGraph.prototype.getStyledTooltipForCell;
 
     var parent = graph.getDefaultParent();
@@ -148,6 +144,12 @@ azdataQueryPlan.prototype.registerZoomInListener = function (element, eventType)
 azdataQueryPlan.prototype.registerZoomOutListener = function (element, eventType) {
     this.graph.addZoomOutListener(element, eventType);
 };
+
+azdataQueryPlan.prototype.registerGraphCallback = function (eventType, callback) {
+    this.graph.addListener(eventType, (sender, event) => {
+        this.graph.graphEventHandler(sender, event, callback);
+    });
+}
 
 azdataQueryPlan.prototype.destroy = function () {
     if (!this.destroyed) {
