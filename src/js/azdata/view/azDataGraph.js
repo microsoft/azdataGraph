@@ -184,7 +184,7 @@ azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
  */
 azdataGraph.prototype.graphEventHandler = function (sender, event, callback) {
     let selectedCell = event.getProperty('cell');
-    if (selectedCell) {
+    if (selectedCell && callback) {
         callback(selectedCell);
     }
     event.consume();
