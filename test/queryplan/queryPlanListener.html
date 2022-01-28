@@ -28,12 +28,12 @@
 			};
 			queryPlan.registerGraphCallback('click', graphEdgeCallback);
 
-			const graphVertexClick = (cell) => {
+			const graphVertexCallback = (cell) => {
 				if (cell.vertex) {
 					console.log('Vertex click detected');
 				}
 			};
-			queryPlan.registerGraphCallback('click', graphVertexClick);
+			queryPlan.registerGraphCallback('click', graphVertexCallback);
 		};
 	</script>
 </head>
