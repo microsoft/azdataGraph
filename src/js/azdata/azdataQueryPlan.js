@@ -145,6 +145,10 @@ azdataQueryPlan.prototype.registerZoomOutListener = function (element, eventType
     this.graph.addZoomOutListener(element, eventType);
 };
 
+azdataQueryPlan.prototype.registerZoomToFitListener = function (element, eventType) {
+    this.graph.addZoomToFitListener(element, eventType);
+}
+
 azdataQueryPlan.prototype.registerGraphCallback = function (eventType, callback) {
     this.graph.addListener(eventType, (sender, event) => {
         this.graph.graphEventHandler(sender, event, callback);

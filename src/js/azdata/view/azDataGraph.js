@@ -209,6 +209,26 @@ azdataGraph.prototype.addZoomInListener = function (element, eventType) {
 }
 
 /**
+ * Function: addZoomInListener
+ * 
+ * Adds the zoom in listener to the given element
+ * 
+ * Parameter:
+ * 
+ * element - The element to add the listener to.
+ * eventType - the event type (i.e. 'click') that should trigger the callback
+ */
+azdataGraph.prototype.addZoomToFitListener = function (element, eventType) {
+    let self = this;
+    mxEvent.addListener(element, eventType, (e) => {
+        azdataGraph.prototype.fit.apply(self);
+        self.view.rendering = true;
+        self.prototype.refresh.apply(self);
+        mxEvent.consume();
+    });
+}
+
+/**
  * Function: addZoomOutListener
  * 
  * Adds the zoom out listener to the given element
