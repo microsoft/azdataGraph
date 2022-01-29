@@ -138,15 +138,28 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
 };
 
 azdataQueryPlan.prototype.registerZoomInListener = function (element, eventType) {
-    this.graph.addZoomInListener(element, eventType);
+    const zoomIn = () => {
+        this.graph.zoomIn();
+    }
+    this.graph.addDomEventListener(element, eventType, zoomIn);
 };
 
 azdataQueryPlan.prototype.registerZoomOutListener = function (element, eventType) {
-    this.graph.addZoomOutListener(element, eventType);
+    const zoomOut = () => {
+        this.graph.zoomOut();
+    };
+
+    this.graph.addDomEventListener(element, eventType, zoomOut);
 };
 
 azdataQueryPlan.prototype.registerZoomToFitListener = function (element, eventType) {
-    this.graph.addZoomToFitListener(element, eventType);
+    const zoomToFit = () => {
+        this.graph.fit();
+        this.graph.view.rendering = true;
+        this.graph.refresh();
+    };
+    
+    this.graph.addDomEventListener(element, eventType, zoomToFit);
 }
 
 azdataQueryPlan.prototype.registerGraphCallback = function (eventType, callback) {
