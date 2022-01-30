@@ -71,6 +71,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     }
 
     graph.getModel().beginUpdate();
+    console.log(this.queryPlanGraph);
     try {
         var rand = Math.floor((Math.random() * icons.length));
 
@@ -101,27 +102,8 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
                         iconName = 'azdataQueryplan-' + icons[rand];
                     }
                     vertex = graph.insertVertex(parent, null, node, 20, 20, 70, 70, iconName);
-
-                    let edgeInfo = {
-                        label: '',
-                        metrics: [{
-                            'name': `Estimated Number of Rows Per Execution`,
-                            'value': `${Math.floor(Math.random() * 500)}`,
-                        },
-                        {
-                            'name': `Estimated Number of Rows for All Executions`,
-                            'value': `${Math.floor(Math.random() * 2000)}`
-                        },
-                        {
-                            'name': `Estimated Row Size`,
-                            'value': `${Math.floor(Math.random() * 700)} B`
-                        },
-                        {
-                            'name': `Estimated Data Size`,
-                            'value': `${Math.floor(Math.random() * 700)} KB`
-                        }]
-                    };
-                    graph.insertWeightedInvertedEdge(parent, null, edgeInfo, entry.vertex, vertex);
+                    var edge = entry.node.edges[i];
+                    graph.insertWeightedInvertedEdge(parent, null, edge, entry.vertex, vertex);
                     stack.push(
                         {
                             vertex: vertex,
