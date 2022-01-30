@@ -21,10 +21,10 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     graph.centerZoom = false;
     graph.setTooltips(true);
     graph.setEnabled(true);
-
     graph.panningHandler.useLeftButtonForPanning = true;
     graph.setPanning(true);
     graph.resizeContainer = false;
+    graph.autoExtend = false; //disables the size of the graph automatically extending if the mouse goes near the container edge while dragging.
 
     graph.convertValueToString = function (cell) {
         if (cell.value != null && cell.value.label != null) {
