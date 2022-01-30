@@ -1,4 +1,135 @@
+class Point {
+    constructor(x, y){
+        this.x = x;
+        this.y = y;
+    }
+}
+class GraphNodeLayoutHelper {
+    constructor(){
+        this.layoutPoints = [];
+    }
+
+    CheckInvariant() {
+        var last = new Point(0, 0);
+
+        for (var i = 0; i < this.layoutPoints.length; i++)
+        {
+            if (last.X > this.layoutPoints[i].x || last.Y > this.layoutPoints[i].y)
+            {
+                console.log('Graph layout failed.');
+                // do not throw exception, in case of failure we render graph incorrectly 
+            }
+
+            last = this.layoutPoints[i];
+        }
+    }
+
+    UpdateNodeLayout(xPosition, yPosition) {
+        this.CheckInvariant();
+
+        // First cover edge cases
+
+        // Empty list
+        if (this.layoutPoints.length === 0) {
+            this.layoutPoints.push(new Point(xPosition, yPosition));
+            return;
+        }
+
+        // Single Element
+        if (this.layoutPoints.length === 1) {
+            if (xPosition < this.layoutPoints[0].x) {
+                this.layoutPoints.splice(0, 0, new Point(xPosition, yPosition));
+            }
+            else if (xPosition === this.layoutPoints[0].x) {
+                this.layoutPoints[0] = new Point(this.layoutPoints[0].x, Math.max(this.layoutPoints[0].y, yPosition));
+            }
+            else {
+                this.layoutPoints.push(new Point(xPosition, yPosition));
+            }
+            return;
+        }
+
+        // Insert Before First Element
+        if (xPosition < this.layoutPoints[0].x && yPosition < this.layoutPoints[0].y) {
+            this.layoutPoints.splice(0, 0, new Point(xPosition, yPosition));
+            return;
+        }
+
+        // Insert Last Element
+        if (this.layoutPoints[this.layoutPoints.length - 1].x < xPosition && yPosition > this.layoutPoints[this.layoutPoints.length - 1].y) {
+            this.layoutPoints.push(new Point(xPosition, yPosition));
+            return;
+        }
+
+        // Update Last Element
+        if (this.layoutPoints[this.layoutPoints.length - 1].x == xPosition) {
+            this.layoutPoints[this.layoutPoints.length - 1] = new Point(xPosition, Math.Max(this.layoutPoints[this.layoutPoints.length - 1].y, yPosition));
+            return;
+        }
+
+        // Insert Point 
+
+        // First find insert index
+        var insertIndex = 0;
+        for (var i = 0; i < this.layoutPoints.length; i++)
+        {
+            if (xPosition <= this.layoutPoints[i].x) {
+                insertIndex = i;
+                break;
+            }
+        }
+
+        // Perform Insert or Update.
+        if (xPosition == this.layoutPoints[insertIndex].x) {
+            this.layoutPoints[insertIndex] = new Point(xPosition, Math.max(this.layoutPoints[insertIndex].y, yPosition));
+        }
+        else {
+            this.layoutPoints.splice(insertIndex, 0, new Point(xPosition, yPosition));
+        }
+
+        // After we insert the point we need to remove following points if they have lower Y value.
+        var lastIndex = insertIndex;
+
+        while (lastIndex < this.layoutPoints.length) {
+            if (this.layoutPoints[lastIndex].y > yPosition) {
+                if (lastIndex - insertIndex - 1 > 1) {
+                    this.layoutPoints.splice(insertIndex + 1, lastIndex - insertIndex - 1);
+                }
+                else {
+                    this.layoutPoints.splice(insertIndex + 1, lastIndex - insertIndex - 1);
+                }
+                return;
+            }
+            ++lastIndex;
+        }
+
+        // Last insert point had the highest Y value, remove elements after inserted point.
+        this.layoutPoints.splice(insertIndex + 1, this.layoutPoints.Count - insertIndex - 1);
+    }
+
+    GetYPositionForXPosition(rowX) {
+        this.CheckInvariant();
+        
+        var yPosition = 0;
+
+        for (var i = 0; i < this.layoutPoints.length; i++){
+            if(rowX < this.layoutPoints[i].x){
+                break;
+            }
+
+            yPosition = Math.max(this.layoutPoints[i].y, yPosition);
+        }
+        return yPosition;
+    }
+}
+
+
+
 function azdataQueryPlan(container, queryPlanGraph, iconPaths) {
+
+    this.paddingX = 48;
+    this.paddingY = 16;
+
     this.queryPlanGraph = queryPlanGraph;
     if (container != null && iconPaths != null) {
         this.init(container, iconPaths);
@@ -63,7 +194,6 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
 
     var icons = new Array();
     for (const iconName in iconPaths) {
-        console.log(iconName + ' - ' + iconPaths[iconName]);
         style = mxUtils.clone(style);
         style[mxConstants.STYLE_IMAGE] = iconPaths[iconName];
         graph.getStylesheet().putCellStyle('azdataQueryplan-' + iconName, style);
@@ -72,6 +202,9 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
 
     graph.getModel().beginUpdate();
     try {
+
+        this.LayoutGraphElements();
+
         var rand = Math.floor((Math.random() * icons.length));
 
         var iconName = undefined;
@@ -81,7 +214,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
             iconName = 'azdataQueryplan-' + icons[rand];
         }
 
-        var vertex = graph.insertVertex(parent, null, this.queryPlanGraph, 20, 20, 70, 70, iconName);
+        var vertex = graph.insertVertex(parent, null, this.queryPlanGraph,  this.queryPlanGraph.Position.x, this.queryPlanGraph.Position.y, 70, 70, iconName);
         var stack =
             [
                 {
@@ -100,7 +233,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
                         rand = Math.floor((Math.random() * icons.length));
                         iconName = 'azdataQueryplan-' + icons[rand];
                     }
-                    vertex = graph.insertVertex(parent, null, node, 20, 20, 70, 70, iconName);
+                    vertex = graph.insertVertex(parent, null, node, node.Position.x, node.Position.y, 70, 70, iconName);
 
                     let edgeInfo = {
                         label: '',
@@ -130,12 +263,80 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
                 }
             }
         }
-        layout.execute(parent);
+        //layout.execute(parent);
     }
     finally {
         graph.getModel().endUpdate();
     }
 };
+
+
+azdataQueryPlan.prototype.LayoutGraphElements = function()
+{
+    // Determine how much Y coords should be increased for each row
+    // for aesthetic  reasons this value is constant across all nodes
+    // for entire showplan
+    var spacingY = 150;
+
+    // Recusively layout all nodes starting with root
+    var startX = (this.paddingX + 70) / 2;
+    var startY = (this.paddingY + 70) / 2;
+
+    this.SetNodePositionRecursive(this.queryPlanGraph, spacingY, startX, startY);
+}
+
+
+azdataQueryPlan.prototype.SetNodePositionRecursive = function(node, spacingY, x, y)
+{
+    this.SetNodeXPostitionRecursive(node, x);
+
+    var layoutHelper = new GraphNodeLayoutHelper();
+
+    this.SetNodeYPositionRecursive(node, layoutHelper, spacingY, y);
+
+    console.log(node);
+}
+
+azdataQueryPlan.prototype.SetNodeXPostitionRecursive = function(node, x)
+{
+    // Place the node at given position
+    node.Position = new Point(x, 0);
+    // Initialize edges for the node and determine the recommanded minimal amount 
+    // of spacing needed for them (when placing children), so they will look nice.
+    var recommandedMinimumSpacing = 100;
+    var spacingX = recommandedMinimumSpacing + this.paddingX;
+
+    // Compute locally optimized X position for node's children
+    x += spacingX;
+
+    node.MaxChildrenXPosition = node.Position.x + 70;
+    // Display each child node at the X position just computed
+    node.children.forEach(n => {
+        this.SetNodeXPostitionRecursive(n, x);
+        node.MaxChildrenXPosition = Math.max(node.MaxChildrenXPosition, n.MaxChildrenXPosition )
+    });
+
+}
+
+azdataQueryPlan.prototype.SetNodeYPositionRecursive = function(node, layoutHelper, spacingY, y){
+    var newY = Math.max(y, layoutHelper.GetYPositionForXPosition(node.MaxChildrenXPosition));
+
+    // Update Node's Y Position
+    node.Position.y = newY ;
+
+    
+    var yToUpdate = newY + spacingY;
+    
+    // Display each child node at the X position just computed
+    node.children.forEach(n => {
+        this.SetNodeYPositionRecursive(n, layoutHelper, spacingY, newY);
+        newY += spacingY;
+    });
+
+    var leftPosition = node.Position.x;
+
+    layoutHelper.UpdateNodeLayout(leftPosition, yToUpdate);
+}
 
 azdataQueryPlan.prototype.registerZoomInListener = function (element, eventType) {
     this.graph.addZoomInListener(element, eventType);
