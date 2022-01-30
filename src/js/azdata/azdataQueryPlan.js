@@ -1,16 +1,16 @@
-class point {
+class Point {
     constructor(x, y) {
         this.x = x;
         this.y = y;
     }
 }
-class graphNodeLayoutHelper {
+class GraphNodeLayoutHelper {
     constructor() {
         this.layoutPoints = [];
     }
 
     checkInvariant() {
-        var last = new point(0, 0);
+        var last = new Point(0, 0);
 
         for (var i = 0; i < this.layoutPoints.length; i++) {
             if (last.x > this.layoutPoints[i].x || last.Y > this.layoutPoints[i].y) {
@@ -29,39 +29,39 @@ class graphNodeLayoutHelper {
 
         // Empty list
         if (this.layoutPoints.length === 0) {
-            this.layoutPoints.push(new point(xPosition, yPosition));
+            this.layoutPoints.push(new Point(xPosition, yPosition));
             return;
         }
 
         // Single Element
         if (this.layoutPoints.length === 1) {
             if (xPosition < this.layoutPoints[0].x) {
-                this.layoutPoints.splice(0, 0, new point(xPosition, yPosition));
+                this.layoutPoints.splice(0, 0, new Point(xPosition, yPosition));
             }
             else if (xPosition === this.layoutPoints[0].x) {
-                this.layoutPoints[0] = new point(this.layoutPoints[0].x, Math.max(this.layoutPoints[0].y, yPosition));
+                this.layoutPoints[0] = new Point(this.layoutPoints[0].x, Math.max(this.layoutPoints[0].y, yPosition));
             }
             else {
-                this.layoutPoints.push(new point(xPosition, yPosition));
+                this.layoutPoints.push(new Point(xPosition, yPosition));
             }
             return;
         }
 
         // Insert Before First Element
         if (xPosition < this.layoutPoints[0].x && yPosition < this.layoutPoints[0].y) {
-            this.layoutPoints.splice(0, 0, new point(xPosition, yPosition));
+            this.layoutPoints.splice(0, 0, new Point(xPosition, yPosition));
             return;
         }
 
         // Insert Last Element
         if (this.layoutPoints[this.layoutPoints.length - 1].x < xPosition && yPosition > this.layoutPoints[this.layoutPoints.length - 1].y) {
-            this.layoutPoints.push(new point(xPosition, yPosition));
+            this.layoutPoints.push(new Point(xPosition, yPosition));
             return;
         }
 
         // Update Last Element
         if (this.layoutPoints[this.layoutPoints.length - 1].x == xPosition) {
-            this.layoutPoints[this.layoutPoints.length - 1] = new point(xPosition, Math.max(this.layoutPoints[this.layoutPoints.length - 1].y, yPosition));
+            this.layoutPoints[this.layoutPoints.length - 1] = new Point(xPosition, Math.max(this.layoutPoints[this.layoutPoints.length - 1].y, yPosition));
             return;
         }
 
@@ -78,10 +78,10 @@ class graphNodeLayoutHelper {
 
         // Perform Insert or Update.
         if (xPosition == this.layoutPoints[insertIndex].x) {
-            this.layoutPoints[insertIndex] = new point(xPosition, Math.max(this.layoutPoints[insertIndex].y, yPosition));
+            this.layoutPoints[insertIndex] = new Point(xPosition, Math.max(this.layoutPoints[insertIndex].y, yPosition));
         }
         else {
-            this.layoutPoints.splice(insertIndex, 0, new point(xPosition, yPosition));
+            this.layoutPoints.splice(insertIndex, 0, new Point(xPosition, yPosition));
         }
 
         // After we insert the point we need to remove following points if they have lower Y value.
@@ -113,7 +113,6 @@ class graphNodeLayoutHelper {
             if (rowX < this.layoutPoints[i].x) {
                 break;
             }
-
             yPosition = Math.max(this.layoutPoints[i].y, yPosition);
         }
         return yPosition;
@@ -123,10 +122,6 @@ class graphNodeLayoutHelper {
 
 
 function azdataQueryPlan(container, queryPlanGraph, iconPaths) {
-
-    this.paddingX = 48;
-    this.paddingY = 16;
-
     this.queryPlanGraph = queryPlanGraph;
     if (container != null && iconPaths != null) {
         this.init(container, iconPaths);
@@ -204,7 +199,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     graph.getModel().beginUpdate();
     try {
 
-        this.LayoutGraphElements();
+        this.placeGraphNodes();
 
         var rand = Math.floor((Math.random() * icons.length));
 
@@ -271,47 +266,71 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     }
 };
 
-
-azdataQueryPlan.prototype.LayoutGraphElements = function () {
+/**
+ * Since we need to display query plan in very particular format, we will use this function
+ * to add x, y coordinates graph nodes. 
+ */
+azdataQueryPlan.prototype.placeGraphNodes = function () {
     // Setting how much Y coords should be increased for each row
     // for aesthetic  reasons this value is constant across all nodes
-    // for entire showplan
-    var spacingY = 100;
+    // for entire showplan. For starters, we set this to 100px. However,
+    // if a node has label with many lines, this value will be updated to 
+    // better fit that node.
+    this.spacingY = 100;
+
+    // Getting the node padding values from SSMS.
+    this.paddingX = 48;
+    this.paddingY = 16;
+
+    // Getting a good enough start value for the root node.
+    var startX = (this.paddingX + 150) / 2;
+    var startY = (this.paddingY + 150) / 2;
 
     // Recusively layout all nodes starting with root
-    var startX = (this.paddingX + 70) / 2;
-    var startY = (this.paddingY + 70) / 2;
-
-    this.SetNodePositionRecursive(this.queryPlanGraph, spacingY, startX, startY);
+    this.SetNodePositionRecursive(this.queryPlanGraph, this.spacingY, startX, startY);
 }
 
 
-azdataQueryPlan.prototype.SetNodePositionRecursive = function (node, spacingY, x, y) {
+azdataQueryPlan.prototype.SetNodePositionRecursive = function (node, x, y) {
+
+    // Recursively setting all the x positions in the graph.
     this.setNodeXPostitionRecursive(node, x);
+    var layoutHelper = new GraphNodeLayoutHelper();
+    this.setNodeYPositionRecursive(node, layoutHelper, this.spacingY, y);
 
-    var layoutHelper = new graphNodeLayoutHelper();
-
-    this.setNodeYPositionRecursive(node, layoutHelper, spacingY, y);
 }
+
 
 azdataQueryPlan.prototype.setNodeXPostitionRecursive = function (node, x) {
     // Place the node at given position
-    node.Position = new point(x, 0);
-    // Initialize edges for the node and determine the recommanded minimal amount 
-    // of spacing needed for them (when placing children), so they will look nice.
-    var cleanedLabel = (node.label)
-    var size = mxUtils.getSizeForString(cleanedLabel, mxConstants.DEFAULT_FONTSIZE,
-        mxConstants.DEFAULT_FONTSIZE, undefined,
-        mxConstants.DEFAULT_FONTSIZE);
-    console.log(node);
+    node.Position = new Point(x, 0);
 
-    var recommandedMinimumSpacing = size.width > 100 ? size.width : 100;
+    // Determining the recommanded minimal amount of spacing needed 
+    // for them (when placing children), so they will look nice.
+
+    // Using a mxUtils function to determine how much space is needed for the label.
+    // Cleaning the label string as mention in the mxGraph docs https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxUtils-js.html#mxUtils.getSizeForString 
+    var cleanedLabel = node.label.replace().replace(/\n/g, "<br>");
+
+    // Assuming default stylings for 
+    var size = mxUtils.getSizeForString(cleanedLabel, mxConstants.DEFAULT_FONTSIZE,
+        mxConstants.DEFAULT_FONTFAMILY, undefined,
+        mxConstants.DEFAULT_FONTSTYLE);
+
+    // Determing the right height for the node. Here, 50px is the appropriate space for node icons.
+    this.spacingY = Math.max(this.spacingY, 50 + size.height);
+
+    // There is no good logic for 125px here. However, trying this on 
+    // graph gives the best visual results.
+    var recommandedMinimumSpacing = size.width > 125 ? size.width : 125;
     var spacingX = recommandedMinimumSpacing + this.paddingX;
 
     // Compute locally optimized X position for node's children
     x += spacingX;
-
-    node.maxChildrenXPosition = node.Position.x + 70;
+    
+    // Storing the max X position of the children. 
+    // This will later help us in determing the y coordinates for them.
+    node.maxChildrenXPosition = node.Position.x
     // Display each child node at the X position just computed
     node.children.forEach(n => {
         n.parent = node;
@@ -326,7 +345,6 @@ azdataQueryPlan.prototype.setNodeYPositionRecursive = function (node, layoutHelp
 
     // Update Node's Y Position
     node.Position.y = newY;
-
 
     var yToUpdate = newY + spacingY;
     // Display each child node at the X position just computed
