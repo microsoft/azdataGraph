@@ -139,14 +139,14 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     var graph = new azdataGraph(container);
     this.graph = graph;
 
-    graph.centerZoom = false;
     graph.setTooltips(true);
     graph.setEnabled(true);
-
-    graph.panningHandler.useLeftButtonForPanning = true;
     graph.setPanning(true);
+    graph.panningHandler.useLeftButtonForPanning = true;
+    graph.centerZoom = false;
     graph.resizeContainer = false;
     graph.autoSizeCellsOnAdd = true;
+    graph.autoExtend = false; //disables the size of the graph automatically extending if the mouse goes near the container edge while dragging.
 
     graph.convertValueToString = function (cell) {
         if (cell.value != null && cell.value.label != null) {
@@ -192,6 +192,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     }
 
     graph.getModel().beginUpdate();
+    
     try {
 
         this.placeGraphNodes();
@@ -225,27 +226,8 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
                         iconName = 'azdataQueryplan-' + icons[rand];
                     }
                     vertex = graph.insertVertex(parent, null, node, node.position.x, node.position.y, 70, 70, iconName);
-
-                    let edgeInfo = {
-                        label: '',
-                        metrics: [{
-                            'name': `Estimated Number of Rows Per Execution`,
-                            'value': `${Math.floor(Math.random() * 500)}`,
-                        },
-                        {
-                            'name': `Estimated Number of Rows for All Executions`,
-                            'value': `${Math.floor(Math.random() * 2000)}`
-                        },
-                        {
-                            'name': `Estimated Row Size`,
-                            'value': `${Math.floor(Math.random() * 700)} B`
-                        },
-                        {
-                            'name': `Estimated Data Size`,
-                            'value': `${Math.floor(Math.random() * 700)} KB`
-                        }]
-                    };
-                    graph.insertWeightedInvertedEdge(parent, null, edgeInfo, entry.vertex, vertex);
+                    var edge = entry.node.edges[i];                    
+                    graph.insertWeightedInvertedEdge(parent, null, edge, entry.vertex, vertex);
                     stack.push(
                         {
                             vertex: vertex,

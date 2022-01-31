@@ -89,23 +89,7 @@ azdataGraph.prototype.insertInvertedEdge = function (parent, id, value, source, 
  * style - Optional string that defines the cell style.
  */
 azdataGraph.prototype.insertWeightedInvertedEdge = function (parent, id, value, source, target, style) {
-    let edgeWeight = '';
-
-    // TDDO lewissanchez - this will eventually be based on the data size for all rows.
-    let randValue = Math.floor(Math.random() * 3)
-    switch (randValue) {
-        case 0:
-            edgeWeight = 'strokeWidth=1;';
-            break;
-        case 1:
-            edgeWeight = 'strokeWidth=1.75;';
-            break;
-        case 2:
-            edgeWeight = 'strokeWidth=2.5;';
-            break;
-    }
-
-    return this.insertInvertedEdge(parent, id, value, source, target, edgeWeight + style);
+    return this.insertInvertedEdge(parent, id, value, source, target, `strokeWidth=${value.weight.toFixed(1)};` + style);
 };
 
 /**
