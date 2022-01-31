@@ -48,13 +48,15 @@ class GraphNodeLayoutHelper {
         }
 
         // Insert Before First Element
-        if (xPosition < this.layoutPoints[0].x && yPosition < this.layoutPoints[0].y) {
+        if (xPosition < this.layoutPoints[0].x && 
+            yPosition < this.layoutPoints[0].y) {
             this.layoutPoints.splice(0, 0, new Point(xPosition, yPosition));
             return;
         }
 
         // Insert Last Element
-        if (this.layoutPoints[this.layoutPoints.length - 1].x < xPosition && yPosition > this.layoutPoints[this.layoutPoints.length - 1].y) {
+        if (this.layoutPoints[this.layoutPoints.length - 1].x < xPosition && 
+            this.layoutPoints[this.layoutPoints.length - 1].y < yPosition) {
             this.layoutPoints.push(new Point(xPosition, yPosition));
             return;
         }
@@ -89,17 +91,12 @@ class GraphNodeLayoutHelper {
 
         while (lastIndex < this.layoutPoints.length) {
             if (this.layoutPoints[lastIndex].y > yPosition) {
-                if (lastIndex - insertIndex - 1 > 1) {
-                    this.layoutPoints.splice(insertIndex + 1, lastIndex - insertIndex - 1);
-                }
-                else {
-                    this.layoutPoints.splice(insertIndex + 1, lastIndex - insertIndex - 1);
-                }
+                this.layoutPoints.splice(insertIndex + 1, lastIndex - insertIndex - 1);
                 return;
             }
             ++lastIndex;
         }
-
+ 
         // Last insert point had the highest Y value, remove elements after inserted point.
         this.layoutPoints.splice(insertIndex + 1, this.layoutPoints.Count - insertIndex - 1);
     }
@@ -325,7 +322,7 @@ azdataQueryPlan.prototype.setNodeXPositionRecursive = function (node, x) {
 
     // Compute locally optimized X position for node's children
     x += spacingX;
-    
+
     // Storing the max X position of the children. 
     // This will later help us in determining the y coordinates for them.
     node.maxChildrenXPosition = node.position.x;
