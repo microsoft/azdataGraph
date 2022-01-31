@@ -174,20 +174,20 @@ azdataQueryPlan.prototype.getZoomLevelPercentage = function() {
 
 azdataQueryPlan.prototype.zoomTo = function (zoomPercentage) {
     const ZOOM_PERCENTAGE_MINIMUM = 3;
-	const ZOOM_PERCENTAGE_MAXIMUM = 500;
+    const ZOOM_PERCENTAGE_MAXIMUM = 500;
 
-	let parsedZoomLevel = parseInt(zoomPercentage);
-	if (isNaN(parsedZoomLevel)) {
-	    return;
-	}
+    let parsedZoomLevel = parseInt(zoomPercentage);
+    if (isNaN(parsedZoomLevel)) {
+        return;
+    }
 
-	if (parsedZoomLevel < ZOOM_PERCENTAGE_MINIMUM) {
-	    parsedZoomLevel = ZOOM_PERCENTAGE_MINIMUM;
-	}
-	else if (parsedZoomLevel > ZOOM_PERCENTAGE_MAXIMUM) {
-	    parsedZoomLevel = ZOOM_PERCENTAGE_MAXIMUM;
-	}
-    
+    if (parsedZoomLevel < ZOOM_PERCENTAGE_MINIMUM) {
+        parsedZoomLevel = ZOOM_PERCENTAGE_MINIMUM;
+    }
+    else if (parsedZoomLevel > ZOOM_PERCENTAGE_MAXIMUM) {
+        parsedZoomLevel = ZOOM_PERCENTAGE_MAXIMUM;
+    }
+
     let zoomScale = parsedZoomLevel / 100;
     this.graph.zoomTo(zoomScale);
 };
