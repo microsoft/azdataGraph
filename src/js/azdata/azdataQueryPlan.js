@@ -149,7 +149,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     graph.panningHandler.useLeftButtonForPanning = true;
     graph.setPanning(true);
     graph.resizeContainer = false;
-    graph.autoSizeCellsOnAdd = true
+    graph.autoSizeCellsOnAdd = true;
 
     graph.convertValueToString = function (cell) {
         if (cell.value != null && cell.value.label != null) {
