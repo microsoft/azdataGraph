@@ -284,7 +284,7 @@ azdataQueryPlan.prototype.placeGraphNodes = function () {
     var startX = (this.paddingX + 150) / 2;
     var startY = (this.paddingY + 150) / 2;
 
-    // Recusively layout all nodes starting with root
+    // Recursively layout all nodes starting with root
     this.SetNodePositionRecursive(this.queryPlanGraph, startX, startY);
 }
 
@@ -292,18 +292,18 @@ azdataQueryPlan.prototype.placeGraphNodes = function () {
 azdataQueryPlan.prototype.SetNodePositionRecursive = function (node, x, y) {
 
     // Recursively setting all the x positions in the graph.
-    this.setNodeXPostitionRecursive(node, x);
+    this.setNodeXPositionRecursive(node, x);
     var layoutHelper = new GraphNodeLayoutHelper();
     this.setNodeYPositionRecursive(node, layoutHelper, this.spacingY, y);
 
 }
 
 
-azdataQueryPlan.prototype.setNodeXPostitionRecursive = function (node, x) {
+azdataQueryPlan.prototype.setNodeXPositionRecursive = function (node, x) {
     // Place the node at given position
     node.Position = new Point(x, 0);
 
-    // Determining the recommanded minimal amount of spacing needed 
+    // Determining the recommended minimal amount of spacing needed 
     // for them (when placing children), so they will look nice.
 
     // Using a mxUtils function to determine how much space is needed for the label.
@@ -315,24 +315,24 @@ azdataQueryPlan.prototype.setNodeXPostitionRecursive = function (node, x) {
         mxConstants.DEFAULT_FONTFAMILY, undefined,
         mxConstants.DEFAULT_FONTSTYLE);
 
-    // Determing the right height for the node. Here, 50px is the appropriate space for node icons.
+    // Determining the right height for the node. Here, 50px is the appropriate space for node icons.
     this.spacingY = Math.max(this.spacingY, 50 + size.height);
 
     // There is no good logic for 125px here. However, trying this on 
     // graph gives the best visual results.
-    var recommandedMinimumSpacing = size.width > 125 ? size.width : 125;
-    var spacingX = recommandedMinimumSpacing + this.paddingX;
+    var recommendedMinimumSpacing = size.width > 125 ? size.width : 125;
+    var spacingX = recommendedMinimumSpacing + this.paddingX;
 
     // Compute locally optimized X position for node's children
     x += spacingX;
     
     // Storing the max X position of the children. 
-    // This will later help us in determing the y coordinates for them.
+    // This will later help us in determining the y coordinates for them.
     node.maxChildrenXPosition = node.Position.x;
     // Display each child node at the X position just computed
     node.children.forEach(n => {
         n.parent = node;
-        this.setNodeXPostitionRecursive(n, x);
+        this.setNodeXPositionRecursive(n, x);
         node.maxChildrenXPosition = Math.max(node.maxChildrenXPosition, n.maxChildrenXPosition);
     });
 
