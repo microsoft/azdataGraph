@@ -308,7 +308,7 @@ azdataQueryPlan.prototype.setNodeXPostitionRecursive = function (node, x) {
 
     // Using a mxUtils function to determine how much space is needed for the label.
     // Cleaning the label string as mention in the mxGraph docs https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxUtils-js.html#mxUtils.getSizeForString 
-    var cleanedLabel = node.label.replace().replace(/\n/g, "<br>");
+    var cleanedLabel = node.label.replace(/\n/g, "<br>");
 
     // Assuming default stylings for 
     var size = mxUtils.getSizeForString(cleanedLabel, mxConstants.DEFAULT_FONTSIZE,
@@ -328,12 +328,12 @@ azdataQueryPlan.prototype.setNodeXPostitionRecursive = function (node, x) {
     
     // Storing the max X position of the children. 
     // This will later help us in determing the y coordinates for them.
-    node.maxChildrenXPosition = node.Position.x
+    node.maxChildrenXPosition = node.Position.x;
     // Display each child node at the X position just computed
     node.children.forEach(n => {
         n.parent = node;
         this.setNodeXPostitionRecursive(n, x);
-        node.maxChildrenXPosition = Math.max(node.maxChildrenXPosition, n.maxChildrenXPosition)
+        node.maxChildrenXPosition = Math.max(node.maxChildrenXPosition, n.maxChildrenXPosition);
     });
 
 }
