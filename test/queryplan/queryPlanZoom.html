@@ -20,7 +20,7 @@
 			var iconPaths = getIconPaths(imageBasePath);
 
 			let queryPlan = new azdataQueryPlan(container, graph, iconPaths);
-			queryPlan.addZoomInClickListener();
+			queryPlan.addZoomInRectListener();
 
 			let zoomInButton = document.getElementById('zoomInBtn');
 			queryPlan.registerZoomInListener(zoomInButton, 'click');

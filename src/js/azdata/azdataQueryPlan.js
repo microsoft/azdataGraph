@@ -18,12 +18,12 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
 
     var graph = new azdataGraph(container);
     this.graph = graph;
+    this.rubberband = new mxRubberband(graph);
     graph.centerZoom = false;
+    this.enablePanning(false);
     graph.setTooltips(true);
     graph.setEnabled(true);
 
-    graph.panningHandler.useLeftButtonForPanning = true;
-    graph.setPanning(true);
     graph.resizeContainer = false;
 
     graph.convertValueToString = function (cell) {
@@ -192,23 +192,23 @@ azdataQueryPlan.prototype.zoomTo = function (zoomPercentage) {
     this.graph.zoomTo(zoomScale);
 };
 
-azdataQueryPlan.prototype.addZoomInClickListener = function() {
-    let zoomInClickListener = (event) => {
-        debugger;
-        let point1 = this.graph.getPointForEvent(event, false);
-        this.graph.zoomIn();
+azdataQueryPlan.prototype.addZoomInRectListener = function() {
+    let self = this;
+    mxRubberband.prototype.mouseUp = function(sender, event) {
+        let execute = self.container && this.width !== undefined && this.height !== undefined;
+        this.reset();
 
-        let point2 = this.graph.getPointForEvent(event, false);
-        let deltaX = point2.x - point1.x;
-        let deltaY = point2.y - point1.y;
-        let view = this.graph.view;
-
-        view.setTranslate(view.translate.x + deltaX, view.translate.y + deltaY);
-
-        mxEvent.consume(event);
+        if (execute) {
+            let rect = new mxRectangle(this.x, this.y, this.width, this.height);
+            self.graph.zoomToRect(rect);
+            event.consume();
+        }
     };
+};
 
-    mxEvent.addListener(this.container, 'click', zoomInClickListener);
+azdataQueryPlan.prototype.enablePanning = function(panning) {
+    this.graph.panningHandler.useLeftButtonForPanning = panning;
+    this.graph.setPanning(panning);
 };
 
 azdataQueryPlan.prototype.destroy = function () {
