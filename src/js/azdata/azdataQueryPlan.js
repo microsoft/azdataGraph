@@ -192,6 +192,25 @@ azdataQueryPlan.prototype.zoomTo = function (zoomPercentage) {
     this.graph.zoomTo(zoomScale);
 };
 
+azdataQueryPlan.prototype.addZoomInClickListener = function() {
+    let zoomInClickListener = (event) => {
+        debugger;
+        let point1 = this.graph.getPointForEvent(event, false);
+        this.graph.zoomIn();
+
+        let point2 = this.graph.getPointForEvent(event, false);
+        let deltaX = point2.x - point1.x;
+        let deltaY = point2.y - point1.y;
+        let view = this.graph.view;
+
+        view.setTranslate(view.translate.x + deltaX, view.translate.y + deltaY);
+
+        mxEvent.consume(event);
+    };
+
+    mxEvent.addListener(this.container, 'click', zoomInClickListener);
+};
+
 azdataQueryPlan.prototype.destroy = function () {
     if (!this.destroyed) {
         this.destroyed = true;
