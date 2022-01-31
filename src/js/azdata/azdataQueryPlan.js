@@ -160,13 +160,13 @@ azdataQueryPlan.prototype.registerZoomToFitListener = function (element, eventTy
     };
     
     this.graph.addDomEventListener(element, eventType, zoomToFit);
-}
+};
 
 azdataQueryPlan.prototype.registerGraphCallback = function (eventType, callback) {
     this.graph.addListener(eventType, (sender, event) => {
         this.graph.graphEventHandler(sender, event, callback);
     });
-}
+};
 
 azdataQueryPlan.prototype.getZoomLevelPercentage = function() {
     return this.graph.view.scale * 100;
