@@ -18,12 +18,12 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
 
     var graph = new azdataGraph(container);
     this.graph = graph;
+    this.rubberband = new mxRubberband(graph);
     graph.centerZoom = false;
+    this.enablePanning(false);
     graph.setTooltips(true);
     graph.setEnabled(true);
 
-    graph.panningHandler.useLeftButtonForPanning = true;
-    graph.setPanning(true);
     graph.resizeContainer = false;
 
     graph.convertValueToString = function (cell) {
@@ -190,6 +190,25 @@ azdataQueryPlan.prototype.zoomTo = function (zoomPercentage) {
 
     let zoomScale = parsedZoomLevel / 100;
     this.graph.zoomTo(zoomScale);
+};
+
+azdataQueryPlan.prototype.addZoomInRectListener = function() {
+    let self = this;
+    mxRubberband.prototype.mouseUp = function(sender, event) {
+        let execute = self.container && this.width !== undefined && this.height !== undefined;
+        this.reset();
+
+        if (execute) {
+            let rect = new mxRectangle(this.x, this.y, this.width, this.height);
+            self.graph.zoomToRect(rect);
+            event.consume();
+        }
+    };
+};
+
+azdataQueryPlan.prototype.enablePanning = function(panning) {
+    this.graph.panningHandler.useLeftButtonForPanning = panning;
+    this.graph.setPanning(panning);
 };
 
 azdataQueryPlan.prototype.destroy = function () {
