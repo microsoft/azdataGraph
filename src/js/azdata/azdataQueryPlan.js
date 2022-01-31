@@ -71,7 +71,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     }
 
     graph.getModel().beginUpdate();
-    console.log(this.queryPlanGraph);
+
     try {
         var rand = Math.floor((Math.random() * icons.length));
 
