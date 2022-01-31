@@ -140,7 +140,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
 azdataQueryPlan.prototype.registerZoomInListener = function (element, eventType) {
     const zoomIn = () => {
         this.graph.zoomIn();
-    }
+    };
     this.graph.addDomEventListener(element, eventType, zoomIn);
 };
 
@@ -167,6 +167,30 @@ azdataQueryPlan.prototype.registerGraphCallback = function (eventType, callback)
         this.graph.graphEventHandler(sender, event, callback);
     });
 }
+
+azdataQueryPlan.prototype.getZoomLevelPercentage = function() {
+    return this.graph.view.scale * 100;
+};
+
+azdataQueryPlan.prototype.zoomTo = function (zoomPercentage) {
+    const ZOOM_PERCENTAGE_MINIMUM = 3;
+	const ZOOM_PERCENTAGE_MAXIMUM = 500;
+
+	let parsedZoomLevel = parseInt(zoomPercentage);
+	if (isNaN(parsedZoomLevel)) {
+	    return;
+	}
+
+	if (parsedZoomLevel < ZOOM_PERCENTAGE_MINIMUM) {
+	    parsedZoomLevel = ZOOM_PERCENTAGE_MINIMUM;
+	}
+	else if (parsedZoomLevel > ZOOM_PERCENTAGE_MAXIMUM) {
+	    parsedZoomLevel = ZOOM_PERCENTAGE_MAXIMUM;
+	}
+    
+    let zoomScale = parsedZoomLevel / 100;
+    this.graph.zoomTo(zoomScale);
+};
 
 azdataQueryPlan.prototype.destroy = function () {
     if (!this.destroyed) {
