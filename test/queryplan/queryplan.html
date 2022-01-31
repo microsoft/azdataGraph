@@ -2,6 +2,7 @@
   Test page for manually testing the Query Plan classes
 -->
 <html>
+
 <head>
 	<title>Query Plan test</title>
 	<script type="text/javascript">
@@ -10,21 +11,21 @@
 	<script type="text/javascript" src="../../src/js/mxClient.js"></script>
 	<script type="text/javascript" src="./src/js/queryPlanSetup.js"></script>
 	<script type="text/javascript">
-	
 
-	function main(container)
-	{
-		var graph = getGraph();
+		function main(container) {
+			var graph = getGraph();
 
-		var imageBasePath = './icons/';
-		var iconPaths = getIconPaths(imageBasePath);
-		
-		new azdataQueryPlan(container, graph, iconPaths);
-	};
+			var imageBasePath = './icons/';
+			var iconPaths = getIconPaths(imageBasePath);
+
+			new azdataQueryPlan(container, graph, iconPaths);
+		};
 
 	</script>
 </head>
+
 <body onload="main(document.getElementById('graphContainer'))">
 	<div id="graphContainer" style="position:relative;overflow:hidden;width:100%;height:100%;cursor:default;"></div>
 </body>
+
 </html>

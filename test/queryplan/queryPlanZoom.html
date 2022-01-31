@@ -9,12 +9,11 @@
 		mxBasePath = '../../src';
 	</script>
 	<script type="text/javascript" src="../../src/js/mxClient.js"></script>
-	<script type="text/javascript" src="./src/js/queryPlanSetup.js" ></script>
+	<script type="text/javascript" src="./src/js/queryPlanSetup.js"></script>
 	<script type="text/javascript">
 
-
 		function main(container) {
-			var graph = getGraph();		
+			var graph = getGraph();
 
 			var imageBasePath = './icons/';
 			var iconPaths = getIconPaths(imageBasePath);
@@ -27,6 +26,7 @@
 			let zoomOutButtom = document.getElementById('zoomOutBtn');
 			queryPlan.registerZoomOutListener(zoomOutButtom, 'click');
 		};
+
 	</script>
 </head>
 
