@@ -285,7 +285,7 @@ azdataQueryPlan.prototype.placeGraphNodes = function () {
     var startY = (this.paddingY + 150) / 2;
 
     // Recusively layout all nodes starting with root
-    this.SetNodePositionRecursive(this.queryPlanGraph, this.spacingY, startX, startY);
+    this.SetNodePositionRecursive(this.queryPlanGraph, startX, startY);
 }
 
 
