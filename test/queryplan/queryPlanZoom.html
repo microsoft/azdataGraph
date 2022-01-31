@@ -8,9 +8,11 @@
 	<script type="text/javascript">
 		mxBasePath = '../../src';
 	</script>
+	<script type="text/javascript" src="./src/js/graph.js" ></script>
 	<script type="text/javascript" src="../../src/js/mxClient.js"></script>
 	<script type="text/javascript" src="./src/js/queryPlanSetup.js"></script>
 	<script type="text/javascript">
+		let queryPlan;
 
 		function main(container) {
 			var graph = getGraph();
@@ -18,13 +20,13 @@
 			var imageBasePath = './icons/';
 			var iconPaths = getIconPaths(imageBasePath);
 
-			let queryPlan = new azdataQueryPlan(container, graph, iconPaths);
-
+			queryPlan = new azdataQueryPlan(container, graph, iconPaths);
 			let zoomInButton = document.getElementById('zoomInBtn');
 			queryPlan.registerZoomInListener(zoomInButton, 'click');
 
 			let zoomOutButtom = document.getElementById('zoomOutBtn');
 			queryPlan.registerZoomOutListener(zoomOutButtom, 'click');
+
 		};
 
 	</script>
