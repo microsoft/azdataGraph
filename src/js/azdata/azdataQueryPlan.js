@@ -208,7 +208,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
             iconName = 'azdataQueryplan-' + icons[rand];
         }
 
-        var vertex = graph.insertVertex(parent, null, this.queryPlanGraph, this.queryPlanGraph.Position.x, this.queryPlanGraph.Position.y, 70, 70, iconName);
+        var vertex = graph.insertVertex(parent, null, this.queryPlanGraph, this.queryPlanGraph.position.x, this.queryPlanGraph.position.y, 70, 70, iconName);
         var stack =
             [
                 {
@@ -227,7 +227,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
                         rand = Math.floor((Math.random() * icons.length));
                         iconName = 'azdataQueryplan-' + icons[rand];
                     }
-                    vertex = graph.insertVertex(parent, null, node, node.Position.x, node.Position.y, 70, 70, iconName);
+                    vertex = graph.insertVertex(parent, null, node, node.position.x, node.position.y, 70, 70, iconName);
 
                     let edgeInfo = {
                         label: '',
@@ -301,7 +301,7 @@ azdataQueryPlan.prototype.SetNodePositionRecursive = function (node, x, y) {
 
 azdataQueryPlan.prototype.setNodeXPositionRecursive = function (node, x) {
     // Place the node at given position
-    node.Position = new Point(x, 0);
+    node.position = new Point(x, 0);
 
     // Determining the recommended minimal amount of spacing needed 
     // for them (when placing children), so they will look nice.
@@ -328,7 +328,7 @@ azdataQueryPlan.prototype.setNodeXPositionRecursive = function (node, x) {
     
     // Storing the max X position of the children. 
     // This will later help us in determining the y coordinates for them.
-    node.maxChildrenXPosition = node.Position.x;
+    node.maxChildrenXPosition = node.position.x;
     // Display each child node at the X position just computed
     node.children.forEach(n => {
         n.parent = node;
@@ -338,20 +338,20 @@ azdataQueryPlan.prototype.setNodeXPositionRecursive = function (node, x) {
 
 }
 
-azdataQueryPlan.prototype.setNodeYPositionRecursive = function (node, layoutHelper, spacingY, y) {
+azdataQueryPlan.prototype.setNodeYPositionRecursive = function (node, layoutHelper, y) {
     var newY = Math.max(y, layoutHelper.getYPositionForXPosition(node.maxChildrenXPosition));
 
     // Update Node's Y Position
-    node.Position.y = newY;
+    node.position.y = newY;
 
-    var yToUpdate = newY + spacingY;
+    var yToUpdate = newY + this.spacingY;
     // Display each child node at the X position just computed
     node.children.forEach(n => {
-        this.setNodeYPositionRecursive(n, layoutHelper, spacingY, newY);
-        newY += spacingY;
+        this.setNodeYPositionRecursive(n, layoutHelper, newY);
+        newY += this.spacingY;
     });
 
-    var leftPosition = node.Position.x;
+    var leftPosition = node.position.x;
 
     layoutHelper.updateNodeLayout(leftPosition, yToUpdate);
 }
