@@ -18,6 +18,9 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
 
     var graph = new azdataGraph(container);
     this.graph = graph;
+    var style = graph.getStylesheet().getDefaultEdgeStyle();
+    style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
+
     graph.centerZoom = false;
     graph.setTooltips(true);
     graph.setEnabled(true);
@@ -46,6 +49,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
 
     var parent = graph.getDefaultParent();
     var layout = new mxHierarchicalLayout(graph, mxConstants.DIRECTION_WEST);
+    layout.disableEdgeStyle = false;
 
     var style = new Object();
     style = mxUtils.clone(style);
