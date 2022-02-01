@@ -121,7 +121,8 @@ mxUrlConverter.prototype.isRelativeUrl = function(url)
 {
 	return url != null && url.substring(0, 2) != '//' && url.substring(0, 7) != 'http://' &&
 		url.substring(0, 8) != 'https://' && url.substring(0, 10) != 'data:image' &&
-		url.substring(0, 7) != 'file://';
+		url.substring(0, 7) != 'file://' 
+		&& url.substring(0,14) != 'vscode-file://'; // {{SQL CARBON EDIT}} Adding a rule for vscode file protocol. 
 };
 
 /**
