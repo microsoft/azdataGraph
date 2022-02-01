@@ -357,7 +357,26 @@ azdataQueryPlan.prototype.registerGraphCallback = function (eventType, callback)
     this.graph.addListener(eventType, (sender, event) => {
         this.graph.graphEventHandler(sender, event, callback);
     });
-}
+};
+
+azdataQueryPlan.prototype.setIconBackgroundColor = function(color) {
+    let cells = this.graph.selectCells(true, false);
+    this.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, color, cells);
+    this.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, color, cells);
+    this.graph.getSelectionModel().clear();
+};
+
+azdataQueryPlan.prototype.setTextFontColor = function(color) {
+    let cells = this.graph.selectCells(true, false);
+    this.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, color, cells);
+    this.graph.getSelectionModel().clear();
+};
+
+azdataQueryPlan.prototype.setEdgeColor = function(color) {
+    let cells = this.graph.selectCells(false, true);
+    this.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, color, cells);
+    this.graph.getSelectionModel().clear();
+};
 
 azdataQueryPlan.prototype.destroy = function () {
     if (!this.destroyed) {
