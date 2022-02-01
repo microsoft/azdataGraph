@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 /**
- * Class: azDataGraph
+ * Class: azdataGraph
  * 
- * Constructor: azDataGraph
+ * Constructor: azdataGraph
  * 
- * Constructs a new azDataGraph in the specified container. Model is an optional
+ * Constructs a new azdataGraph in the specified container. Model is an optional
  * mxGraphModel. If no model is provided, a new mxGraphModel instance is 
  * used as the model. The container must have a valid owner document prior 
  * to calling this function in Internet Explorer. RenderHint is a string to
@@ -27,7 +27,7 @@
  * To create a graph inside a DOM node with an id of graph:
  * (code)
  * var container = document.getElementById('graph');
- * var graph = new azDataGraph(container);
+ * var graph = new azdataGraph(container);
  * (end)
  * 
  * Parameters:
@@ -40,12 +40,12 @@
  * performance. Default is mxConstants.DIALECT_MIXEDHTML (for IE).
  * stylesheet - Optional <mxStylesheet> to be used in the graph.
  */
-function azDataGraph(container, model, renderHint, styleSheet) {
+function azdataGraph(container, model, renderHint, styleSheet) {
     mxGraph.call(this, container, model, renderHint, styleSheet);
 }
 
-azDataGraph.prototype = Object.create(mxGraph.prototype);
-azDataGraph.prototype.constructor = azDataGraph;
+azdataGraph.prototype = Object.create(mxGraph.prototype);
+azdataGraph.prototype.constructor = azdataGraph;
 
 /**
  * Function: insertInvertedEdge
@@ -64,7 +64,7 @@ azDataGraph.prototype.constructor = azDataGraph;
  * target - <mxCell> that defines the target of the edge.
  * style - Optional string that defines the cell style.
  */
-azDataGraph.prototype.insertInvertedEdge = function (parent, id, value, source, target, style) {
+azdataGraph.prototype.insertInvertedEdge = function (parent, id, value, source, target, style) {
     var terminalStyle = 'startArrow=classic;endArrow=none;';
     var edge = this.createEdge(parent, id, value, source, target, terminalStyle + style);
 
@@ -88,25 +88,8 @@ azDataGraph.prototype.insertInvertedEdge = function (parent, id, value, source, 
  * target - <mxCell> that defines the target of the edge.
  * style - Optional string that defines the cell style.
  */
-azDataGraph.prototype.insertWeightedInvertedEdge = function (parent, id, value, source, target, style) {
-    let edgeWeight = '';
-    
-    // TDDO lewissanchez - this will eventually be based on the data size for all rows.
-    let randValue = Math.floor(Math.random() * 3)
-    switch (randValue)
-    {
-        case 0:
-            edgeWeight = 'strokeWidth=1;';
-            break;
-        case 1:
-            edgeWeight = 'strokeWidth=1.75;';
-            break;
-        case 2:
-            edgeWeight = 'strokeWidth=2.5;';
-            break;
-    }
-    
-    return this.insertInvertedEdge(parent, id, value, source, target, edgeWeight + style);
+azdataGraph.prototype.insertWeightedInvertedEdge = function (parent, id, value, source, target, style) {
+    return this.insertInvertedEdge(parent, id, value, source, target, `strokeWidth=${value.weight.toFixed(1)};` + style);
 };
 
 /**
@@ -119,14 +102,15 @@ azDataGraph.prototype.insertWeightedInvertedEdge = function (parent, id, value, 
  * Parameters:
  * cell - <mxCell> that specifies the cell the retrieved tooltip is for.
  */
-azDataGraph.prototype.getStyledTooltipForCell = function(cell) {
-    const tooltipWidth = cell.edge ? 'width: 25em;' : 'width: 45em;';
+azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
+    const tooltipWidth = cell.edge ? 'width: auto;' : 'width: 45em;';
     const justifyContent = 'display: flex; justify-content: space-between;';
     const boldText = 'font-weight: bold;';
     const tooltipLineHeight = 'padding-top: .13em; line-height: .5em;';
     const centerText = 'text-align: center;';
     const headerBottomMargin = 'margin-bottom: 1.5em;';
     const footerTopMargin = 'margin-top: 1.5em;';
+    const metricLabelMargin = 'margin-right: 4em;';
 
     if (cell.value != null && cell.value.metrics != null) {
         var tooltip = `<div style=\"${tooltipWidth}\">`;
@@ -143,7 +127,7 @@ azDataGraph.prototype.getStyledTooltipForCell = function(cell) {
             tooltip += `<div style=\"${tooltipLineHeight}\">`;
 
             tooltip += `<div style=\"${justifyContent}\">`;
-            tooltip += `<span style=\"${boldText}\">${cell.value.metrics[i].name}</span>`;
+            tooltip += `<span style=\"${boldText} ${metricLabelMargin}\">${cell.value.metrics[i].name}</span>`;
             tooltip += `<span>${cell.value.metrics[i].value}</span>`;
             tooltip += '</div>';
 
@@ -161,7 +145,7 @@ azDataGraph.prototype.getStyledTooltipForCell = function(cell) {
             tooltip += `<div><span>${cell.value.metrics[0].value}</span></div>`;
             tooltip += `<div><span style=\"${boldText}\">Warnings</span></div>`;
             tooltip += '<div><span>No join predicate</span></div>';
-            
+
         }
 
         tooltip += '</div>';
@@ -169,5 +153,44 @@ azDataGraph.prototype.getStyledTooltipForCell = function(cell) {
         return tooltip;
     }
 
-    return azDataGraph.prototype.getTooltipForCell.apply(this, arguments); // "supercall"
-}
+    return azdataGraph.prototype.getTooltipForCell.apply(this, arguments); // "supercall"
+};
+
+/**
+ * Function: graphEventHandler
+ * 
+ * Event listener for the entire graph.
+ * 
+ * Parameter:
+ * 
+ * sender - Optional sender argument. Default is this.
+ * event - The event caught by the listener.
+ * callback - The callback to invoke with the passed in selected cell.
+ */
+azdataGraph.prototype.graphEventHandler = function (sender, event, eventCallback) {
+    let selectedCell = event.getProperty('cell');
+    if (eventCallback && selectedCell) {
+        eventCallback(selectedCell);
+    }
+    event.consume();
+};
+
+/**
+ * Function: addDomEventListener
+ * 
+ * Adds a listener to the given element
+ * 
+ * Parameter
+ * 
+ * element - The element to add the listener to.
+ * eventType - The event type (i.e. 'click') that should trigger the callback
+ * callback - The callback function that is executed by the event listener.
+ */
+ azdataGraph.prototype.addDomEventListener = function (element, eventType, eventCallback) {
+    mxEvent.addListener(element, eventType, (e) => {
+        if (eventCallback) {
+            eventCallback();
+        }
+        mxEvent.consume(e);
+    });
+};

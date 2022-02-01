@@ -4,11 +4,11 @@
 <html>
 
 <head>
-	<title>Query Plan test</title>
+	<title>Query Plan Listener test</title>
 	<script type="text/javascript">
 		mxBasePath = '../../src';
 	</script>
-	<script type="text/javascript" src="./src/js/graph.js" ></script>
+	<script type="text/javascript" src="./src/js/graph.js"></script>
 	<script type="text/javascript" src="../../src/js/mxClient.js"></script>
 	<script type="text/javascript" src="./src/js/queryPlanSetup.js"></script>
 	<script type="text/javascript">
@@ -19,7 +19,21 @@
 			var imageBasePath = './icons/';
 			var iconPaths = getIconPaths(imageBasePath);
 
-			new azdataQueryPlan(container, graph, iconPaths);
+			let queryPlan = new azdataQueryPlan(container, graph, iconPaths);
+
+			const graphEdgeCallback = (cell) => {
+				if (cell.edge) {
+					console.log('Edge click detected');
+				}
+			};
+			queryPlan.registerGraphCallback('click', graphEdgeCallback);
+
+			const graphVertexCallback = (cell) => {
+				if (cell.vertex) {
+					console.log('Vertex click detected');
+				}
+			};
+			queryPlan.registerGraphCallback('click', graphVertexCallback);
 		};
 
 	</script>
