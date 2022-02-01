@@ -1,10 +1,10 @@
 <!--
   Test page for manually testing the Query Plan classes
 -->
-<html>
+<html style="background-color: black;">
 
 <head>
-	<title>Query Plan test</title>
+	<title>Query Plan Cell Color test</title>
 	<script type="text/javascript">
 		mxBasePath = '../../src';
 	</script>
@@ -19,7 +19,14 @@
 			var imageBasePath = './icons/';
 			var iconPaths = getIconPaths(imageBasePath);
 
-			new azdataQueryPlan(container, graph, iconPaths);
+			let iconBackgroundColor = 'black';
+			let fontColor = 'white';
+			let edgeColor = 'white';
+
+			let queryPlan = new azdataQueryPlan(container, graph, iconPaths);
+			queryPlan.setIconBackgroundColor(iconBackgroundColor);
+			queryPlan.setTextFontColor(fontColor);
+			queryPlan.setEdgeColor(edgeColor);
 		};
 
 	</script>
