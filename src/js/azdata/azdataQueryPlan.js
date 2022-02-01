@@ -20,7 +20,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     this.graph = graph;
     this.rubberband = new mxRubberband(graph);
     graph.centerZoom = false;
-    this.enablePanning(false);
+    this.enablePanning(true);
     graph.setTooltips(true);
     graph.setEnabled(true);
 
@@ -173,8 +173,7 @@ azdataQueryPlan.prototype.getZoomLevelPercentage = function() {
 };
 
 azdataQueryPlan.prototype.zoomTo = function (zoomPercentage) {
-    const ZOOM_PERCENTAGE_MINIMUM = 3;
-    const ZOOM_PERCENTAGE_MAXIMUM = 500;
+    const ZOOM_PERCENTAGE_MINIMUM = 1;
 
     let parsedZoomLevel = parseInt(zoomPercentage);
     if (isNaN(parsedZoomLevel)) {
@@ -183,9 +182,6 @@ azdataQueryPlan.prototype.zoomTo = function (zoomPercentage) {
 
     if (parsedZoomLevel < ZOOM_PERCENTAGE_MINIMUM) {
         parsedZoomLevel = ZOOM_PERCENTAGE_MINIMUM;
-    }
-    else if (parsedZoomLevel > ZOOM_PERCENTAGE_MAXIMUM) {
-        parsedZoomLevel = ZOOM_PERCENTAGE_MAXIMUM;
     }
 
     let zoomScale = parsedZoomLevel / 100;
