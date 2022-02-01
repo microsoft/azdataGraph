@@ -143,11 +143,13 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
 
     var graph = new azdataGraph(container);
     this.graph = graph;
+    this.rubberband = new mxRubberband(graph);
 
     var style = graph.getStylesheet().getDefaultEdgeStyle();
     style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
 
     graph.centerZoom = false;
+    this.enablePanning(true);
     graph.setTooltips(true);
     graph.setEnabled(true);
     graph.setPanning(true);
@@ -346,17 +348,73 @@ azdataQueryPlan.prototype.setNodeYPositionRecursive = function (node, layoutHelp
 }
 
 azdataQueryPlan.prototype.registerZoomInListener = function (element, eventType) {
-    this.graph.addZoomInListener(element, eventType);
+    const zoomIn = () => {
+        this.graph.zoomIn();
+    };
+    this.graph.addDomEventListener(element, eventType, zoomIn);
 };
 
 azdataQueryPlan.prototype.registerZoomOutListener = function (element, eventType) {
-    this.graph.addZoomOutListener(element, eventType);
+    const zoomOut = () => {
+        this.graph.zoomOut();
+    };
+
+    this.graph.addDomEventListener(element, eventType, zoomOut);
+};
+
+azdataQueryPlan.prototype.registerZoomToFitListener = function (element, eventType) {
+    const zoomToFit = () => {
+        this.graph.fit();
+        this.graph.view.rendering = true;
+        this.graph.refresh();
+    };
+    
+    this.graph.addDomEventListener(element, eventType, zoomToFit);
 };
 
 azdataQueryPlan.prototype.registerGraphCallback = function (eventType, callback) {
     this.graph.addListener(eventType, (sender, event) => {
         this.graph.graphEventHandler(sender, event, callback);
     });
+};
+
+azdataQueryPlan.prototype.getZoomLevelPercentage = function() {
+    return this.graph.view.scale * 100;
+};
+
+azdataQueryPlan.prototype.zoomTo = function (zoomPercentage) {
+    const ZOOM_PERCENTAGE_MINIMUM = 1;
+
+    let parsedZoomLevel = parseInt(zoomPercentage);
+    if (isNaN(parsedZoomLevel)) {
+        return;
+    }
+
+    if (parsedZoomLevel < ZOOM_PERCENTAGE_MINIMUM) {
+        parsedZoomLevel = ZOOM_PERCENTAGE_MINIMUM;
+    }
+
+    let zoomScale = parsedZoomLevel / 100;
+    this.graph.zoomTo(zoomScale);
+};
+
+azdataQueryPlan.prototype.addZoomInRectListener = function() {
+    let self = this;
+    mxRubberband.prototype.mouseUp = function(sender, event) {
+        let execute = self.container && this.width !== undefined && this.height !== undefined;
+        this.reset();
+
+        if (execute) {
+            let rect = new mxRectangle(this.x, this.y, this.width, this.height);
+            self.graph.zoomToRect(rect);
+            event.consume();
+        }
+    };
+};
+
+azdataQueryPlan.prototype.enablePanning = function(panning) {
+    this.graph.panningHandler.useLeftButtonForPanning = panning;
+    this.graph.setPanning(panning);
 };
 
 azdataQueryPlan.prototype.setIconBackgroundColor = function(color) {

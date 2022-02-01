@@ -154,7 +154,7 @@ azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
     }
 
     return azdataGraph.prototype.getTooltipForCell.apply(this, arguments); // "supercall"
-}
+};
 
 /**
  * Function: graphEventHandler
@@ -167,46 +167,30 @@ azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
  * event - The event caught by the listener.
  * callback - The callback to invoke with the passed in selected cell.
  */
-azdataGraph.prototype.graphEventHandler = function (sender, event, callback) {
+azdataGraph.prototype.graphEventHandler = function (sender, event, eventCallback) {
     let selectedCell = event.getProperty('cell');
-    if (selectedCell && callback) {
-        callback(selectedCell);
+    if (eventCallback && selectedCell) {
+        eventCallback(selectedCell);
     }
     event.consume();
-}
+};
 
 /**
- * Function: addZoomInListener
+ * Function: addDomEventListener
  * 
- * Adds the zoom in listener to the given element
- * 
- * Parameter:
- * 
- * element - The element to add the listener to.
- * eventType - the event type (i.e. 'click') that should trigger the callback
- */
-azdataGraph.prototype.addZoomInListener = function (element, eventType) {
-    let self = this;
-    mxEvent.addListener(element, eventType, (e) => {
-        azdataGraph.prototype.zoomIn.apply(self);
-        mxEvent.consume(e);
-    });
-}
-
-/**
- * Function: addZoomOutListener
- * 
- * Adds the zoom out listener to the given element
+ * Adds a listener to the given element
  * 
  * Parameter
  * 
  * element - The element to add the listener to.
  * eventType - The event type (i.e. 'click') that should trigger the callback
+ * callback - The callback function that is executed by the event listener.
  */
-azdataGraph.prototype.addZoomOutListener = function (element, eventType) {
-    let self = this;
+ azdataGraph.prototype.addDomEventListener = function (element, eventType, eventCallback) {
     mxEvent.addListener(element, eventType, (e) => {
-        azdataGraph.prototype.zoomOut.apply(self);
+        if (eventCallback) {
+            eventCallback();
+        }
         mxEvent.consume(e);
     });
-}
+};

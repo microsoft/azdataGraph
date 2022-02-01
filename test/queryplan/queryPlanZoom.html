@@ -20,13 +20,38 @@
 			var imageBasePath = './icons/';
 			var iconPaths = getIconPaths(imageBasePath);
 
-			queryPlan = new azdataQueryPlan(container, graph, iconPaths);
+			let queryPlan = new azdataQueryPlan(container, graph, iconPaths);
+			queryPlan.enablePanning(false);
+			queryPlan.addZoomInRectListener();
+
 			let zoomInButton = document.getElementById('zoomInBtn');
 			queryPlan.registerZoomInListener(zoomInButton, 'click');
+			zoomInButton.addEventListener('click', () => {
+				zoomLevelInput.value = `${queryPlan.getZoomLevelPercentage()}`;
+			});
 
-			let zoomOutButtom = document.getElementById('zoomOutBtn');
-			queryPlan.registerZoomOutListener(zoomOutButtom, 'click');
+			let zoomOutButton = document.getElementById('zoomOutBtn');
+			queryPlan.registerZoomOutListener(zoomOutButton, 'click');
+			zoomOutButton.addEventListener('click', () => {
+				zoomLevelInput.value = `${queryPlan.getZoomLevelPercentage()}`;
+			});
 
+			let zoomToFitButton = document.getElementById('zoomToFitBtn');
+			queryPlan.registerZoomToFitListener(zoomToFitButton, 'click');
+			zoomToFitButton.addEventListener('click', () => {
+				zoomLevelInput.value = `${queryPlan.getZoomLevelPercentage()}`;
+			});
+
+			let zoomLevelInput = document.getElementById('zoomLevel');
+			zoomLevelInput.value = `${queryPlan.getZoomLevelPercentage()}`;
+
+			let zoomBtn = document.getElementById('zoomBtn');
+			zoomBtn.addEventListener('click', () => {
+				let enteredZoomLevel = zoomLevelInput.value;
+				queryPlan.zoomTo(enteredZoomLevel);
+
+				zoomLevelInput.value = `${queryPlan.getZoomLevelPercentage()}`;
+			});
 		};
 
 	</script>
@@ -34,15 +59,14 @@
 
 <body onload="main(document.getElementById('graphContainer'))">
 	<div id="graphContainer" style="position:relative;overflow:hidden;width:100%;height:100%;cursor:default;"></div>
-	<div style="position: absolute; overflow: visible; top: 8px; left: 8px;">
-		<!-- zoom in button -->
-		<div id="zoomInBtn"
-			style="position: absolute; background-color: transparent; border: 1px solid gray; text-align: center; font-size: 10px; cursor: pointer; width: 16px; height: 16px; left: 0px; top: 0px;">
-			+</div>
-		<!-- zoom out button -->
-		<div id="zoomOutBtn"
-			style="position: absolute; background-color: transparent; border: 1px solid gray; text-align: center; font-size: 10px; cursor: pointer; width: 16px; height: 16px; left: 16px; top: 0px;">
-			-</div>
+	<div style="position: absolute; overflow: visible; bottom: 50px; left: 8px;">
+		<button id="zoomInBtn" type="button" style="font-size:20px;">+</button>
+		<button id="zoomOutBtn" type="button" style="font-size:20px;">-</button>
+		<button id="zoomToFitBtn" type="button" style="font-size:20px;">To Fit</button>
+
+		<label for="zoomLevel" style="margin-left: 50px; font-size: 20px;">Zoom Level %: </label>
+		<input type="text" id="zoomLevel" name="zoom" style="font-size: 20px;">
+		<button id="zoomBtn" type="button" style="font-size: 20px;">Zoom</button>
 	</div>
 
 </body>
