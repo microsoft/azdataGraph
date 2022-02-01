@@ -89,23 +89,7 @@ azdataGraph.prototype.insertInvertedEdge = function (parent, id, value, source, 
  * style - Optional string that defines the cell style.
  */
 azdataGraph.prototype.insertWeightedInvertedEdge = function (parent, id, value, source, target, style) {
-    let edgeWeight = '';
-
-    // TDDO lewissanchez - this will eventually be based on the data size for all rows.
-    let randValue = Math.floor(Math.random() * 3)
-    switch (randValue) {
-        case 0:
-            edgeWeight = 'strokeWidth=1;';
-            break;
-        case 1:
-            edgeWeight = 'strokeWidth=1.75;';
-            break;
-        case 2:
-            edgeWeight = 'strokeWidth=2.5;';
-            break;
-    }
-
-    return this.insertInvertedEdge(parent, id, value, source, target, edgeWeight + style);
+    return this.insertInvertedEdge(parent, id, value, source, target, `strokeWidth=${value.weight.toFixed(1)};` + style);
 };
 
 /**
@@ -119,13 +103,14 @@ azdataGraph.prototype.insertWeightedInvertedEdge = function (parent, id, value, 
  * cell - <mxCell> that specifies the cell the retrieved tooltip is for.
  */
 azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
-    const tooltipWidth = cell.edge ? 'width: 25em;' : 'width: 45em;';
+    const tooltipWidth = cell.edge ? 'width: auto;' : 'width: 45em;';
     const justifyContent = 'display: flex; justify-content: space-between;';
     const boldText = 'font-weight: bold;';
     const tooltipLineHeight = 'padding-top: .13em; line-height: .5em;';
     const centerText = 'text-align: center;';
     const headerBottomMargin = 'margin-bottom: 1.5em;';
     const footerTopMargin = 'margin-top: 1.5em;';
+    const metricLabelMargin = 'margin-right: 4em;';
 
     if (cell.value != null && cell.value.metrics != null) {
         var tooltip = `<div style=\"${tooltipWidth}\">`;
@@ -142,7 +127,7 @@ azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
             tooltip += `<div style=\"${tooltipLineHeight}\">`;
 
             tooltip += `<div style=\"${justifyContent}\">`;
-            tooltip += `<span style=\"${boldText}\">${cell.value.metrics[i].name}</span>`;
+            tooltip += `<span style=\"${boldText} ${metricLabelMargin}\">${cell.value.metrics[i].name}</span>`;
             tooltip += `<span>${cell.value.metrics[i].value}</span>`;
             tooltip += '</div>';
 

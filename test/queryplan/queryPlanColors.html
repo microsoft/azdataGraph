@@ -1,14 +1,14 @@
 <!--
   Test page for manually testing the Query Plan classes
 -->
-<html>
+<html style="background-color: black;">
 
 <head>
-	<title>Query Plan Listener test</title>
+	<title>Query Plan Cell Color test</title>
 	<script type="text/javascript">
 		mxBasePath = '../../src';
 	</script>
-	<script type="text/javascript" src="./src/js/graph.js"></script>
+	<script type="text/javascript" src="./src/js/graph.js" ></script>
 	<script type="text/javascript" src="../../src/js/mxClient.js"></script>
 	<script type="text/javascript" src="./src/js/queryPlanSetup.js"></script>
 	<script type="text/javascript">
@@ -19,21 +19,14 @@
 			var imageBasePath = './icons/';
 			var iconPaths = getIconPaths(imageBasePath);
 
+			let iconBackgroundColor = 'black';
+			let fontColor = 'white';
+			let edgeColor = 'white';
+
 			let queryPlan = new azdataQueryPlan(container, graph, iconPaths);
-
-			const graphEdgeCallback = (cell) => {
-				if (cell.edge) {
-					console.log('Edge click detected');
-				}
-			};
-			queryPlan.registerGraphCallback('click', graphEdgeCallback);
-
-			const graphVertexCallback = (cell) => {
-				if (cell.vertex) {
-					console.log('Vertex click detected');
-				}
-			};
-			queryPlan.registerGraphCallback('click', graphVertexCallback);
+			queryPlan.setIconBackgroundColor(iconBackgroundColor);
+			queryPlan.setTextFontColor(fontColor);
+			queryPlan.setEdgeColor(edgeColor);
 		};
 
 	</script>
