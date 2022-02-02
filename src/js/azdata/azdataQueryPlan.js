@@ -131,10 +131,7 @@ function azdataQueryPlan(container, queryPlanGraph, iconPaths) {
 };
 
 azdataQueryPlan.prototype.init = function (container, iconPaths) {
-    let div = document.getElementById('graphContainer');
-    div.style.overflow = 'auto';
     this.container = container;
-
     mxEvent.addListener(window, 'unload', mxUtils.bind(this, function () {
         this.destroy();
     }));
