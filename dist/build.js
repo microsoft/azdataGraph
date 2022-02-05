@@ -92909,6 +92909,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     graph.resizeContainer = false;
     graph.autoSizeCellsOnAdd = true;
     graph.autoExtend = false; //disables the size of the graph automatically extending if the mouse goes near the container edge while dragging.
+    graph.getSelectionModel().setSingleSelection(true); //Forcing only single cell selection in graph
 
     graph.convertValueToString = function (cell) {
         if (cell.value != null && cell.value.label != null) {
@@ -92969,7 +92970,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
             iconName = 'azdataQueryplan-' + icons[rand];
         }
 
-        var vertex = graph.insertVertex(parent, null, this.queryPlanGraph, this.queryPlanGraph.position.x, this.queryPlanGraph.position.y, 70, 70, iconName);
+        var vertex = graph.insertVertex(parent, this.queryPlanGraph.id, this.queryPlanGraph, this.queryPlanGraph.position.x, this.queryPlanGraph.position.y, 70, 70, iconName);
         var stack =
             [
                 {
@@ -92988,9 +92989,9 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
                         rand = Math.floor((Math.random() * icons.length));
                         iconName = 'azdataQueryplan-' + icons[rand];
                     }
-                    vertex = graph.insertVertex(parent, null, node, node.position.x, node.position.y, 70, 70, iconName);
+                    vertex = graph.insertVertex(parent, node.id, node, node.position.x, node.position.y, 70, 70, iconName);
                     var edge = entry.node.edges[i];                    
-                    graph.insertWeightedInvertedEdge(parent, null, edge, entry.vertex, vertex);
+                    graph.insertWeightedInvertedEdge(parent, edge.id, edge, entry.vertex, vertex);
                     stack.push(
                         {
                             vertex: vertex,
