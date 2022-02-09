@@ -93170,22 +93170,18 @@ azdataQueryPlan.prototype.enablePanning = function(panning) {
 };
 
 azdataQueryPlan.prototype.setIconBackgroundColor = function(color) {
-    let cells = this.graph.selectCells(true, false);
-    this.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, color, cells);
-    this.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, color, cells);
-    this.graph.getSelectionModel().clear();
+    const allVertices = this.graph.model.getChildCells(this.graph.getDefaultParent());
+    this.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, color, allVertices);
+    this.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, color, allVertices);
+
 };
 
 azdataQueryPlan.prototype.setTextFontColor = function(color) {
-    let cells = this.graph.selectCells(true, false);
-    this.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, color, cells);
-    this.graph.getSelectionModel().clear();
+    this.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, color, this.graph.model.getChildCells(this.graph.getDefaultParent()));
 };
 
 azdataQueryPlan.prototype.setEdgeColor = function(color) {
-    let cells = this.graph.selectCells(false, true);
-    this.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, color, cells);
-    this.graph.getSelectionModel().clear();
+    this.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, color, this.graph.model.getChildEdges(this.graph.getDefaultParent()));
 };
 
 azdataQueryPlan.prototype.destroy = function () {
