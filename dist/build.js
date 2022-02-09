@@ -661,7 +661,7 @@ if (mxClient.IS_VML)
 // PREPROCESSOR-REMOVE-START
 // If script is loaded via CommonJS, do not write <script> tags to the page
 // for dependencies. These are already included in the build.
-if (mxForceIncludes || !(typeof module === 'object' && module.exports != null))
+if (mxForceIncludes)
 {
 // PREPROCESSOR-REMOVE-END
 	mxClient.include(mxClient.basePath+'/js/util/mxLog.js');
