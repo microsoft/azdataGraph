@@ -127,6 +127,9 @@ azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
         // tooltip body
         let startIndex = cell.edge ? 0 : 1; // first index for vertices contains footer label, so we can skip for vertices.
         for (var i = startIndex; i < cell.value.metrics.length; ++i) {
+            if(cell.value.metrics[i].isLongString){ // Skipping all strings as they go to the bottom of tooltip
+                continue; 
+            }
             tooltip += `<div style=\"${tooltipLineHeight}\">`;
 
             tooltip += `<div style=\"${justifyContent}\">`;
@@ -143,12 +146,11 @@ azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
 
         // tooltip footer for vertices only
         if (!cell.edge) {
-            tooltip += '<hr />';
-            tooltip += `<div style=\"${footerTopMargin}\"><span style=\"${boldText}\">${cell.value.metrics[0].name}</span></div>`;
-            tooltip += `<div><span>${cell.value.metrics[0].value}</span></div>`;
-            tooltip += `<div><span style=\"${boldText}\">Warnings</span></div>`;
-            tooltip += '<div><span>No join predicate</span></div>';
-
+            cell.value.metrics.filter(m => m.isLongString).forEach(m => {
+                tooltip += '<hr />';
+                tooltip += `<div style=\"${footerTopMargin}\"><span style=\"${boldText}\">${m.name}</span></div>`;
+                tooltip += `<div><span>${m.value.replace(/(\r\n|\n|\r)/gm, " ")}</span></div>`; // Removing all line breaks as they look bad in tooltips
+            })
         }
 
         tooltip += '</div>';
