@@ -68611,6 +68611,7 @@ azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
     const tooltipLineHeight = 'padding-top: .13em; line-height: .5em;';
     const centerText = 'text-align: center;';
     const headerBottomMargin = 'margin-bottom: 1.5em;';
+    const headerTopMargin = 'margin-top: 1.5em;';
     const footerTopMargin = 'margin-top: 1.5em;';
     const metricLabelMargin = 'margin-right: 4em;';
 
@@ -68620,7 +68621,9 @@ azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
         // tooltip heading for vertices only
         if (!cell.edge) {
             tooltip += `<div style=\"${centerText}\"><span style=\"${boldText}\">${cell.value.label}</span></div>`;
-            tooltip += `<div style=\"${headerBottomMargin}\"><span>[Description of operation here]</span></div>`;
+            if(cell.value.description){
+                tooltip += `<div style=\"${headerBottomMargin} ${headerTopMargin}\"><span>${cell.value.description}</span></div>`;
+            }
         }
 
         // tooltip body
