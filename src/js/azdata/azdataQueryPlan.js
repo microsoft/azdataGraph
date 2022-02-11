@@ -144,8 +144,6 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     this.keyHandler = new mxKeyHandler(graph);
 
     const selectNext = (evt) => {
-        debugger;
-        let view = evt.view;
         this.graph.selectCell(true, false, false);
     };
 
@@ -153,7 +151,6 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     this.keyHandler.bindKey(arrowRightKey, selectNext);
 
     const selectPrevious = (evt) => {
-        debugger;
         this.graph.selectCell(false, false, false);
     };
 
