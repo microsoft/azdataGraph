@@ -141,6 +141,24 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     var graph = new azdataGraph(container);
     this.graph = graph;
     this.rubberband = new mxRubberband(graph);
+    this.keyHandler = new mxKeyHandler(graph);
+
+    const selectNext = (evt) => {
+        debugger;
+        let view = evt.view;
+        this.graph.selectCell(true, false, false);
+    };
+
+    const arrowRightKey = 39;
+    this.keyHandler.bindKey(arrowRightKey, selectNext);
+
+    const selectPrevious = (evt) => {
+        debugger;
+        this.graph.selectCell(false, false, false);
+    };
+
+    const arrowLeftKey = 37;
+    this.keyHandler.bindKey(arrowLeftKey, selectPrevious);
 
     var style = graph.getStylesheet().getDefaultEdgeStyle();
     style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
