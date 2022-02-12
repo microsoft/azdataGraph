@@ -143,19 +143,55 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     this.rubberband = new mxRubberband(graph);
     this.keyHandler = new mxKeyHandler(graph);
 
-    const selectNext = (evt) => {
-        this.graph.selectCell(true, false, false);
-    };
-
     const arrowRightKey = 39;
+    const selectNext = (evt) => {
+        let currentCell = this.graph.getSelectionCell();
+        if (currentCell && currentCell.vertex) {
+            if (currentCell.edges.length === 1) {
+                if (currentCell.edges[0].target !== currentCell) {
+                    this.graph.setSelectionCell(currentCell.edges[0]);
+                }
+            }
+            else if (currentCell.edges.length > 1) {
+                this.graph.setSelectionCell(currentCell.edges[1]);
+            }
+        }
+        else if (currentCell && currentCell.edge) {
+            this.graph.setSelectionCell(currentCell.target);
+        }
+    };
     this.keyHandler.bindKey(arrowRightKey, selectNext);
 
-    const selectPrevious = (evt) => {
-        this.graph.selectCell(false, false, false);
-    };
-
     const arrowLeftKey = 37;
+    const selectPrevious = (evt) => {
+        let currentCell = this.graph.getSelectionCell();
+        if (currentCell && currentCell.vertex) {
+            if (currentCell.edges.length === 1) {
+                if (currentCell.edges[0].source !== currentCell) {
+                    this.graph.setSelectionCell(currentCell.edges[0]);
+                }
+            }
+            else if (currentCell.edges.length > 1) {
+                this.graph.setSelectionCell(currentCell.edges[0]);
+            }
+        }
+        else if (currentCell && currentCell.edge) {
+            this.graph.setSelectionCell(currentCell.source);
+        }
+    };
     this.keyHandler.bindKey(arrowLeftKey, selectPrevious);
+
+    const arrowUpKey = 38;
+    const selectSibling = (evt) => {
+        // this.graph.selectCell();
+    };
+    this.keyHandler.bindKey(arrowUpKey, selectSibling);
+
+    const arrowDownKey = 40;
+    const selectNextSibling = (evt) => {
+        // this.graph.selectCell();
+    };
+    this.keyHandler.bindKey(arrowDownKey, selectNextSibling);
 
     var style = graph.getStylesheet().getDefaultEdgeStyle();
     style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
