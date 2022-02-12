@@ -183,13 +183,23 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
 
     const arrowUpKey = 38;
     const selectSibling = (evt) => {
-        // this.graph.selectCell();
+        let currentCell = this.graph.getSelectionCell();
+        if (currentCell && currentCell.edge) {
+            let source = currentCell.source;
+            if (source.edges.length === 3) {
+                this.graph.setSelectionCell(source.edges[source.edges.length - 2]);
+            }
+        }
     };
     this.keyHandler.bindKey(arrowUpKey, selectSibling);
 
     const arrowDownKey = 40;
     const selectNextSibling = (evt) => {
-        // this.graph.selectCell();
+        let currentCell = this.graph.getSelectionCell();
+        if (currentCell && currentCell.edge) {
+            let source = currentCell.source;
+            this.graph.setSelectionCell(source.edges[source.edges.length - 1]);
+        }
     };
     this.keyHandler.bindKey(arrowDownKey, selectNextSibling);
 
