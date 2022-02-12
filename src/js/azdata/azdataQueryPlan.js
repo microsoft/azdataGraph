@@ -182,7 +182,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     this.keyHandler.bindKey(arrowLeftKey, selectPrevious);
 
     const arrowUpKey = 38;
-    const selectSibling = (evt) => {
+    const selectTop = (evt) => {
         let currentCell = this.graph.getSelectionCell();
         if (currentCell && currentCell.edge) {
             let source = currentCell.source;
@@ -191,17 +191,17 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
             }
         }
     };
-    this.keyHandler.bindKey(arrowUpKey, selectSibling);
+    this.keyHandler.bindKey(arrowUpKey, selectTop);
 
     const arrowDownKey = 40;
-    const selectNextSibling = (evt) => {
+    const selectBottom = (evt) => {
         let currentCell = this.graph.getSelectionCell();
         if (currentCell && currentCell.edge) {
             let source = currentCell.source;
             this.graph.setSelectionCell(source.edges[source.edges.length - 1]);
         }
     };
-    this.keyHandler.bindKey(arrowDownKey, selectNextSibling);
+    this.keyHandler.bindKey(arrowDownKey, selectBottom);
 
     var style = graph.getStylesheet().getDefaultEdgeStyle();
     style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
