@@ -190,6 +190,13 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
                 this.graph.setSelectionCell(source.edges[source.edges.length - 2]);
             }
         }
+        else if (currentCell && currentCell.vertex) {
+            let source = currentCell.edges[0].source;
+            if (source.edges.length === 3) {
+                let edge = source.edges[1];
+                this.graph.setSelectionCell(edge.target);
+            }
+        }
     };
     this.keyHandler.bindKey(arrowUpKey, selectTop);
 
@@ -199,6 +206,13 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
         if (currentCell && currentCell.edge) {
             let source = currentCell.source;
             this.graph.setSelectionCell(source.edges[source.edges.length - 1]);
+        }
+        else if (currentCell && currentCell.vertex) {
+            let source = currentCell.edges[0].source;
+            if (source.edges.length === 3) {
+                let edge = source.edges[2];
+                this.graph.setSelectionCell(edge.target);
+            }
         }
     };
     this.keyHandler.bindKey(arrowDownKey, selectBottom);
