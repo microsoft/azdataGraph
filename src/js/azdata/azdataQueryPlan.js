@@ -53,14 +53,14 @@ class GraphNodeLayoutHelper {
         }
 
         // Insert Before First Element
-        if (xPosition < this.layoutPoints[0].x && 
+        if (xPosition < this.layoutPoints[0].x &&
             yPosition < this.layoutPoints[0].y) {
             this.layoutPoints.splice(0, 0, new Point(xPosition, yPosition));
             return;
         }
 
         // Insert Last Element
-        if (this.layoutPoints[this.layoutPoints.length - 1].x < xPosition && 
+        if (this.layoutPoints[this.layoutPoints.length - 1].x < xPosition &&
             this.layoutPoints[this.layoutPoints.length - 1].y < yPosition) {
             this.layoutPoints.push(new Point(xPosition, yPosition));
             return;
@@ -101,7 +101,7 @@ class GraphNodeLayoutHelper {
             }
             ++lastIndex;
         }
- 
+
         // Last insert point had the highest Y value, remove elements after inserted point.
         this.layoutPoints.splice(insertIndex + 1, this.layoutPoints.Count - insertIndex - 1);
     }
@@ -141,6 +141,122 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     var graph = new azdataGraph(container);
     this.graph = graph;
     this.rubberband = new mxRubberband(graph);
+    this.keyHandler = new mxKeyHandler(graph);
+
+    const arrowRightKey = 39;
+    const selectNext = (evt) => {
+        let currentCell = this.graph.getSelectionCell();
+        if (currentCell && currentCell.vertex) {
+            if (currentCell.edges.length === 1) {
+                if (currentCell.edges[0].target !== currentCell) {
+                    this.graph.setSelectionCell(currentCell.edges[0]);
+                }
+            }
+            else if (currentCell.edges.length > 1) {
+                this.graph.setSelectionCell(currentCell.edges[1]);
+            }
+        }
+        else if (currentCell && currentCell.edge) {
+            this.graph.setSelectionCell(currentCell.target);
+        }
+    };
+    this.keyHandler.bindKey(arrowRightKey, selectNext);
+
+    const arrowLeftKey = 37;
+    const selectPrevious = (evt) => {
+        let currentCell = this.graph.getSelectionCell();
+        if (currentCell && currentCell.vertex) {
+            if (currentCell.edges.length === 1) {
+                if (currentCell.edges[0].source !== currentCell) {
+                    this.graph.setSelectionCell(currentCell.edges[0]);
+                }
+            }
+            else if (currentCell.edges.length > 1) {
+                this.graph.setSelectionCell(currentCell.edges[0]);
+            }
+        }
+        else if (currentCell && currentCell.edge) {
+            this.graph.setSelectionCell(currentCell.source);
+        }
+    };
+    this.keyHandler.bindKey(arrowLeftKey, selectPrevious);
+
+    const arrowUpKey = 38;
+    const selectTop = (evt) => {
+        let currentCell = this.graph.getSelectionCell();
+        if (currentCell && currentCell.edge) {
+            let source = currentCell.source;
+
+            let edgeIndex = 0;
+            while (edgeIndex <= source.edges.length) {
+                if (source.edges[edgeIndex] === currentCell) {
+                    break;
+                }
+                ++edgeIndex;
+            }
+
+            --edgeIndex;
+            if (edgeIndex >= 1) {
+                this.graph.setSelectionCell(source.edges[edgeIndex]);
+            }
+        }
+        else if (currentCell && currentCell.vertex) {
+            let source = currentCell.edges[0].source;
+
+            let edgeIndex = 1;
+            while (edgeIndex <= source.edges.length - 1) {
+                if (source.edges[edgeIndex].target === currentCell) {
+                    break;
+                }
+                ++edgeIndex;
+            }
+
+            --edgeIndex;
+            if (edgeIndex >= 1) {
+                this.graph.setSelectionCell(source.edges[edgeIndex]);
+            }
+        }
+    };
+    this.keyHandler.bindKey(arrowUpKey, selectTop);
+
+    const arrowDownKey = 40;
+    const selectBottom = (evt) => {
+        let currentCell = this.graph.getSelectionCell();
+        if (currentCell && currentCell.edge) {
+            let source = currentCell.source;
+
+            let edgeIndex = 1;
+            while (edgeIndex <= source.edges.length - 1) {
+                if (source.edges[edgeIndex] === currentCell) {
+                    break;
+                }
+                ++edgeIndex;
+            }
+
+            ++edgeIndex;
+            if (edgeIndex <= source.edges.length - 1) {
+                this.graph.setSelectionCell(source.edges[edgeIndex]);
+            }
+        }
+        else if (currentCell && currentCell.vertex) {
+            let source = currentCell.edges[0].source;
+
+            let edgeIndex = 1;
+            while (edgeIndex <= source.edges.length - 1) {
+                if (source.edges[edgeIndex].target === currentCell) {
+                    break;
+                }
+                ++edgeIndex;
+            }
+
+            ++edgeIndex;
+            if (edgeIndex <= source.edges.length - 1) {
+                let edge = source.edges[edgeIndex];
+                this.graph.setSelectionCell(edge.target);
+            }
+        }
+    };
+    this.keyHandler.bindKey(arrowDownKey, selectBottom);
 
     var style = graph.getStylesheet().getDefaultEdgeStyle();
     style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
@@ -202,7 +318,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     }
 
     graph.getModel().beginUpdate();
-    
+
     try {
 
         this.placeGraphNodes();
@@ -236,7 +352,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
                         iconName = 'azdataQueryplan-' + icons[rand];
                     }
                     vertex = graph.insertVertex(parent, node.id, node, node.position.x, node.position.y, 70, 70, iconName);
-                    var edge = entry.node.edges[i];                    
+                    var edge = entry.node.edges[i];
                     graph.insertWeightedInvertedEdge(parent, edge.id, edge, entry.vertex, vertex);
                     stack.push(
                         {
@@ -366,7 +482,7 @@ azdataQueryPlan.prototype.registerZoomToFitListener = function (element, eventTy
         this.graph.view.rendering = true;
         this.graph.refresh();
     };
-    
+
     this.graph.addDomEventListener(element, eventType, zoomToFit);
 };
 
@@ -376,7 +492,7 @@ azdataQueryPlan.prototype.registerGraphCallback = function (eventType, callback)
     });
 };
 
-azdataQueryPlan.prototype.getZoomLevelPercentage = function() {
+azdataQueryPlan.prototype.getZoomLevelPercentage = function () {
     return this.graph.view.scale * 100;
 };
 
@@ -396,9 +512,9 @@ azdataQueryPlan.prototype.zoomTo = function (zoomPercentage) {
     this.graph.zoomTo(zoomScale);
 };
 
-azdataQueryPlan.prototype.addZoomInRectListener = function() {
+azdataQueryPlan.prototype.addZoomInRectListener = function () {
     let self = this;
-    mxRubberband.prototype.mouseUp = function(sender, event) {
+    mxRubberband.prototype.mouseUp = function (sender, event) {
         let execute = self.container && this.width !== undefined && this.height !== undefined;
         this.reset();
 
@@ -410,23 +526,23 @@ azdataQueryPlan.prototype.addZoomInRectListener = function() {
     };
 };
 
-azdataQueryPlan.prototype.enablePanning = function(panning) {
+azdataQueryPlan.prototype.enablePanning = function (panning) {
     this.graph.panningHandler.useLeftButtonForPanning = panning;
     this.graph.setPanning(panning);
 };
 
-azdataQueryPlan.prototype.setIconBackgroundColor = function(color) {
+azdataQueryPlan.prototype.setIconBackgroundColor = function (color) {
     const allVertices = this.graph.model.getChildCells(this.graph.getDefaultParent());
     this.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, color, allVertices);
     this.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, color, allVertices);
 
 };
 
-azdataQueryPlan.prototype.setTextFontColor = function(color) {
+azdataQueryPlan.prototype.setTextFontColor = function (color) {
     this.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, color, this.graph.model.getChildCells(this.graph.getDefaultParent()));
 };
 
-azdataQueryPlan.prototype.setEdgeColor = function(color) {
+azdataQueryPlan.prototype.setEdgeColor = function (color) {
     this.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, color, this.graph.model.getChildEdges(this.graph.getDefaultParent()));
 };
 
