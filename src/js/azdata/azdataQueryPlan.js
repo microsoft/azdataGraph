@@ -213,7 +213,8 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
 
             --edgeIndex;
             if (edgeIndex >= 1) {
-                this.graph.setSelectionCell(source.edges[edgeIndex]);
+                let edge = source.edges[edgeIndex];
+                this.graph.setSelectionCell(edge.target);
             }
         }
     };
