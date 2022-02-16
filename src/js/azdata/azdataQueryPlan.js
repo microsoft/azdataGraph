@@ -277,7 +277,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     graph.convertValueToString = function (cell) {
         if (cell.value != null && cell.value.label != null) {
             let cellLabel = '';
-            let splitLabel = cell.value.label.split('\n');
+            let splitLabel = cell.value.label.split(/\n/);
             splitLabel.forEach((str, i) => {
                 if (str.length > 20) {
                     cellLabel += str.substring(0, 17) + '...';
@@ -287,7 +287,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
                 }
 
                 if (i < splitLabel.length - 1) {
-                    cellLabel += '\n';
+                    cellLabel += getEndOfLine();
                 }
             });
 
@@ -383,6 +383,10 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     finally {
         graph.getModel().endUpdate();
     }
+};
+
+const getEndOfLine = function () {
+    return navigator.appVersion.indexOf('Win') === -1 ? '\n' : '\r\n';
 };
 
 /**
