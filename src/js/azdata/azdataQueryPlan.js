@@ -276,20 +276,20 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
 
     graph.convertValueToString = function (cell) {
         if (cell.value != null && cell.value.label != null) {
-            let splitLabel = cell.value.label.split('\n');
             let cellLabel = '';
-            for (let index = 0; index < splitLabel.length; ++index) {
-                if (splitLabel[index].length > 20) {
-                    cellLabel += splitLabel[index].substring(0, 17) + '...';
+            let splitLabel = cell.value.label.split('\n');
+            splitLabel.forEach((str, i) => {
+                if (str.length > 20) {
+                    cellLabel += str.substring(0, 17) + '...';
                 }
                 else {
-                    cellLabel += splitLabel[index];
+                    cellLabel += str;
                 }
 
-                if (index < splitLabel.length - 1) {
+                if (i < splitLabel.length - 1) {
                     cellLabel += '\n';
                 }
-            }
+            });
 
             return cellLabel;
         }
