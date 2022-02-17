@@ -276,7 +276,6 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
 
     graph.convertValueToString = function (cell) {
         if (cell.value != null && cell.value.label != null) {
-            debugger;
             let hasWindowsEOL = cell.value.label.includes('\r\n');
             let splitLabel = cell.value.label.split(/\r\n|\n/);
             let cellLabel = splitLabel.map((str, i) => {
