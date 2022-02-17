@@ -278,7 +278,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
         if (cell.value != null && cell.value.label != null) {
             let hasWindowsEOL = cell.value.label.includes('\r\n');
             let splitLabel = cell.value.label.split(/\r\n|\n/);
-            let cellLabel = splitLabel.map((str, i) => {
+            let cellLabel = splitLabel.map(str => {
                 let label = '';
                 if (str.length > 20) {
                     label += str.substring(0, 17) + '...';
