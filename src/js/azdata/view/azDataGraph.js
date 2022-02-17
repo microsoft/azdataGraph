@@ -118,19 +118,19 @@ azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
 
         // tooltip heading for vertices only
         if (!cell.edge) {
-            let costFreeLabel = '';
+            let tooltipTitle = '';
             let hasWindowsEOL = cell.value.label.includes('\r\n');
 
             let splitLabel = cell.value.label.split(/\r\n|\n/);
             splitLabel.pop();
             if (hasWindowsEOL) {
-                costFreeLabel = splitLabel.join('\r\n');
+                tooltipTitle = splitLabel.join('\r\n');
             }
             else {
-                costFreeLabel = splitLabel.join('\n');
+                tooltipTitle = splitLabel.join('\n');
             }
             
-            tooltip += `<div style=\"${centerText}\"><span style=\"${boldText}\">${costFreeLabel}</span></div>`;
+            tooltip += `<div style=\"${centerText}\"><span style=\"${boldText}\">${tooltipTitle}</span></div>`;
             if(cell.value.description){
                 tooltip += `<div style=\"${headerBottomMargin} ${headerTopMargin}\"><span>${cell.value.description}</span></div>`;
             }
