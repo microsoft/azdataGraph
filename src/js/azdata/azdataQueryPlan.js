@@ -277,8 +277,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     graph.convertValueToString = function (cell) {
         if (cell.value != null && cell.value.label != null) {
             let splitLabel = cell.value.label.split(/\n/);
-
-            return splitLabel.map((str, i) => {
+            let cellLabel = splitLabel.map((str, i) => {
                 let label = '';
                 if (str.length > 20) {
                     label += str.substring(0, 17) + '...';
@@ -290,6 +289,8 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
                 return label;
             })
             .join(getEndOfLine());
+
+            return cellLabel;
         }
 
         return azdataGraph.prototype.convertValueToString.apply(this, arguments); // "supercall"
