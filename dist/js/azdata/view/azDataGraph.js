@@ -118,7 +118,7 @@ azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
 
         // tooltip heading for vertices only
         if (!cell.edge) {
-            tooltip += `<div style=\"${centerText}\"><span style=\"${boldText}\">${cell.value.label}</span></div>`;
+            tooltip += `<div style=\"${centerText}\"><span style=\"${boldText}\">${cell.value.tooltipTitle}</span></div>`;
             if(cell.value.description){
                 tooltip += `<div style=\"${headerBottomMargin} ${headerTopMargin}\"><span>${cell.value.description}</span></div>`;
             }

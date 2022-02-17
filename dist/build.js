@@ -68620,7 +68620,7 @@ azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
 
         // tooltip heading for vertices only
         if (!cell.edge) {
-            tooltip += `<div style=\"${centerText}\"><span style=\"${boldText}\">${cell.value.label}</span></div>`;
+            tooltip += `<div style=\"${centerText}\"><span style=\"${boldText}\">${cell.value.tooltipTitle}</span></div>`;
             if(cell.value.description){
                 tooltip += `<div style=\"${headerBottomMargin} ${headerTopMargin}\"><span>${cell.value.description}</span></div>`;
             }
@@ -93035,7 +93035,28 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
 
     graph.convertValueToString = function (cell) {
         if (cell.value != null && cell.value.label != null) {
-            return cell.value.label;
+            let hasWindowsEOL = cell.value.label.includes('\r\n');
+            let splitLabel = cell.value.label.split(/\r\n|\n/);
+            let cellLabel = splitLabel.map(str => {
+                let label = '';
+                if (str.length > 20) {
+                    label += str.substring(0, 17) + '...';
+                }
+                else {
+                    label += str;
+                }
+
+                return label;
+            });
+
+            if (hasWindowsEOL) {
+                cellLabel = cellLabel.join('\r\n');
+            }
+            else {
+                cellLabel = cellLabel.join('\n');
+            }
+
+            return cellLabel;
         }
 
         return azdataGraph.prototype.convertValueToString.apply(this, arguments); // "supercall"
