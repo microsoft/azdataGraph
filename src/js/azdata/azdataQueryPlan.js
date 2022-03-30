@@ -3,6 +3,13 @@
  *  Licensed under the Source EULA. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+const GRAPH_PADDING_RIGHT = 48;
+const GRAPH_PADDING_TOP = 16;
+const GRAPH_PADDING_BOTTOM = 80;
+const GRAPH_PADDING_LEFT = 80;
+const CELL_WIDTH = 70;
+const CELL_HEIGHT = 70;
+
 class Point {
     constructor(x, y) {
         this.x = x;
@@ -332,7 +339,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
             iconName = 'azdataQueryplan-' + icons[rand];
         }
 
-        var vertex = graph.insertVertex(parent, this.queryPlanGraph.id, this.queryPlanGraph, this.queryPlanGraph.position.x, this.queryPlanGraph.position.y, 70, 70, iconName);
+        var vertex = graph.insertVertex(parent, this.queryPlanGraph.id, this.queryPlanGraph, this.queryPlanGraph.position.x, this.queryPlanGraph.position.y, CELL_WIDTH, CELL_HEIGHT, iconName);
         var stack =
             [
                 {
@@ -360,7 +367,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
                     if(node.position.y > maxY){
                         maxY = node.position.y;
                     }
-                    vertex = graph.insertVertex(parent, node.id, node, node.position.x, node.position.y, 70, 70, iconName);
+                    vertex = graph.insertVertex(parent, node.id, node, node.position.x, node.position.y, CELL_WIDTH, CELL_HEIGHT, iconName);
                     var edge = entry.node.edges[i];
                     graph.insertWeightedInvertedEdge(parent, edge.id, edge, entry.vertex, vertex);
                     stack.push(
@@ -372,7 +379,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
             }
         }
         // Adding a very small cell to the parent for padding on the bottom right corner of the graph. 
-        vertex = graph.insertVertex(parent, 'paddingVertex', undefined, maxX+70+100, maxY+70+100, 0.0001, 0.0001, '');
+        vertex = graph.insertVertex(parent, 'paddingVertex', undefined, maxX + CELL_WIDTH + GRAPH_PADDING_LEFT, maxY + CELL_HEIGHT + GRAPH_PADDING_BOTTOM, 0.0001, 0.0001, '');
     }
     finally {
         graph.getModel().endUpdate();
@@ -392,8 +399,8 @@ azdataQueryPlan.prototype.placeGraphNodes = function () {
     this.spacingY = 100;
 
     // Getting the node padding values from SSMS.
-    this.paddingX = 48;
-    this.paddingY = 16;
+    this.paddingX = GRAPH_PADDING_RIGHT;
+    this.paddingY = GRAPH_PADDING_TOP;
 
     // Getting a good enough start value for the root node.
     var startX = (this.paddingX + 150) / 2;
