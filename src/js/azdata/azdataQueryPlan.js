@@ -272,7 +272,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     graph.autoSizeCellsOnAdd = true;
     graph.autoExtend = false; //disables the size of the graph automatically extending if the mouse goes near the container edge while dragging.
     graph.getSelectionModel().setSingleSelection(true); //Forcing only single cell selection in graph
-
+    
     graph.convertValueToString = function (cell) {
         if (cell.value != null && cell.value.label != null) {
             return cell.value.label;
@@ -340,6 +340,9 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
                     node: this.queryPlanGraph
                 }
             ];
+
+        var maxX = -1;
+        var maxY = -1;
         while (stack.length > 0) {
             var entry = stack.pop();
             if (entry.node.children) {
@@ -350,6 +353,12 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
                     } else {
                         rand = Math.floor((Math.random() * icons.length));
                         iconName = 'azdataQueryplan-' + icons[rand];
+                    }
+                    if(node.position.x > maxX){
+                        maxX = node.position.x;
+                    }
+                    if(node.position.y > maxY){
+                        maxY = node.position.y;
                     }
                     vertex = graph.insertVertex(parent, node.id, node, node.position.x, node.position.y, 70, 70, iconName);
                     var edge = entry.node.edges[i];
@@ -362,7 +371,8 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
                 }
             }
         }
-        //layout.execute(parent);
+        // Adding a very small cell to the parent for padding on the bottom right corner of the graph. 
+        vertex = graph.insertVertex(parent, 'paddingVertex', undefined, maxX+70+100, maxY+70+100, 0.0001, 0.0001, '');
     }
     finally {
         graph.getModel().endUpdate();
