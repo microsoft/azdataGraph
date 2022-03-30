@@ -152,6 +152,33 @@ mxTooltipHandler.prototype.init = function()
 				this.hideTooltip();
 			}
 		}));
+
+		/**
+		 * {{SQL CARBON EDIT}} we only want to show the tooltip when the mouse is over the cell.
+		 * To track that when the tooltip is present over the cell we use this event.
+		 * As soon as the cursor goes outside the cell bound (over the tooltip) we hide the tooltip
+		 */
+		mxEvent.addListener(this.div, 'mousemove', mxUtils.bind(this, function(evt)
+		{
+			var pt = mxUtils.convertPoint(this.graph.container, evt.clientX, evt.clientY);
+			if( this.sourceCell &&
+				pt.x < this.sourceCell.geometry.x ||
+				pt.x > (this.sourceCell.geometry.x + this.sourceCell.geometry.width) ||
+				pt.y < (this.sourceCell.geometry.y) ||
+				pt.y > (this.sourceCell.geometry.y + this.sourceCell.geometry.height)
+			){
+				this.hideTooltip();
+			}
+		}));
+
+		/**
+		 * {{SQL CARBON EDIT}} Handling an edge case when the both cell and tooltip are at the edge of 
+		 * the screen. When the mouse goes outside the screen we close the tooltip
+		 */
+		 mxEvent.addListener(this.div, 'mouseleave', mxUtils.bind(this, function(evt)
+		 {
+			this.hideTooltip();
+		 }));
 	}
 };
 
@@ -251,6 +278,8 @@ mxTooltipHandler.prototype.reset = function(me, restart, state)
 	
 			this.thread = window.setTimeout(mxUtils.bind(this, function()
 			{
+				// {{SQL CARBON EDIT}} saving source cell to be used in the events for hiding the tooltip
+				this.sourceCell = me.sourceState.cell;
 				if (!this.graph.isEditing() && !this.graph.popupMenuHandler.isMenuShowing() && !this.graph.isMouseDown)
 				{
 					// Uses information from inside event cause using the event at
@@ -290,6 +319,8 @@ mxTooltipHandler.prototype.hideTooltip = function()
 		this.div.style.visibility = 'hidden';
 		this.div.innerHTML = '';
 	}
+	// {{SQL CARBON EDIT}} setting sourceCell to undefined when we hide the tooltip
+	this.sourceCell = undefined;
 };
 
 /**
@@ -324,9 +355,36 @@ mxTooltipHandler.prototype.show = function(tip, x, y)
 			this.div.innerHTML = '';
 			this.div.appendChild(tip);
 		}
-		
+
+		/**
+		 * {{SQL CARBON EDIT}} Adding smart placement of tooltip for better viewing.
+		 * This takes into account the tooltip width and height and sees if the tooltip 
+		 * is visible within in the window if not then it adjusts the position of the tooltip
+		 */
+		const tooltipWidth = this.div.offsetWidth + 4;
+		const tooltipHeight = this.div.offsetHeight + 4;
+
+		const windowWidth = window.innerWidth;
+		const windowHeight = window.innerHeight;
+
+		if ((windowWidth - x) < tooltipWidth) {
+			this.div.style.left = windowWidth - tooltipWidth + "px";
+		}
+
+		if ((windowHeight - y) < tooltipHeight) {
+			this.div.style.top = windowHeight - tooltipHeight + "px";
+		}
+
+		/**
+		 * {{SQL CARBON EDIT}} end of code
+		 */
 		this.div.style.visibility = '';
-		mxUtils.fit(this.div);
+		/**
+		 * {{SQL CARBON EDIT}} Commenting out the check to see if the tooltip 
+		 * fits in the screen or not as we always want to show it.
+		 */
+		//mxUtils.fit(this.div); 
+
 	}
 };
 

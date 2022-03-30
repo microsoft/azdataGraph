@@ -1683,7 +1683,10 @@ mxGraph.prototype.init = function(container)
 		if (this.tooltipHandler != null && this.tooltipHandler.div != null &&
 			this.tooltipHandler.div != evt.relatedTarget)
 		{
-			this.tooltipHandler.hide();
+			/**
+			* {{SQL CARBON EDIT}} commenting out this code as it gets triggered for cells at the edge of the screen.
+			*/
+			// this.tooltipHandler.hide();
 		}
 	}));
 
