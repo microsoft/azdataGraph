@@ -361,8 +361,9 @@ mxTooltipHandler.prototype.show = function(tip, x, y)
 		 * This takes into account the tooltip width and height and sees if the tooltip 
 		 * is visible within in the window if not then it adjusts the position of the tooltip
 		 */
-		const tooltipWidth = this.div.offsetWidth + 4;
-		const tooltipHeight = this.div.offsetHeight + 4;
+		const tooltipPadding = 4;
+		const tooltipWidth = this.div.offsetWidth + tooltipPadding;
+		const tooltipHeight = this.div.offsetHeight + tooltipPadding;
 
 		const windowWidth = window.innerWidth;
 		const windowHeight = window.innerHeight;
