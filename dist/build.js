@@ -56952,7 +56952,10 @@ mxGraph.prototype.init = function(container)
 		if (this.tooltipHandler != null && this.tooltipHandler.div != null &&
 			this.tooltipHandler.div != evt.relatedTarget)
 		{
-			this.tooltipHandler.hide();
+			/**
+			* {{SQL CARBON EDIT}} commenting out this code as it gets triggered for cells at the edge of the screen.
+			*/
+			// this.tooltipHandler.hide();
 		}
 	}));
 
@@ -68605,7 +68608,7 @@ azdataGraph.prototype.insertWeightedInvertedEdge = function (parent, id, value, 
  * cell - <mxCell> that specifies the cell the retrieved tooltip is for.
  */
 azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
-    const tooltipWidth = cell.edge ? 'width: auto;' : 'width: 45em;';
+    const tooltipWidth = 'width: 45em;';
     const justifyContent = 'display: flex; justify-content: space-between;';
     const boldText = 'font-weight: bold;';
     const tooltipLineHeight = 'padding-top: .13em; line-height: .5em;';
@@ -68624,7 +68627,7 @@ azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
             if(cell.value.description){
                 tooltip += `<div style=\"${headerBottomMargin} ${headerTopMargin}\"><span>${cell.value.description}</span></div>`;
             }
-        }
+        } 
 
         // tooltip body
         let startIndex = cell.edge ? 0 : 1; // first index for vertices contains footer label, so we can skip for vertices.
@@ -84293,6 +84296,33 @@ mxTooltipHandler.prototype.init = function()
 				this.hideTooltip();
 			}
 		}));
+
+		/**
+		 * {{SQL CARBON EDIT}} we only want to show the tooltip when the mouse is over the cell.
+		 * To track that when the tooltip is present over the cell we use this event.
+		 * As soon as the cursor goes outside the cell bound (over the tooltip) we hide the tooltip
+		 */
+		mxEvent.addListener(this.div, 'mousemove', mxUtils.bind(this, function(evt)
+		{
+			var pt = mxUtils.convertPoint(this.graph.container, evt.clientX, evt.clientY);
+			if( this.sourceCell &&
+				pt.x < this.sourceCell.geometry.x ||
+				pt.x > (this.sourceCell.geometry.x + this.sourceCell.geometry.width) ||
+				pt.y < (this.sourceCell.geometry.y) ||
+				pt.y > (this.sourceCell.geometry.y + this.sourceCell.geometry.height)
+			){
+				this.hideTooltip();
+			}
+		}));
+
+		/**
+		 * {{SQL CARBON EDIT}} Handling an edge case when the both cell and tooltip are at the edge of 
+		 * the screen. When the mouse goes outside the screen we close the tooltip
+		 */
+		 mxEvent.addListener(this.div, 'mouseleave', mxUtils.bind(this, function(evt)
+		 {
+			this.hideTooltip();
+		 }));
 	}
 };
 
@@ -84392,6 +84422,8 @@ mxTooltipHandler.prototype.reset = function(me, restart, state)
 	
 			this.thread = window.setTimeout(mxUtils.bind(this, function()
 			{
+				// {{SQL CARBON EDIT}} saving source cell to be used in the events for hiding the tooltip
+				this.sourceCell = me.sourceState.cell;
 				if (!this.graph.isEditing() && !this.graph.popupMenuHandler.isMenuShowing() && !this.graph.isMouseDown)
 				{
 					// Uses information from inside event cause using the event at
@@ -84431,6 +84463,8 @@ mxTooltipHandler.prototype.hideTooltip = function()
 		this.div.style.visibility = 'hidden';
 		this.div.innerHTML = '';
 	}
+	// {{SQL CARBON EDIT}} setting sourceCell to undefined when we hide the tooltip
+	this.sourceCell = undefined;
 };
 
 /**
@@ -84465,9 +84499,37 @@ mxTooltipHandler.prototype.show = function(tip, x, y)
 			this.div.innerHTML = '';
 			this.div.appendChild(tip);
 		}
-		
+
+		/**
+		 * {{SQL CARBON EDIT}} Adding smart placement of tooltip for better viewing.
+		 * This takes into account the tooltip width and height and sees if the tooltip 
+		 * is visible within in the window if not then it adjusts the position of the tooltip
+		 */
+		const tooltipPadding = 4;
+		const tooltipWidth = this.div.offsetWidth + tooltipPadding;
+		const tooltipHeight = this.div.offsetHeight + tooltipPadding;
+
+		const windowWidth = window.innerWidth;
+		const windowHeight = window.innerHeight;
+
+		if ((windowWidth - x) < tooltipWidth) {
+			this.div.style.left = windowWidth - tooltipWidth + "px";
+		}
+
+		if ((windowHeight - y) < tooltipHeight) {
+			this.div.style.top = windowHeight - tooltipHeight + "px";
+		}
+
+		/**
+		 * {{SQL CARBON EDIT}} end of code
+		 */
 		this.div.style.visibility = '';
-		mxUtils.fit(this.div);
+		/**
+		 * {{SQL CARBON EDIT}} Commenting out the check to see if the tooltip 
+		 * fits in the screen or not as we always want to show it.
+		 */
+		//mxUtils.fit(this.div); 
+
 	}
 };
 
@@ -92762,6 +92824,13 @@ __mxOutput.mxEditorCodec = typeof mxEditorCodec !== 'undefined' ? mxEditorCodec 
  *  Licensed under the Source EULA. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+const GRAPH_PADDING_RIGHT = 48;
+const GRAPH_PADDING_TOP = 16;
+const GRAPH_PADDING_BOTTOM = 80;
+const GRAPH_PADDING_LEFT = 80;
+const CELL_WIDTH = 70;
+const CELL_HEIGHT = 70;
+
 class Point {
     constructor(x, y) {
         this.x = x;
@@ -93113,7 +93182,10 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
             iconName = 'azdataQueryplan-' + icons[rand];
         }
 
-        var vertex = graph.insertVertex(parent, this.queryPlanGraph.id, this.queryPlanGraph, this.queryPlanGraph.position.x, this.queryPlanGraph.position.y, 70, 70, iconName);
+        var maxX = this.queryPlanGraph.position.x;
+        var maxY = this.queryPlanGraph.position.y;
+
+        var vertex = graph.insertVertex(parent, this.queryPlanGraph.id, this.queryPlanGraph, this.queryPlanGraph.position.x, this.queryPlanGraph.position.y, CELL_WIDTH, CELL_HEIGHT, iconName);
         var stack =
             [
                 {
@@ -93121,6 +93193,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
                     node: this.queryPlanGraph
                 }
             ];
+
         while (stack.length > 0) {
             var entry = stack.pop();
             if (entry.node.children) {
@@ -93132,7 +93205,13 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
                         rand = Math.floor((Math.random() * icons.length));
                         iconName = 'azdataQueryplan-' + icons[rand];
                     }
-                    vertex = graph.insertVertex(parent, node.id, node, node.position.x, node.position.y, 70, 70, iconName);
+                    if(node.position.x > maxX){
+                        maxX = node.position.x;
+                    }
+                    if(node.position.y > maxY){
+                        maxY = node.position.y;
+                    }
+                    vertex = graph.insertVertex(parent, node.id, node, node.position.x, node.position.y, CELL_WIDTH, CELL_HEIGHT, iconName);
                     var edge = entry.node.edges[i];
                     graph.insertWeightedInvertedEdge(parent, edge.id, edge, entry.vertex, vertex);
                     stack.push(
@@ -93143,7 +93222,8 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
                 }
             }
         }
-        //layout.execute(parent);
+        // Adding a very small cell to the parent for padding on the bottom right corner of the graph. 
+        vertex = graph.insertVertex(parent, 'paddingVertex', undefined, maxX + CELL_WIDTH + GRAPH_PADDING_LEFT, maxY + CELL_HEIGHT + GRAPH_PADDING_BOTTOM, 0.0001, 0.0001, '');
     }
     finally {
         graph.getModel().endUpdate();
@@ -93163,8 +93243,8 @@ azdataQueryPlan.prototype.placeGraphNodes = function () {
     this.spacingY = 100;
 
     // Getting the node padding values from SSMS.
-    this.paddingX = 48;
-    this.paddingY = 16;
+    this.paddingX = GRAPH_PADDING_RIGHT;
+    this.paddingY = GRAPH_PADDING_TOP;
 
     // Getting a good enough start value for the root node.
     var startX = (this.paddingX + 150) / 2;

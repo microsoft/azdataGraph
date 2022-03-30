@@ -103,7 +103,7 @@ azdataGraph.prototype.insertWeightedInvertedEdge = function (parent, id, value, 
  * cell - <mxCell> that specifies the cell the retrieved tooltip is for.
  */
 azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
-    const tooltipWidth = cell.edge ? 'width: auto;' : 'width: 45em;';
+    const tooltipWidth = 'width: 45em;';
     const justifyContent = 'display: flex; justify-content: space-between;';
     const boldText = 'font-weight: bold;';
     const tooltipLineHeight = 'padding-top: .13em; line-height: .5em;';
@@ -122,7 +122,7 @@ azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
             if(cell.value.description){
                 tooltip += `<div style=\"${headerBottomMargin} ${headerTopMargin}\"><span>${cell.value.description}</span></div>`;
             }
-        }
+        } 
 
         // tooltip body
         let startIndex = cell.edge ? 0 : 1; // first index for vertices contains footer label, so we can skip for vertices.
