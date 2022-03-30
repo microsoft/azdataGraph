@@ -272,7 +272,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     graph.autoSizeCellsOnAdd = true;
     graph.autoExtend = false; //disables the size of the graph automatically extending if the mouse goes near the container edge while dragging.
     graph.getSelectionModel().setSingleSelection(true); //Forcing only single cell selection in graph
-    
+
     graph.convertValueToString = function (cell) {
         if (cell.value != null && cell.value.label != null) {
             return cell.value.label;
