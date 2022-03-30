@@ -339,6 +339,9 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
             iconName = 'azdataQueryplan-' + icons[rand];
         }
 
+        var maxX = this.queryPlanGraph.position.x;
+        var maxY = this.queryPlanGraph.position.y;
+
         var vertex = graph.insertVertex(parent, this.queryPlanGraph.id, this.queryPlanGraph, this.queryPlanGraph.position.x, this.queryPlanGraph.position.y, CELL_WIDTH, CELL_HEIGHT, iconName);
         var stack =
             [
@@ -348,8 +351,6 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
                 }
             ];
 
-        var maxX = -1;
-        var maxY = -1;
         while (stack.length > 0) {
             var entry = stack.pop();
             if (entry.node.children) {
