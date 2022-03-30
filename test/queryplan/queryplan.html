@@ -9,7 +9,7 @@
 		mxForceIncludes = true;
 		mxBasePath = '../../src';
 	</script>
-	<script type="text/javascript" src="./src/js/graph.js" ></script>
+	<script type="text/javascript" src="./src/js/graph.js"></script>
 	<script type="text/javascript" src="../../src/js/mxClient.js"></script>
 	<script type="text/javascript" src="./src/js/queryPlanSetup.js"></script>
 	<script type="text/javascript">
@@ -24,10 +24,22 @@
 		};
 
 	</script>
+	<style>
+		#graphContainer {
+			position:relative;
+			overflow:scroll;
+			width:800px;
+			height:800px;
+			cursor:default;
+			border: 1px solid;
+			margin-top: 100px;
+			margin-left: 100px;
+		}
+	</style>
 </head>
 
 <body onload="main(document.getElementById('graphContainer'))">
-	<div id="graphContainer" style="position:relative;overflow:hidden;width:100%;height:100%;cursor:default;"></div>
+	<div id="graphContainer"></div>
 </body>
 
 </html>
