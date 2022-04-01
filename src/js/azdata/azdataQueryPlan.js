@@ -604,7 +604,7 @@ azdataQueryPlan.prototype.addBadges = function (cell, badgeIconPaths) {
     const badgeHeight = 16;
     if (cell.value.badges) {
         cell.value.badges.forEach(b => {
-            var img = mxUtils.createImage(badgeIconPaths[b.types]);
+            var img = mxUtils.createImage(badgeIconPaths[b.type]);
             img.setAttribute('title', b.tooltip);
             img.style.position = 'absolute';
             img.style.cursor = 'pointer';
