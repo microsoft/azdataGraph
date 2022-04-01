@@ -282,30 +282,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     graph.getSelectionModel().setSingleSelection(true); //Forcing only single cell selection in graph
 
     graph.convertValueToString = function (cell) {
-        if (cell.value != null && cell.value.label != null) {
-            let hasWindowsEOL = cell.value.label.includes('\r\n');
-            let splitLabel = cell.value.label.split(/\r\n|\n/);
-            let cellLabel = splitLabel.map(str => {
-                let label = '';
-                if (str.length > 20) {
-                    label += str.substring(0, 17) + '...';
-                }
-                else {
-                    label += str;
-                }
-
-                return label;
-            });
-
-            if (hasWindowsEOL) {
-                cellLabel = cellLabel.join('\r\n');
-            }
-            else {
-                cellLabel = cellLabel.join('\n');
-            }
-
-            return cellLabel;
-        }
+        return cell.value.label;
 
         return azdataGraph.prototype.convertValueToString.apply(this, arguments); // "supercall"
     };
