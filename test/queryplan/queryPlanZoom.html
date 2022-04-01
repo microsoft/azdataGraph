@@ -20,8 +20,9 @@
 
 			var imageBasePath = './icons/';
 			var iconPaths = getIconPaths(imageBasePath);
+			var badgePaths = getBadgePath(badgePaths);
 
-			queryPlan = new azdataQueryPlan(container, graph, iconPaths);
+			queryPlan = new azdataQueryPlan(container, graph, iconPaths, badgePaths);
 			queryPlan.enablePanning(false);
 			queryPlan.addZoomInRectListener();
 
