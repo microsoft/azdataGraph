@@ -9,6 +9,7 @@ class Point {
         this.y = y;
     }
 }
+
 class GraphNodeLayoutHelper {
     constructor() {
         this.layoutPoints = [];
@@ -121,7 +122,138 @@ class GraphNodeLayoutHelper {
     }
 }
 
+class FlatLine {
+    constructor(x1, x2, y) {
+        this.X1 = x1;
+        this.X2 = x2;
+        this.Y = y;
+    }
+}
 
+class OutlineShapeBuilder {
+    constructor() {
+        this.Lines = [];
+        // this.rectangle = new mxRectangle();
+    }
+
+    getVertices() {
+        let vertices = new Array();
+
+        // First start from left upper point.
+        vertices.Add(new Point(this.Lines[0].X1, this.Lines[0].Y));
+        let xPos = this.Lines[0].X1;
+
+        // Add points on right, from top to bottom. 
+        let index = 0;
+        for (index = 0; index < this.Lines.length - 1; index++) {
+            xPos = Math.max(xPos, this.Lines[index].X2);
+            vertices.push(new Point(xPos, this.Lines[index].Y));
+            vertices.push(new Point(xPos, this.Lines[index + 1].Y));
+        }
+
+        // Include most bottom right point.
+        vertices.push(new Point(this.Lines[index].X2, this.Lines[index].Y));
+
+        // Move to bottom left.
+        vertices.push(new Point(this.Lines[index].X1, this.Lines[index].Y));
+
+        xPos = this.Lines[index].X1;
+
+        // Add points on the left from bottom to top. 
+        for (index = this.Lines.length - 1; index > 0; index--) {
+            xPos = Math.min(xPos, this.Lines[index].X1);
+            vertices.push(new Point(xPos, this.Lines[index].Y));
+            vertices.push(new Point(xPos, this.Lines[index - 1].Y));
+        }
+
+        // Close the shape including left upper point.
+        vertices.push(new Point(this.Lines[0].X1, this.Lines[0].Y));
+
+        return vertices;
+    }
+
+    updateLines(p) {
+        // Update Lines
+        if (this.Lines.length == 0) {
+            this.Lines.push(new FlatLine(p.X, p.X, p.Y));
+            return;
+        }
+
+        // Insert new point inside the line.
+        for (let i = 0; i < this.Lines.length; i++)
+        {
+            if (this.Lines[i].Y == p.Y) {
+                // update existing point
+                this.Lines[i] = new FlatLine(Math.min(p.X, this.Lines[i].X1), Math.max(p.X, this.Lines[i].X2), p.Y);
+                return;
+            }
+
+            if (this.Lines[i].Y > p.Y) {
+                this.Lines.splice(i, 0, new FlatLine(p.X, p.X, p.Y));
+                return;
+            }
+        }
+
+        _lines.push(new FlatLine(p.X, p.X, p.Y));
+    }
+
+    updateFromNode(node)
+            {
+                // Get Node Bounding Rectangle and inflate it a bit.
+                // Rectangle rect = node.BoundingRect;
+                // rect.Inflate(0, InflateRectRate);
+                // rect.Offset(0, InflateRectRate - 1);
+
+                // update Bounding Box
+                if (_boundingBox.IsEmpty)
+                {
+                    _boundingBox = node.BoundingRect;
+                }
+                else
+                {
+                    _boundingBox = Rectangle.Union(_boundingBox, node.BoundingRect);
+
+                    // Handle the case when parent node is above current node.
+                    // We need to adjust rectangle to include the edge.
+                    if (node.Parent != null &&
+                        node.Position.Y != node.Parent.Position.Y)
+                    {
+                        let rightPos = rect.Right;
+
+                        let minMidPoint = Number.MAX_SAFE_INTEGER;
+
+                        IEdgeEnumerator edges = node.EdgesRelated;
+
+                        while (edges.MoveNext())
+                        {
+                            EdgeDisplay edge = edges.Current as EdgeDisplay;
+
+                            if (edge != null)
+                            {
+                                minMidPoint = Math.Min(minMidPoint, edge.GetMidpoint() - edge.Width / 2 - InflateRectRate * 2);
+                            }
+                        }
+
+                        // Calculate left boundary, values are chosen to have consistent vertical and horizontal spacing.
+                        rect.X = minMidPoint;
+                        rect.Width = rightPos - rect.Left;
+                    }
+                }
+
+                // Update shape line using node bounding rectangle.
+                UpdateLines(new Point(rect.Left, rect.Top));
+                UpdateLines(new Point(rect.Right, rect.Top));
+                UpdateLines(new Point(rect.Left, rect.Bottom));
+                UpdateLines(new Point(rect.Right, rect.Bottom));
+            }
+
+
+
+
+
+
+
+}
 
 function azdataQueryPlan(container, queryPlanGraph, iconPaths) {
     this.queryPlanGraph = queryPlanGraph;
@@ -340,6 +472,12 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
     }
 
     graph.getModel().beginUpdate();
+    var rectangle = new mxRectangle(250, 250, 1000, 1000)
+    var rectangleShape = new mxRectangleShape(rectangle, 'blue', 'blue', 2);
+    let event = (evt) => {
+        console.log(evt);
+    };
+    graph.selectRegion(rectangleShape, event)
 
     try {
 
