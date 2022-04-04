@@ -154,7 +154,7 @@ azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
         }
 
         tooltip += '</div>';
-
+        
         return tooltip;
     }
 

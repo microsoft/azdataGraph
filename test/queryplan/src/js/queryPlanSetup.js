@@ -254,3 +254,15 @@ function getIconPaths(imageBasePath) {
 
 	return iconPaths;
 }
+
+function getBadgePaths(imageBasePath) {
+	return {
+		warning: imageBasePath + 'overlay-warning.svg',
+
+		criticalWarning: imageBasePath + 'critical-warning.svg',
+
+		parallelism: imageBasePath + 'overlay-parallelism.svg'
+	};
+}
+
+

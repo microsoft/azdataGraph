@@ -19,9 +19,9 @@
 
 			var imageBasePath = './icons/';
 			var iconPaths = getIconPaths(imageBasePath);
+			var badgePaths = getBadgePath(badgePaths);
 
-			let queryPlan = new azdataQueryPlan(container, graph, iconPaths);
-
+			let queryPlan = new azdataQueryPlan(container, graph, iconPaths,  badgePaths);
 			const graphEdgeCallback = (cell) => {
 				if (cell.edge) {
 					console.log('Edge click detected');

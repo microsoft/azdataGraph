@@ -130,14 +130,14 @@ class GraphNodeLayoutHelper {
 
 
 
-function azdataQueryPlan(container, queryPlanGraph, iconPaths) {
+function azdataQueryPlan(container, queryPlanGraph, iconPaths, badgeIconPaths) {
     this.queryPlanGraph = queryPlanGraph;
     if (container != null && iconPaths != null) {
-        this.init(container, iconPaths);
+        this.init(container, iconPaths, badgeIconPaths);
     }
 };
 
-azdataQueryPlan.prototype.init = function (container, iconPaths) {
+azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths) {
     this.container = container;
     mxEvent.addListener(window, 'unload', mxUtils.bind(this, function () {
         this.destroy();
@@ -283,28 +283,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
 
     graph.convertValueToString = function (cell) {
         if (cell.value != null && cell.value.label != null) {
-            let hasWindowsEOL = cell.value.label.includes('\r\n');
-            let splitLabel = cell.value.label.split(/\r\n|\n/);
-            let cellLabel = splitLabel.map(str => {
-                let label = '';
-                if (str.length > 20) {
-                    label += str.substring(0, 17) + '...';
-                }
-                else {
-                    label += str;
-                }
-
-                return label;
-            });
-
-            if (hasWindowsEOL) {
-                cellLabel = cellLabel.join('\r\n');
-            }
-            else {
-                cellLabel = cellLabel.join('\n');
-            }
-
-            return cellLabel;
+            return cell.value.label;
         }
 
         return azdataGraph.prototype.convertValueToString.apply(this, arguments); // "supercall"
@@ -365,6 +344,8 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
         var maxY = this.queryPlanGraph.position.y;
 
         var vertex = graph.insertVertex(parent, this.queryPlanGraph.id, this.queryPlanGraph, this.queryPlanGraph.position.x, this.queryPlanGraph.position.y, CELL_WIDTH, CELL_HEIGHT, iconName);
+        this.addBadges(vertex, badgeIconPaths);
+
         var stack =
             [
                 {
@@ -384,13 +365,15 @@ azdataQueryPlan.prototype.init = function (container, iconPaths) {
                         rand = Math.floor((Math.random() * icons.length));
                         iconName = 'azdataQueryplan-' + icons[rand];
                     }
-                    if(node.position.x > maxX){
+                    if (node.position.x > maxX) {
                         maxX = node.position.x;
                     }
-                    if(node.position.y > maxY){
+                    if (node.position.y > maxY) {
                         maxY = node.position.y;
                     }
                     vertex = graph.insertVertex(parent, node.id, node, node.position.x, node.position.y, CELL_WIDTH, CELL_HEIGHT, iconName);
+                    this.addBadges(vertex, badgeIconPaths);
+
                     var edge = entry.node.edges[i];
                     graph.insertWeightedInvertedEdge(parent, edge.id, edge, entry.vertex, vertex);
                     stack.push(
@@ -593,4 +576,24 @@ azdataQueryPlan.prototype.destroy = function () {
     }
 };
 
+azdataQueryPlan.prototype.addBadges = function (cell, badgeIconPaths) {
+    let positionX = cell.geometry.x + 50;
+    const positionY = cell.geometry.y + 35;
+    const badgeWidth = 16;
+    const badgeHeight = 16;
+    if (cell.value.badges) {
+        cell.value.badges.forEach(b => {
+            var img = mxUtils.createImage(badgeIconPaths[b.type]);
+            img.setAttribute('title', b.tooltip);
+            img.style.position = 'absolute';
+            img.style.cursor = 'pointer';
+            img.style.width = `${badgeWidth}px`;
+            img.style.height = `${badgeHeight}px`;
+            img.style.left = `${positionX}px`;
+            img.style.top = `${positionY}px`;
+            this.graph.container.appendChild(img);
+            positionX += badgeWidth;
+        });
+    }
+}
 __mxOutput.azdataQueryPlan = typeof azdataQueryPlan !== 'undefined' ? azdataQueryPlan : undefined;
