@@ -19,12 +19,13 @@
 
 			var imageBasePath = './icons/';
 			var iconPaths = getIconPaths(imageBasePath);
+			var badgePaths = getBadgePath(badgePaths);
 
 			let iconBackgroundColor = 'black';
 			let fontColor = 'white';
 			let edgeColor = 'white';
 
-			let queryPlan = new azdataQueryPlan(container, graph, iconPaths);
+			let queryPlan = new azdataQueryPlan(container, graph, iconPaths, badgePaths);
 			queryPlan.setIconBackgroundColor(iconBackgroundColor);
 			queryPlan.setTextFontColor(fontColor);
 			queryPlan.setEdgeColor(edgeColor);
