@@ -508,11 +508,25 @@ azdataQueryPlan.prototype.setNodeYPositionRecursive = function (node, layoutHelp
 
 azdataQueryPlan.prototype.registerZoomInListener = function (element, eventType) {
     const zoomIn = () => {
-        this.graph.zoomIn();
+        if(this.graph.view.getScale() * this.graph.zoomFactor <= 2){
+            this.graph.zoomIn();
+        } else {
+            this.graph.zoomTo(2)
+        }
         this.redrawBadges();
     };
     this.graph.addDomEventListener(element, eventType, zoomIn);
 };
+
+
+azdataQueryPlan.prototype.zoomIn = function(){
+    if(this.graph.view.getScale() * this.graph.zoomFactor <= 2){
+        this.graph.zoomIn();
+    } else {
+        this.graph.zoomTo(2)
+    }
+    this.redrawBadges();
+}
 
 azdataQueryPlan.prototype.registerZoomOutListener = function (element, eventType) {
     const zoomOut = () => {
@@ -522,6 +536,12 @@ azdataQueryPlan.prototype.registerZoomOutListener = function (element, eventType
 
     this.graph.addDomEventListener(element, eventType, zoomOut);
 };
+
+azdataQueryPlan.prototype.zoomOut = function(){
+    this.graph.zoomOut();
+    this.redrawBadges();
+}
+
 
 azdataQueryPlan.prototype.registerZoomToFitListener = function (element, eventType) {
     const zoomToFit = () => {
@@ -533,6 +553,13 @@ azdataQueryPlan.prototype.registerZoomToFitListener = function (element, eventTy
 
     this.graph.addDomEventListener(element, eventType, zoomToFit);
 };
+
+azdataQueryPlan.prototype.zoomToFit = function(){
+    this.graph.fit(undefined, true, 20);
+    this.redrawBadges();
+    this.graph.view.rendering = true;
+    this.graph.refresh();
+}
 
 azdataQueryPlan.prototype.registerGraphCallback = function (eventType, callback) {
     this.graph.addListener(eventType, (sender, event) => {
@@ -546,6 +573,7 @@ azdataQueryPlan.prototype.getZoomLevelPercentage = function () {
 
 azdataQueryPlan.prototype.zoomTo = function (zoomPercentage) {
     const ZOOM_PERCENTAGE_MINIMUM = 1;
+    const ZOOM_PERCENTAGE_MAXIMUM = 200;
 
     let parsedZoomLevel = parseInt(zoomPercentage);
     if (isNaN(parsedZoomLevel)) {
@@ -554,6 +582,10 @@ azdataQueryPlan.prototype.zoomTo = function (zoomPercentage) {
 
     if (parsedZoomLevel < ZOOM_PERCENTAGE_MINIMUM) {
         parsedZoomLevel = ZOOM_PERCENTAGE_MINIMUM;
+    }
+
+    if(parsedZoomLevel > ZOOM_PERCENTAGE_MAXIMUM) {
+        parsedZoomLevel = ZOOM_PERCENTAGE_MAXIMUM;
     }
 
     let zoomScale = parsedZoomLevel / 100;
