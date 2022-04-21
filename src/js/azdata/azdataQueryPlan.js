@@ -139,6 +139,7 @@ function azdataQueryPlan(container, queryPlanGraph, iconPaths, badgeIconPaths) {
 
 azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths) {
     this.container = container;
+    this.badges = [];
     mxEvent.addListener(window, 'unload', mxUtils.bind(this, function () {
         this.destroy();
     }));
@@ -508,6 +509,7 @@ azdataQueryPlan.prototype.setNodeYPositionRecursive = function (node, layoutHelp
 azdataQueryPlan.prototype.registerZoomInListener = function (element, eventType) {
     const zoomIn = () => {
         this.graph.zoomIn();
+        this.redrawBadges();
     };
     this.graph.addDomEventListener(element, eventType, zoomIn);
 };
@@ -515,6 +517,7 @@ azdataQueryPlan.prototype.registerZoomInListener = function (element, eventType)
 azdataQueryPlan.prototype.registerZoomOutListener = function (element, eventType) {
     const zoomOut = () => {
         this.graph.zoomOut();
+        this.redrawBadges();
     };
 
     this.graph.addDomEventListener(element, eventType, zoomOut);
@@ -522,7 +525,8 @@ azdataQueryPlan.prototype.registerZoomOutListener = function (element, eventType
 
 azdataQueryPlan.prototype.registerZoomToFitListener = function (element, eventType) {
     const zoomToFit = () => {
-        this.graph.fit();
+        this.graph.fit(undefined, true, 20);
+        this.redrawBadges();
         this.graph.view.rendering = true;
         this.graph.refresh();
     };
@@ -554,6 +558,7 @@ azdataQueryPlan.prototype.zoomTo = function (zoomPercentage) {
 
     let zoomScale = parsedZoomLevel / 100;
     this.graph.zoomTo(zoomScale);
+    this.redrawBadges();
 };
 
 azdataQueryPlan.prototype.addZoomInRectListener = function () {
@@ -612,8 +617,22 @@ azdataQueryPlan.prototype.addBadges = function (cell, badgeIconPaths) {
             img.style.height = `${badgeHeight}px`;
             img.style.left = `${positionX}px`;
             img.style.top = `${positionY}px`;
+            img.setAttribute('initLeft', positionX);
+            img.setAttribute('initTop', positionY); 
+            img.setAttribute('initHeight', badgeHeight);
+            img.setAttribute('initWidth', badgeWidth);
             this.graph.container.appendChild(img);
             positionX += badgeWidth;
+            this.badges.push(img);
         });
     }
+}
+
+azdataQueryPlan.prototype.redrawBadges = function(){
+    this.badges.forEach(b => {
+        b.style.left = b.getAttribute('initLeft') * this.graph.view.getScale() + 'px';
+        b.style.top = b.getAttribute('initTop') * this.graph.view.getScale() + 'px';
+        b.style.width = b.getAttribute('initWidth') * this.graph.view.getScale() + 'px';
+        b.style.height = b.getAttribute('initHeight') * this.graph.view.getScale() + 'px';
+    });
 }
