@@ -9,7 +9,7 @@
 		mxForceIncludes = true;
 		mxBasePath = '../../src';
 	</script>
-	<script type="text/javascript" src="./src/js/graph.js" ></script>
+	<script type="text/javascript" src="./src/js/graph.js"></script>
 	<script type="text/javascript" src="../../src/js/mxClient.js"></script>
 	<script type="text/javascript" src="./src/js/queryPlanSetup.js"></script>
 	<script type="text/javascript">
@@ -20,27 +20,27 @@
 
 			var imageBasePath = './icons/';
 			var iconPaths = getIconPaths(imageBasePath);
-			var badgePaths = getBadgePath(badgePaths);
+			var badgePaths = getBadgePaths(imageBasePath);
 
 			queryPlan = new azdataQueryPlan(container, graph, iconPaths, badgePaths);
 			queryPlan.enablePanning(false);
 			queryPlan.addZoomInRectListener();
 
 			let zoomInButton = document.getElementById('zoomInBtn');
-			queryPlan.registerZoomInListener(zoomInButton, 'click');
 			zoomInButton.addEventListener('click', () => {
+				queryPlan.zoomIn();
 				zoomLevelInput.value = `${queryPlan.getZoomLevelPercentage()}`;
 			});
 
 			let zoomOutButton = document.getElementById('zoomOutBtn');
-			queryPlan.registerZoomOutListener(zoomOutButton, 'click');
 			zoomOutButton.addEventListener('click', () => {
+				queryPlan.zoomOut();
 				zoomLevelInput.value = `${queryPlan.getZoomLevelPercentage()}`;
 			});
 
 			let zoomToFitButton = document.getElementById('zoomToFitBtn');
-			queryPlan.registerZoomToFitListener(zoomToFitButton, 'click');
 			zoomToFitButton.addEventListener('click', () => {
+				queryPlan.zoomToFit();
 				zoomLevelInput.value = `${queryPlan.getZoomLevelPercentage()}`;
 			});
 
@@ -57,10 +57,22 @@
 		};
 
 	</script>
+	<style>
+		#graphContainer {
+			position: relative;
+			overflow: scroll;
+			width: 800px;
+			height: 800px;
+			cursor: default;
+			border: 1px solid;
+			margin-top: 100px;
+			margin-left: 100px;
+		}
+	</style>
 </head>
 
 <body onload="main(document.getElementById('graphContainer'))">
-	<div id="graphContainer" style="position:relative;overflow:hidden;width:100%;height:100%;cursor:default;"></div>
+	<div id="graphContainer"></div>
 	<div style="position: absolute; overflow: visible; bottom: 50px; left: 8px;">
 		<button id="zoomInBtn" type="button" style="font-size:20px;">+</button>
 		<button id="zoomOutBtn" type="button" style="font-size:20px;">-</button>
