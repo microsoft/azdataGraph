@@ -27,20 +27,20 @@
 			queryPlan.addZoomInRectListener();
 
 			let zoomInButton = document.getElementById('zoomInBtn');
-			queryPlan.registerZoomInListener(zoomInButton, 'click');
 			zoomInButton.addEventListener('click', () => {
+				queryPlan.zoomIn();
 				zoomLevelInput.value = `${queryPlan.getZoomLevelPercentage()}`;
 			});
 
 			let zoomOutButton = document.getElementById('zoomOutBtn');
-			queryPlan.registerZoomOutListener(zoomOutButton, 'click');
 			zoomOutButton.addEventListener('click', () => {
+				queryPlan.zoomOut();
 				zoomLevelInput.value = `${queryPlan.getZoomLevelPercentage()}`;
 			});
 
 			let zoomToFitButton = document.getElementById('zoomToFitBtn');
-			queryPlan.registerZoomToFitListener(zoomToFitButton, 'click');
 			zoomToFitButton.addEventListener('click', () => {
+				queryPlan.zoomToFit();
 				zoomLevelInput.value = `${queryPlan.getZoomLevelPercentage()}`;
 			});
 

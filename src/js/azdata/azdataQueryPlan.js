@@ -506,18 +506,6 @@ azdataQueryPlan.prototype.setNodeYPositionRecursive = function (node, layoutHelp
     layoutHelper.updateNodeLayout(leftPosition, yToUpdate);
 }
 
-azdataQueryPlan.prototype.registerZoomInListener = function (element, eventType) {
-    const zoomIn = () => {
-        if(this.graph.view.getScale() * this.graph.zoomFactor <= 2){
-            this.graph.zoomIn();
-        } else {
-            this.graph.zoomTo(2)
-        }
-        this.redrawBadges();
-    };
-    this.graph.addDomEventListener(element, eventType, zoomIn);
-};
-
 
 azdataQueryPlan.prototype.zoomIn = function(){
     if(this.graph.view.getScale() * this.graph.zoomFactor <= 2){
@@ -528,31 +516,10 @@ azdataQueryPlan.prototype.zoomIn = function(){
     this.redrawBadges();
 }
 
-azdataQueryPlan.prototype.registerZoomOutListener = function (element, eventType) {
-    const zoomOut = () => {
-        this.graph.zoomOut();
-        this.redrawBadges();
-    };
-
-    this.graph.addDomEventListener(element, eventType, zoomOut);
-};
-
 azdataQueryPlan.prototype.zoomOut = function(){
     this.graph.zoomOut();
     this.redrawBadges();
 }
-
-
-azdataQueryPlan.prototype.registerZoomToFitListener = function (element, eventType) {
-    const zoomToFit = () => {
-        this.graph.fit(undefined, true, 20);
-        this.redrawBadges();
-        this.graph.view.rendering = true;
-        this.graph.refresh();
-    };
-
-    this.graph.addDomEventListener(element, eventType, zoomToFit);
-};
 
 azdataQueryPlan.prototype.zoomToFit = function(){
     this.graph.fit(undefined, true, 20);
