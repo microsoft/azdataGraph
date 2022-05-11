@@ -658,6 +658,7 @@ azdataQueryPlan.prototype.drawPolygon = function(pts, fillColor, strokeColor, st
 
 /**
  * Gets an array of points that represents the perimeter for a polygon.
+ * @param {*} node The starting node where the perimeter will start being outlined.
  * @returns an array of points
  */
 azdataQueryPlan.prototype.getPolygonPerimeter = function(node) {
@@ -672,6 +673,11 @@ azdataQueryPlan.prototype.getPolygonPerimeter = function(node) {
 const NODE_HEIGHT = 100;
 const NODE_WIDTH = 100;
 
+/**
+ * Gets the left side points for the starting node in the polygon from top to bottom.
+ * @param {*} node The starting node for the left side perimeter points.
+ * @returns an array of points for the left side of the starting node in the polygon.
+ */
 azdataQueryPlan.prototype.getLeftSidePoints = function(node) {
     let points = [];
     points.push({ x: node.position.x, y: node.position.y });
@@ -680,6 +686,11 @@ azdataQueryPlan.prototype.getLeftSidePoints = function(node) {
     return points;
 }
 
+/**
+ * Gets the points for what will be the bottom side of the polygon from left to right.
+ * @param {*} node The starting node where highlighting will begin.
+ * @returns An array of points for the bottom side of the polygon.
+ */
 azdataQueryPlan.prototype.getBottomSidePoints = function(node) {
     let points = [];
     var stack = [ node ];
@@ -703,6 +714,11 @@ azdataQueryPlan.prototype.getBottomSidePoints = function(node) {
     return points;
 }
 
+/**
+ * Gets the points for what will be the right side of the polygon from left to right.
+ * @param {*} node The starting node where highlighting will begin.
+ * @returns An array of points for the right side of the polygon.
+ */
 azdataQueryPlan.prototype.getRightSidePoints = function(node) {
     let points = [];
     let leafNodes = this.getLeafNodes(node);
@@ -717,6 +733,11 @@ azdataQueryPlan.prototype.getRightSidePoints = function(node) {
     return points;
 }
 
+/**
+ * Helper function to get the right most nodes of the polygon in a execution plan
+ * @param {*} node The root node that will be used to find all of the leaf nodes
+ * @returns An array of leaf nodes for a region from bottom-up
+ */
 azdataQueryPlan.prototype.getLeafNodes = function(node) {
     let leafNodeTable = {};
     let stack = [node];
@@ -743,12 +764,4 @@ azdataQueryPlan.prototype.getLeafNodes = function(node) {
     let leafNodes = Object.keys(leafNodeTable).map(key => leafNodeTable[key]).reverse();
 
     return leafNodes;
-}
-
-azdataQueryPlan.prototype.getRightSidePointsForNode = function(node) {
-    let points = [];
-    points.push({ x: node.position.x + NODE_WIDTH, y: node.position.y + NODE_HEIGHT });
-    points.push({ x: node.position.x + NODE_WIDTH, y: node.position.y})
-
-    return points
 }
