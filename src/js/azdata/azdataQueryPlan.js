@@ -328,8 +328,8 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
     var style = new Object();
     style = mxUtils.clone(style);
     style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_LABEL;
-    style[mxConstants.STYLE_STROKECOLOR] = '#ffffff';
-    style[mxConstants.STYLE_FILLCOLOR] = '#ffffff';
+    style[mxConstants.STYLE_STROKECOLOR] = 'transparent';
+    style[mxConstants.STYLE_FILLCOLOR] = 'transparent';
     style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
     style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
     style[mxConstants.STYLE_IMAGE_ALIGN] = mxConstants.ALIGN_CENTER;
@@ -634,4 +634,24 @@ azdataQueryPlan.prototype.redrawBadges = function(){
         b.style.width = b.getAttribute('initWidth') * this.graph.view.getScale() + 'px';
         b.style.height = b.getAttribute('initHeight') * this.graph.view.getScale() + 'px';
     });
+}
+
+/**
+ * Draws a polygon using the points given
+ * @param {*} pts  array of points for all the corners of the polygon. A point has x and y attributes. 
+ * @param {*} fillColor string value for the fill color. Supported values are hex, rbg and rbga
+ * @param {*} strokeColor string value for the stroke/border color. Supported values are hex, rbg and rbga
+ * @param {*} strokeWidth thickness of the stroke
+ */
+azdataQueryPlan.prototype.drawPolygon = function(pts, fillColor, strokeColor, strokeWidth){
+
+    var samplePolygon = new mxPolygon(
+        pts.map(p => new mxPoint(p.x, p.y)),
+        fillColor,
+        strokeColor,
+        strokeWidth
+    )
+    samplePolygon.init(this.graph.getView().getBackgroundPane());
+    samplePolygon.isDashed = true;
+    samplePolygon.redraw();
 }
