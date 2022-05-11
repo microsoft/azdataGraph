@@ -21,6 +21,6 @@
  {
      var arcSize = mxUtils.getValue(this.style, mxConstants.STYLE_ARCSIZE, mxConstants.LINE_ARCSIZE) / 2;
      c.begin();
-     this.addPoints(c, pts, rounded, arcSize, false); // TODO lewissanchez - set this back to true
+     this.addPoints(c, pts, rounded, arcSize, true);
      c.fillAndStroke();
  };
