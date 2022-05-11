@@ -655,3 +655,83 @@ azdataQueryPlan.prototype.drawPolygon = function(pts, fillColor, strokeColor, st
     samplePolygon.isDashed = true;
     samplePolygon.redraw();
 }
+
+/**
+ * Gets an array of points that represents the perimeter for a polygon.
+ * @returns an array of points
+ */
+azdataQueryPlan.prototype.getPolygonPerimeter = function(node) {
+    let points = [];
+    points = points.concat(this.getLeftSidePoints(node));
+    points = points.concat(this.getBottomSidePoints(node));
+    points = points.concat(this.getRightSidePoints(node));
+
+    return points;
+}
+
+const NODE_HEIGHT = 100;
+const NODE_WIDTH = 100;
+
+azdataQueryPlan.prototype.getLeftSidePoints = function(node) {
+    let points = [];
+    points.push({ x: node.position.x, y: node.position.y });
+    points.push({ x: node.position.x, y: node.position.y + NODE_HEIGHT })
+
+    return points;
+}
+
+azdataQueryPlan.prototype.getBottomSidePoints = function(node) {
+    let points = [];
+    var stack = [ node ];
+
+    while (stack.length !== 0) {
+        let entry = stack.pop();
+        points.push({ x: entry.position.x + NODE_HEIGHT, y: entry.position.y + NODE_WIDTH });
+
+        if (entry.children && entry.children.length > 0) {
+            let nextNode = entry.children[entry.children.length - 1];
+
+            if (entry.children.length > 1) {
+                let auxiliaryPoint = { x: entry.position.x + NODE_WIDTH, y: nextNode.position.y + NODE_HEIGHT};
+                points.push(auxiliaryPoint);
+            }
+
+            stack.push(nextNode);
+        }
+    }
+
+    return points;
+}
+
+azdataQueryPlan.prototype.getRightSidePoints = function(node) {
+    let leafNodes = this.getLeafNodes(node);
+    // TODO lewissanchez - connect leaf nodes from bottom-up
+}
+
+azdataQueryPlan.prototype.getLeafNodes = function(node) {
+    let leafNodeTable = {};
+    let stack = [node];
+
+    while (stack.length !== 0) {
+        let entry = stack.pop();
+        if (entry.children.length === 0) {
+            if (entry.position.y in leafNodeTable) {
+                let previouslyCachedEntry = leafNodeTable[entry.position.y];
+                if (entry.position.x > previouslyCachedEntry.position.x) {
+                    leafNodeTable[entry.position.y] = entry;
+                }
+            }
+            else {
+                leafNodeTable[entry.position.y] = entry;
+            }
+        }
+
+        for (let nodeIndex = entry.children.length - 1; nodeIndex >= 0; --nodeIndex) {
+            stack.push(entry.children[nodeIndex]);
+        }
+    }
+
+    let leafNodes = Object.keys(leafNodeTable).map(key => leafNodeTable[key]);
+
+    return leafNodes;
+}
