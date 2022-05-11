@@ -704,8 +704,16 @@ azdataQueryPlan.prototype.getBottomSidePoints = function(node) {
 }
 
 azdataQueryPlan.prototype.getRightSidePoints = function(node) {
+    let points = [];
     let leafNodes = this.getLeafNodes(node);
-    // TODO lewissanchez - connect leaf nodes from bottom-up
+
+    for (let nodeIndex = 0; nodeIndex < leafNodes.length; ++nodeIndex) {
+        let nodeRightSidePoints = this.getRightSidePointsForNode(leafNodes[nodeIndex]);
+
+        points = points.concat(nodeRightSidePoints)
+    }
+
+    return points;
 }
 
 azdataQueryPlan.prototype.getLeafNodes = function(node) {
@@ -726,12 +734,20 @@ azdataQueryPlan.prototype.getLeafNodes = function(node) {
             }
         }
 
-        for (let nodeIndex = entry.children.length - 1; nodeIndex >= 0; --nodeIndex) {
+        for (let nodeIndex = 0; nodeIndex < entry.children.length; ++nodeIndex) {
             stack.push(entry.children[nodeIndex]);
         }
     }
 
-    let leafNodes = Object.keys(leafNodeTable).map(key => leafNodeTable[key]);
+    let leafNodes = Object.keys(leafNodeTable).map(key => leafNodeTable[key]).reverse();
 
     return leafNodes;
+}
+
+azdataQueryPlan.prototype.getRightSidePointsForNode = function(node) {
+    let points = [];
+    points.push({ x: node.position.x + NODE_WIDTH, y: node.position.y + NODE_HEIGHT });
+    points.push({ x: node.position.x + NODE_WIDTH, y: node.position.y})
+
+    return points
 }
