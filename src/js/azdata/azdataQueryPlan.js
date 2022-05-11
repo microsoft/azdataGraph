@@ -708,9 +708,10 @@ azdataQueryPlan.prototype.getRightSidePoints = function(node) {
     let leafNodes = this.getLeafNodes(node);
 
     for (let nodeIndex = 0; nodeIndex < leafNodes.length; ++nodeIndex) {
-        let nodeRightSidePoints = this.getRightSidePointsForNode(leafNodes[nodeIndex]);
+        let leafNode = leafNodes[nodeIndex];
 
-        points = points.concat(nodeRightSidePoints)
+        points.push({ x: leafNode.position.x + NODE_WIDTH, y: leafNode.position.y + NODE_HEIGHT });
+        points.push({ x: leafNode.position.x + NODE_WIDTH, y: leafNode.position.y});
     }
 
     return points;
