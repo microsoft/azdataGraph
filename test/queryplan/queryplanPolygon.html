@@ -23,15 +23,9 @@
 
 			var azdataGraph = new azdataQueryPlan(container, graph, iconPaths, badgePaths);
 
+			var points = azdataGraph.getPolygonPerimeter(azdataGraph.queryPlanGraph);
 			var samplePolygon = azdataGraph.drawPolygon(
-                [
-                    {x: 100, y: 100},
-					{x: 100, y: 200},
-					{x: 700, y: 200},
-					{x: 700, y: 400},
-					{x: 900, y: 400},
-					{x: 900, y: 100},
-                ],
+                points,
                 "rgba(236, 0, 140,0.1)",
                 "rgba(236, 0, 140)",
                 2
