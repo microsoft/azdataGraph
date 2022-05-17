@@ -328,8 +328,8 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
     var style = new Object();
     style = mxUtils.clone(style);
     style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_LABEL;
-    style[mxConstants.STYLE_STROKECOLOR] = '#ffffff';
-    style[mxConstants.STYLE_FILLCOLOR] = '#ffffff';
+    style[mxConstants.STYLE_STROKECOLOR] = 'transparent';
+    style[mxConstants.STYLE_FILLCOLOR] = 'transparent';
     style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
     style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
     style[mxConstants.STYLE_IMAGE_ALIGN] = mxConstants.ALIGN_CENTER;
@@ -634,4 +634,134 @@ azdataQueryPlan.prototype.redrawBadges = function(){
         b.style.width = b.getAttribute('initWidth') * this.graph.view.getScale() + 'px';
         b.style.height = b.getAttribute('initHeight') * this.graph.view.getScale() + 'px';
     });
+}
+
+/**
+ * Draws a polygon using the points given
+ * @param {*} pts  array of points for all the corners of the polygon. A point has x and y attributes. 
+ * @param {*} fillColor string value for the fill color. Supported values are hex, rbg and rbga
+ * @param {*} strokeColor string value for the stroke/border color. Supported values are hex, rbg and rbga
+ * @param {*} strokeWidth thickness of the stroke
+ */
+azdataQueryPlan.prototype.drawPolygon = function(pts, fillColor, strokeColor, strokeWidth){
+
+    var samplePolygon = new mxPolygon(
+        pts.map(p => new mxPoint(p.x, p.y)),
+        fillColor,
+        strokeColor,
+        strokeWidth
+    )
+    samplePolygon.init(this.graph.getView().getBackgroundPane());
+    samplePolygon.isDashed = true;
+    samplePolygon.redraw();
+}
+
+/**
+ * Gets an array of points that represents the perimeter for a polygon.
+ * @param {*} node The starting node where the perimeter will start being outlined.
+ * @returns an array of points
+ */
+azdataQueryPlan.prototype.getPolygonPerimeter = function(node) {
+    let points = [];
+    points = points.concat(this.getLeftSidePoints(node));
+    points = points.concat(this.getBottomSidePoints(node));
+    points = points.concat(this.getRightSidePoints(node));
+
+    return points;
+}
+
+const NODE_HEIGHT = 100;
+const NODE_WIDTH = 100;
+
+/**
+ * Gets the left side points for the starting node in the polygon from top to bottom.
+ * @param {*} node The starting node for the left side perimeter points.
+ * @returns an array of points for the left side of the starting node in the polygon.
+ */
+azdataQueryPlan.prototype.getLeftSidePoints = function(node) {
+    let points = [];
+    points.push({ x: node.position.x, y: node.position.y });
+    points.push({ x: node.position.x, y: node.position.y + NODE_HEIGHT })
+
+    return points;
+}
+
+/**
+ * Gets the points for what will be the bottom side of the polygon from left to right.
+ * @param {*} node The starting node where highlighting will begin.
+ * @returns An array of points for the bottom side of the polygon.
+ */
+azdataQueryPlan.prototype.getBottomSidePoints = function(node) {
+    let points = [];
+    var stack = [ node ];
+
+    while (stack.length !== 0) {
+        let entry = stack.pop();
+        points.push({ x: entry.position.x + NODE_HEIGHT, y: entry.position.y + NODE_WIDTH });
+
+        if (entry.children && entry.children.length > 0) {
+            let nextNode = entry.children[entry.children.length - 1];
+
+            if (entry.children.length > 1) {
+                let auxiliaryPoint = { x: entry.position.x + NODE_WIDTH, y: nextNode.position.y + NODE_HEIGHT};
+                points.push(auxiliaryPoint);
+            }
+
+            stack.push(nextNode);
+        }
+    }
+
+    return points;
+}
+
+/**
+ * Gets the points for what will be the right side of the polygon from left to right.
+ * @param {*} node The starting node where highlighting will begin.
+ * @returns An array of points for the right side of the polygon.
+ */
+azdataQueryPlan.prototype.getRightSidePoints = function(node) {
+    let points = [];
+    let leafNodes = this.getLeafNodes(node);
+
+    for (let nodeIndex = 0; nodeIndex < leafNodes.length; ++nodeIndex) {
+        let leafNode = leafNodes[nodeIndex];
+
+        points.push({ x: leafNode.position.x + NODE_WIDTH, y: leafNode.position.y + NODE_HEIGHT });
+        points.push({ x: leafNode.position.x + NODE_WIDTH, y: leafNode.position.y});
+    }
+
+    return points;
+}
+
+/**
+ * Helper function to get the right most nodes of the polygon in a execution plan
+ * @param {*} node The root node that will be used to find all of the leaf nodes
+ * @returns An array of leaf nodes for a region from bottom-up
+ */
+azdataQueryPlan.prototype.getLeafNodes = function(node) {
+    let leafNodeTable = {};
+    let stack = [node];
+
+    while (stack.length !== 0) {
+        let entry = stack.pop();
+        if (entry.children.length === 0) {
+            if (entry.position.y in leafNodeTable) {
+                let previouslyCachedEntry = leafNodeTable[entry.position.y];
+                if (entry.position.x > previouslyCachedEntry.position.x) {
+                    leafNodeTable[entry.position.y] = entry;
+                }
+            }
+            else {
+                leafNodeTable[entry.position.y] = entry;
+            }
+        }
+
+        for (let nodeIndex = 0; nodeIndex < entry.children.length; ++nodeIndex) {
+            stack.push(entry.children[nodeIndex]);
+        }
+    }
+
+    let leafNodes = Object.keys(leafNodeTable).map(key => leafNodeTable[key]).reverse();
+
+    return leafNodes;
 }
