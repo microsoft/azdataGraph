@@ -699,6 +699,7 @@ if (mxForceIncludes)
 	mxClient.include(mxClient.basePath+'/js/shape/mxDoubleEllipse.js');
 	mxClient.include(mxClient.basePath+'/js/shape/mxRhombus.js');
 	mxClient.include(mxClient.basePath+'/js/shape/mxPolyline.js');
+	mxClient.include(mxClient.basePath+'/js/shape/mxPolygon.js');
 	mxClient.include(mxClient.basePath+'/js/shape/mxArrow.js');
 	mxClient.include(mxClient.basePath+'/js/shape/mxArrowConnector.js');
 	mxClient.include(mxClient.basePath+'/js/shape/mxText.js');
