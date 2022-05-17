@@ -658,14 +658,14 @@ azdataQueryPlan.prototype.drawPolygon = function(pts, fillColor, strokeColor, st
 
 /**
  * Gets an array of points that represents the perimeter for a polygon.
- * @param {*} node The starting node where the perimeter will start being outlined.
+ * @param {*} cell The starting node where the perimeter will start being outlined.
  * @returns an array of points
  */
-azdataQueryPlan.prototype.getPolygonPerimeter = function(node) {
+azdataQueryPlan.prototype.getPolygonPerimeter = function(cell) {
     let points = [];
-    points = points.concat(this.getLeftSidePoints(node));
-    points = points.concat(this.getBottomSidePoints(node));
-    points = points.concat(this.getRightSidePoints(node));
+    points = points.concat(this.getLeftSidePoints(cell));
+    points = points.concat(this.getBottomSidePoints(cell));
+    points = points.concat(this.getRightSidePoints(cell));
 
     return points;
 }
@@ -675,35 +675,35 @@ const NODE_WIDTH = 100;
 
 /**
  * Gets the left side points for the starting node in the polygon from top to bottom.
- * @param {*} node The starting node for the left side perimeter points.
+ * @param {*} cell The starting node for the left side perimeter points.
  * @returns an array of points for the left side of the starting node in the polygon.
  */
-azdataQueryPlan.prototype.getLeftSidePoints = function(node) {
+azdataQueryPlan.prototype.getLeftSidePoints = function(cell) {
     let points = [];
-    points.push({ x: node.position.x, y: node.position.y });
-    points.push({ x: node.position.x, y: node.position.y + NODE_HEIGHT })
+    points.push({ x: cell.geometry.x, y: cell.geometry.y });
+    points.push({ x: cell.geometry.x, y: cell.geometry.y + NODE_HEIGHT })
 
     return points;
 }
 
 /**
  * Gets the points for what will be the bottom side of the polygon from left to right.
- * @param {*} node The starting node where highlighting will begin.
+ * @param {*} cell The starting node where highlighting will begin.
  * @returns An array of points for the bottom side of the polygon.
  */
-azdataQueryPlan.prototype.getBottomSidePoints = function(node) {
+azdataQueryPlan.prototype.getBottomSidePoints = function(cell) {
     let points = [];
-    var stack = [ node ];
+    var stack = [ cell ];
 
     while (stack.length !== 0) {
         let entry = stack.pop();
-        points.push({ x: entry.position.x + NODE_HEIGHT, y: entry.position.y + NODE_WIDTH });
+        points.push({ x: entry.geometry.x + NODE_HEIGHT, y: entry.geometry.y + NODE_WIDTH });
 
-        if (entry.children && entry.children.length > 0) {
-            let nextNode = entry.children[entry.children.length - 1];
+        if (entry?.value?.children?.length > 0) {
+            let nextNode = this.graph.model.getCell(entry.value.children[entry.value.children.length - 1].id);
 
-            if (entry.children.length > 1) {
-                let auxiliaryPoint = { x: entry.position.x + NODE_WIDTH, y: nextNode.position.y + NODE_HEIGHT};
+            if (entry.value.children.length > 1) {
+                let auxiliaryPoint = { x: entry.geometry.x + NODE_WIDTH, y: nextNode.geometry.y + NODE_HEIGHT};
                 points.push(auxiliaryPoint);
             }
 
@@ -716,18 +716,18 @@ azdataQueryPlan.prototype.getBottomSidePoints = function(node) {
 
 /**
  * Gets the points for what will be the right side of the polygon from left to right.
- * @param {*} node The starting node where highlighting will begin.
+ * @param {*} cell The starting node where highlighting will begin.
  * @returns An array of points for the right side of the polygon.
  */
-azdataQueryPlan.prototype.getRightSidePoints = function(node) {
+azdataQueryPlan.prototype.getRightSidePoints = function(cell) {
     let points = [];
-    let leafNodes = this.getLeafNodes(node);
+    let leafNodes = this.getLeafNodes(cell);
 
     for (let nodeIndex = 0; nodeIndex < leafNodes.length; ++nodeIndex) {
         let leafNode = leafNodes[nodeIndex];
 
-        points.push({ x: leafNode.position.x + NODE_WIDTH, y: leafNode.position.y + NODE_HEIGHT });
-        points.push({ x: leafNode.position.x + NODE_WIDTH, y: leafNode.position.y});
+        points.push({ x: leafNode.geometry.x + NODE_WIDTH, y: leafNode.geometry.y + NODE_HEIGHT });
+        points.push({ x: leafNode.geometry.x + NODE_WIDTH, y: leafNode.geometry.y});
     }
 
     return points;
@@ -735,29 +735,30 @@ azdataQueryPlan.prototype.getRightSidePoints = function(node) {
 
 /**
  * Helper function to get the right most nodes of the polygon in a execution plan
- * @param {*} node The root node that will be used to find all of the leaf nodes
+ * @param {*} cell The root node that will be used to find all of the leaf nodes
  * @returns An array of leaf nodes for a region from bottom-up
  */
-azdataQueryPlan.prototype.getLeafNodes = function(node) {
+azdataQueryPlan.prototype.getLeafNodes = function(cell) {
     let leafNodeTable = {};
-    let stack = [node];
+    let stack = [cell];
 
     while (stack.length !== 0) {
         let entry = stack.pop();
-        if (entry.children.length === 0) {
-            if (entry.position.y in leafNodeTable) {
-                let previouslyCachedEntry = leafNodeTable[entry.position.y];
-                if (entry.position.x > previouslyCachedEntry.position.x) {
-                    leafNodeTable[entry.position.y] = entry;
+        
+        if (entry.value.children.length === 0) {
+            if (entry.geometry.y in leafNodeTable) {
+                let previouslyCachedEntry = leafNodeTable[entry.geometry.y];
+                if (entry.geometry.x > previouslyCachedEntry.geometry.x) {
+                    leafNodeTable[entry.geometry.y] = entry;
                 }
             }
             else {
-                leafNodeTable[entry.position.y] = entry;
+                leafNodeTable[entry.geometry.y] = entry;
             }
         }
 
-        for (let nodeIndex = 0; nodeIndex < entry.children.length; ++nodeIndex) {
-            stack.push(entry.children[nodeIndex]);
+        for (let nodeIndex = 0; nodeIndex < entry.value.children.length; ++nodeIndex) {
+            stack.push(this.graph.model.getCell(entry.value.children[nodeIndex].id));
         }
     }
 
