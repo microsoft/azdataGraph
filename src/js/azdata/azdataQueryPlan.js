@@ -733,8 +733,9 @@ const NODE_WIDTH = 100;
  */
 azdataQueryPlan.prototype.getLeftSidePoints = function(cell) {
     let points = [];
-    points.push({ x: cell.geometry.x, y: cell.geometry.y });
-    points.push({ x: cell.geometry.x, y: cell.geometry.y + NODE_HEIGHT })
+    let xPosition = cell.geometry.x - 15; // subtracting to push the x coordinate to the left.
+    points.push({ x: xPosition, y: cell.geometry.y });
+    points.push({ x: xPosition, y: cell.geometry.y + NODE_HEIGHT })
 
     return points;
 }
