@@ -10,12 +10,22 @@ const GRAPH_PADDING_LEFT = 80;
 const CELL_WIDTH = 70;
 const CELL_HEIGHT = 70;
 
+class PolygonRoot {
+    constructor(cell, fillColor, strokeColor, strokeWidth) {
+        this.cell = cell;
+        this.fillColor = fillColor;
+        this.strokeColor = strokeColor;
+        this.strokeWidth = strokeWidth;
+    }
+}
+
 class Point {
     constructor(x, y) {
         this.x = x;
         this.y = y;
     }
 }
+
 class GraphNodeLayoutHelper {
     constructor() {
         this.layoutPoints = [];
@@ -139,6 +149,7 @@ function azdataQueryPlan(container, queryPlanGraph, iconPaths, badgeIconPaths) {
 
 azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths) {
     this.container = container;
+    this.polygonRoots = [];
     this.drawnPolygons = [];
     this.badges = [];
     mxEvent.addListener(window, 'unload', mxUtils.bind(this, function () {
@@ -517,6 +528,7 @@ azdataQueryPlan.prototype.zoomIn = function() {
         this.graph.zoomTo(2)
     }
     this.redrawBadges();
+    this.redrawPolygons();
 }
 
 azdataQueryPlan.prototype.zoomOut = function(){
@@ -524,6 +536,7 @@ azdataQueryPlan.prototype.zoomOut = function(){
 
     this.graph.zoomOut();
     this.redrawBadges();
+    this.redrawPolygons();
 }
 
 azdataQueryPlan.prototype.zoomToFit = function(){
@@ -533,6 +546,8 @@ azdataQueryPlan.prototype.zoomToFit = function(){
     this.redrawBadges();
     this.graph.view.rendering = true;
     this.graph.refresh();
+
+    this.redrawPolygons();
 }
 
 azdataQueryPlan.prototype.registerGraphCallback = function (eventType, callback) {
@@ -647,14 +662,17 @@ azdataQueryPlan.prototype.redrawBadges = function(){
 
 /**
  * Draws a polygon using the points given
- * @param {*} pts  array of points for all the corners of the polygon. A point has x and y attributes. 
+ * @param {*} cell starting cell where the polygon will start to be drawn. 
  * @param {*} fillColor string value for the fill color. Supported values are hex, rbg and rbga
  * @param {*} strokeColor string value for the stroke/border color. Supported values are hex, rbg and rbga
  * @param {*} strokeWidth thickness of the stroke
  */
-azdataQueryPlan.prototype.drawPolygon = function(pts, fillColor, strokeColor, strokeWidth){
+azdataQueryPlan.prototype.drawPolygon = function(cell, fillColor, strokeColor, strokeWidth){
+    let scale = this.graph.view.getScale();
+    let points = this.getPolygonPerimeter(cell);
+
     var polygon = new mxPolygon(
-        pts.map(p => new mxPoint(p.x, p.y)),
+        points.map(p => new mxPoint(p.x * scale, p.y * scale)),
         fillColor,
         strokeColor,
         strokeWidth
@@ -663,6 +681,7 @@ azdataQueryPlan.prototype.drawPolygon = function(pts, fillColor, strokeColor, st
     polygon.isDashed = true;
     polygon.redraw();
 
+    this.polygonRoots.push(new PolygonRoot(cell, fillColor, strokeColor, strokeWidth));
     this.drawnPolygons.push(polygon);
 }
 
@@ -673,6 +692,20 @@ azdataQueryPlan.prototype.removeDrawnPolygons = function() {
     while (this.drawnPolygons.length !== 0) {
         let polygon = this.drawnPolygons.pop();
         polygon.destroy();
+    }
+}
+
+/**
+ * Redraws all polygons on the execution plan.
+ */
+azdataQueryPlan.prototype.redrawPolygons = function () {
+    let polygonCount = this.polygonRoots.length;
+
+    while (polygonCount !== 0) {
+        let polygonRoot = this.polygonRoots.pop();
+        this.drawPolygon(polygonRoot.cell, polygonRoot.fillColor, polygonRoot.strokeColor, polygonRoot.strokeWidth);
+
+        polygonCount--;
     }
 }
 
