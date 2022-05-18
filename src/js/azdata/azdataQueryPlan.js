@@ -66,6 +66,7 @@ class GraphNodeLayoutHelper {
             else {
                 this.layoutPoints.push(new Point(xPosition, yPosition));
             }
+            
             return;
         }
 
@@ -116,6 +117,7 @@ class GraphNodeLayoutHelper {
                 this.layoutPoints.splice(insertIndex + 1, lastIndex - insertIndex - 1);
                 return;
             }
+
             ++lastIndex;
         }
 
@@ -132,6 +134,7 @@ class GraphNodeLayoutHelper {
             if (rowX < this.layoutPoints[i].x) {
                 break;
             }
+
             yPosition = Math.max(this.layoutPoints[i].y, yPosition);
         }
         return yPosition;
@@ -390,6 +393,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
 
         while (stack.length > 0) {
             var entry = stack.pop();
+
             if (entry.node.children) {
                 for (var i = 0; i < entry.node.children.length; ++i) {
                     var node = entry.node.children[i];
@@ -399,12 +403,15 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
                         rand = Math.floor((Math.random() * icons.length));
                         iconName = 'azdataQueryplan-' + icons[rand];
                     }
+
                     if (node.position.x > maxX) {
                         maxX = node.position.x;
                     }
+
                     if (node.position.y > maxY) {
                         maxY = node.position.y;
                     }
+
                     vertex = graph.insertVertex(parent, node.id, node, node.position.x, node.position.y, CELL_WIDTH, CELL_HEIGHT, iconName);
                     this.addBadges(vertex, badgeIconPaths);
 
@@ -450,7 +457,6 @@ azdataQueryPlan.prototype.placeGraphNodes = function () {
     this.SetNodePositionRecursive(this.queryPlanGraph, startX, startY);
 }
 
-
 azdataQueryPlan.prototype.SetNodePositionRecursive = function (node, x, y) {
 
     // Recursively setting all the x positions in the graph.
@@ -459,7 +465,6 @@ azdataQueryPlan.prototype.SetNodePositionRecursive = function (node, x, y) {
     this.setNodeYPositionRecursive(node, layoutHelper, this.spacingY, y);
 
 }
-
 
 azdataQueryPlan.prototype.setNodeXPositionRecursive = function (node, x) {
     // Place the node at given position
@@ -519,10 +524,10 @@ azdataQueryPlan.prototype.setNodeYPositionRecursive = function (node, layoutHelp
 }
 
 
-azdataQueryPlan.prototype.zoomIn = function() {
+azdataQueryPlan.prototype.zoomIn = function () {
     this.removeDrawnPolygons();
 
-    if(this.graph.view.getScale() * this.graph.zoomFactor <= 2){
+    if (this.graph.view.getScale() * this.graph.zoomFactor <= 2) {
         this.graph.zoomIn();
     } else {
         this.graph.zoomTo(2)
@@ -531,7 +536,7 @@ azdataQueryPlan.prototype.zoomIn = function() {
     this.redrawPolygons();
 }
 
-azdataQueryPlan.prototype.zoomOut = function(){
+azdataQueryPlan.prototype.zoomOut = function () {
     this.removeDrawnPolygons();
 
     this.graph.zoomOut();
@@ -539,7 +544,7 @@ azdataQueryPlan.prototype.zoomOut = function(){
     this.redrawPolygons();
 }
 
-azdataQueryPlan.prototype.zoomToFit = function(){
+azdataQueryPlan.prototype.zoomToFit = function () {
     this.removeDrawnPolygons();
 
     this.graph.fit(undefined, true, 20);
@@ -575,7 +580,7 @@ azdataQueryPlan.prototype.zoomTo = function (zoomPercentage) {
         parsedZoomLevel = ZOOM_PERCENTAGE_MINIMUM;
     }
 
-    if(parsedZoomLevel > ZOOM_PERCENTAGE_MAXIMUM) {
+    if (parsedZoomLevel > ZOOM_PERCENTAGE_MAXIMUM) {
         parsedZoomLevel = ZOOM_PERCENTAGE_MAXIMUM;
     }
 
@@ -641,7 +646,7 @@ azdataQueryPlan.prototype.addBadges = function (cell, badgeIconPaths) {
             img.style.left = `${positionX}px`;
             img.style.top = `${positionY}px`;
             img.setAttribute('initLeft', positionX);
-            img.setAttribute('initTop', positionY); 
+            img.setAttribute('initTop', positionY);
             img.setAttribute('initHeight', badgeHeight);
             img.setAttribute('initWidth', badgeWidth);
             this.graph.container.appendChild(img);
@@ -651,7 +656,7 @@ azdataQueryPlan.prototype.addBadges = function (cell, badgeIconPaths) {
     }
 }
 
-azdataQueryPlan.prototype.redrawBadges = function(){
+azdataQueryPlan.prototype.redrawBadges = function () {
     this.badges.forEach(b => {
         b.style.left = b.getAttribute('initLeft') * this.graph.view.getScale() + 'px';
         b.style.top = b.getAttribute('initTop') * this.graph.view.getScale() + 'px';
@@ -667,7 +672,7 @@ azdataQueryPlan.prototype.redrawBadges = function(){
  * @param {*} strokeColor string value for the stroke/border color. Supported values are hex, rbg and rbga
  * @param {*} strokeWidth thickness of the stroke
  */
-azdataQueryPlan.prototype.drawPolygon = function(cell, fillColor, strokeColor, strokeWidth){
+azdataQueryPlan.prototype.drawPolygon = function (cell, fillColor, strokeColor, strokeWidth) {
     let scale = this.graph.view.getScale();
     let points = this.getPolygonPerimeter(cell);
 
@@ -688,7 +693,7 @@ azdataQueryPlan.prototype.drawPolygon = function(cell, fillColor, strokeColor, s
 /**
  * Removes all drawn polygons on the execution plan.
  */
-azdataQueryPlan.prototype.removeDrawnPolygons = function() {
+azdataQueryPlan.prototype.removeDrawnPolygons = function () {
     while (this.drawnPolygons.length !== 0) {
         let polygon = this.drawnPolygons.pop();
         polygon.destroy();
@@ -714,7 +719,7 @@ azdataQueryPlan.prototype.redrawPolygons = function () {
  * @param {*} cell The starting node where the perimeter will start being outlined.
  * @returns an array of points
  */
-azdataQueryPlan.prototype.getPolygonPerimeter = function(cell) {
+azdataQueryPlan.prototype.getPolygonPerimeter = function (cell) {
     let points = [];
     points = points.concat(this.getLeftSidePoints(cell));
     points = points.concat(this.getBottomSidePoints(cell));
@@ -731,7 +736,7 @@ const NODE_WIDTH = 100;
  * @param {*} cell The starting node for the left side perimeter points.
  * @returns an array of points for the left side of the starting node in the polygon.
  */
-azdataQueryPlan.prototype.getLeftSidePoints = function(cell) {
+azdataQueryPlan.prototype.getLeftSidePoints = function (cell) {
     let points = [];
     let xPosition = cell.geometry.x - 15; // subtracting to push the x coordinate to the left.
     points.push({ x: xPosition, y: cell.geometry.y });
@@ -745,9 +750,9 @@ azdataQueryPlan.prototype.getLeftSidePoints = function(cell) {
  * @param {*} cell The starting node where highlighting will begin.
  * @returns An array of points for the bottom side of the polygon.
  */
-azdataQueryPlan.prototype.getBottomSidePoints = function(cell) {
+azdataQueryPlan.prototype.getBottomSidePoints = function (cell) {
     let points = [];
-    var stack = [ cell ];
+    var stack = [cell];
 
     while (stack.length !== 0) {
         let entry = stack.pop();
@@ -757,7 +762,7 @@ azdataQueryPlan.prototype.getBottomSidePoints = function(cell) {
             let nextNode = this.graph.model.getCell(entry.value.children[entry.value.children.length - 1].id);
 
             if (entry.value.children.length > 1) {
-                let auxiliaryPoint = { x: entry.geometry.x + NODE_WIDTH, y: nextNode.geometry.y + NODE_HEIGHT};
+                let auxiliaryPoint = { x: entry.geometry.x + NODE_WIDTH, y: nextNode.geometry.y + NODE_HEIGHT };
                 points.push(auxiliaryPoint);
             }
 
@@ -773,7 +778,7 @@ azdataQueryPlan.prototype.getBottomSidePoints = function(cell) {
  * @param {*} cell The starting node where highlighting will begin.
  * @returns An array of points for the right side of the polygon.
  */
-azdataQueryPlan.prototype.getRightSidePoints = function(cell) {
+azdataQueryPlan.prototype.getRightSidePoints = function (cell) {
     let points = [];
     let leafNodes = this.getLeafNodes(cell);
 
@@ -781,7 +786,7 @@ azdataQueryPlan.prototype.getRightSidePoints = function(cell) {
         let leafNode = leafNodes[nodeIndex];
 
         points.push({ x: leafNode.geometry.x + NODE_WIDTH, y: leafNode.geometry.y + NODE_HEIGHT });
-        points.push({ x: leafNode.geometry.x + NODE_WIDTH, y: leafNode.geometry.y});
+        points.push({ x: leafNode.geometry.x + NODE_WIDTH, y: leafNode.geometry.y });
     }
 
     return points;
@@ -792,13 +797,13 @@ azdataQueryPlan.prototype.getRightSidePoints = function(cell) {
  * @param {*} cell The root node that will be used to find all of the leaf nodes
  * @returns An array of leaf nodes for a region from bottom-up
  */
-azdataQueryPlan.prototype.getLeafNodes = function(cell) {
+azdataQueryPlan.prototype.getLeafNodes = function (cell) {
     let leafNodeTable = {};
     let stack = [cell];
 
     while (stack.length !== 0) {
         let entry = stack.pop();
-        
+
         if (entry.value.children.length === 0) {
             if (entry.geometry.y in leafNodeTable) {
                 let previouslyCachedEntry = leafNodeTable[entry.geometry.y];
