@@ -139,6 +139,7 @@ function azdataQueryPlan(container, queryPlanGraph, iconPaths, badgeIconPaths) {
 
 azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths) {
     this.container = container;
+    this.drawnPolygons = [];
     this.badges = [];
     mxEvent.addListener(window, 'unload', mxUtils.bind(this, function () {
         this.destroy();
@@ -507,7 +508,9 @@ azdataQueryPlan.prototype.setNodeYPositionRecursive = function (node, layoutHelp
 }
 
 
-azdataQueryPlan.prototype.zoomIn = function(){
+azdataQueryPlan.prototype.zoomIn = function() {
+    this.removeDrawnPolygons();
+
     if(this.graph.view.getScale() * this.graph.zoomFactor <= 2){
         this.graph.zoomIn();
     } else {
@@ -517,11 +520,15 @@ azdataQueryPlan.prototype.zoomIn = function(){
 }
 
 azdataQueryPlan.prototype.zoomOut = function(){
+    this.removeDrawnPolygons();
+
     this.graph.zoomOut();
     this.redrawBadges();
 }
 
 azdataQueryPlan.prototype.zoomToFit = function(){
+    this.removeDrawnPolygons();
+
     this.graph.fit(undefined, true, 20);
     this.redrawBadges();
     this.graph.view.rendering = true;
@@ -539,6 +546,8 @@ azdataQueryPlan.prototype.getZoomLevelPercentage = function () {
 };
 
 azdataQueryPlan.prototype.zoomTo = function (zoomPercentage) {
+    this.removeDrawnPolygons();
+
     const ZOOM_PERCENTAGE_MINIMUM = 1;
     const ZOOM_PERCENTAGE_MAXIMUM = 200;
 
@@ -644,16 +653,27 @@ azdataQueryPlan.prototype.redrawBadges = function(){
  * @param {*} strokeWidth thickness of the stroke
  */
 azdataQueryPlan.prototype.drawPolygon = function(pts, fillColor, strokeColor, strokeWidth){
-
-    var samplePolygon = new mxPolygon(
+    var polygon = new mxPolygon(
         pts.map(p => new mxPoint(p.x, p.y)),
         fillColor,
         strokeColor,
         strokeWidth
-    )
-    samplePolygon.init(this.graph.getView().getBackgroundPane());
-    samplePolygon.isDashed = true;
-    samplePolygon.redraw();
+    );
+    polygon.init(this.graph.getView().getBackgroundPane());
+    polygon.isDashed = true;
+    polygon.redraw();
+
+    this.drawnPolygons.push(polygon);
+}
+
+/**
+ * Removes all drawn polygons on the execution plan.
+ */
+azdataQueryPlan.prototype.removeDrawnPolygons = function() {
+    while (this.drawnPolygons.length !== 0) {
+        let polygon = this.drawnPolygons.pop();
+        polygon.destroy();
+    }
 }
 
 /**
