@@ -1,0 +1,54 @@
+<!--
+  Test page for manually testing query plan polygons
+-->
+<html>
+
+<head>
+	<title>Query Plan test</title>
+	<script type="text/javascript">
+		mxForceIncludes = true;
+		mxBasePath = '../../src';
+	</script>
+	<script type="text/javascript" src="./src/js/graph.js"></script>
+	<script type="text/javascript" src="../../src/js/mxClient.js"></script>
+	<script type="text/javascript" src="./src/js/queryPlanSetup.js"></script>
+	<script type="text/javascript">
+
+		function main(container) {
+			var graph = getGraph();
+
+			var imageBasePath = './icons/';
+			var iconPaths = getIconPaths(imageBasePath);
+			var badgePaths = getBadgePaths(imageBasePath);
+
+			var azdataGraph = new azdataQueryPlan(container, graph, iconPaths, badgePaths);
+			const cell = azdataGraph.graph.model.getCell('element-7')
+			var points = azdataGraph.getPolygonPerimeter(cell);
+			var samplePolygon = azdataGraph.drawPolygon(
+                points,
+                "rgba(236, 0, 140,0.1)",
+                "rgba(236, 0, 140)",
+                2
+            )
+		};
+
+	</script>
+	<style>
+		#graphContainer {
+			position:relative;
+			overflow:scroll;
+			width:1000px;
+			height:1000px;
+			cursor:default;
+			border: 1px solid;
+			margin-top: 100px;
+			margin-left: 100px;
+		}
+	</style>
+</head>
+
+<body onload="main(document.getElementById('graphContainer'))">
+	<div id="graphContainer"></div>
+</body>
+
+</html>
