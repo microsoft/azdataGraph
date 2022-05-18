@@ -26,19 +26,16 @@
 			let zoomInButton = document.getElementById('zoomInBtn');
 			zoomInButton.addEventListener('click', () => {
 				azdataGraph.zoomIn();
-				zoomLevelInput.value = `${azdataGraph.getZoomLevelPercentage()}`;
 			});
 
 			let zoomOutButton = document.getElementById('zoomOutBtn');
 			zoomOutButton.addEventListener('click', () => {
 				azdataGraph.zoomOut();
-				zoomLevelInput.value = `${azdataGraph.getZoomLevelPercentage()}`;
 			});
 
 			let zoomToFitButton = document.getElementById('zoomToFitBtn');
 			zoomToFitButton.addEventListener('click', () => {
 				azdataGraph.zoomToFit();
-				zoomLevelInput.value = `${azdataGraph.getZoomLevelPercentage()}`;
 			});
 			
 			const cell = azdataGraph.graph.model.getCell('element-7')
