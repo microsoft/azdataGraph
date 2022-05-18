@@ -22,7 +22,7 @@
 			var badgePaths = getBadgePaths(imageBasePath);
 
 			var azdataGraph = new azdataQueryPlan(container, graph, iconPaths, badgePaths);
-			
+
 			let zoomInButton = document.getElementById('zoomInBtn');
 			zoomInButton.addEventListener('click', () => {
 				azdataGraph.zoomIn();
@@ -37,24 +37,24 @@
 			zoomToFitButton.addEventListener('click', () => {
 				azdataGraph.zoomToFit();
 			});
-			
+
 			const cell = azdataGraph.graph.model.getCell('element-7')
 			var samplePolygon = azdataGraph.drawPolygon(
 				cell,
-                "rgba(236, 0, 140,0.1)",
-                "rgba(236, 0, 140)",
-                2
-            )
+				"rgba(236, 0, 140,0.1)",
+				"rgba(236, 0, 140)",
+				2
+			)
 		};
 
 	</script>
 	<style>
 		#graphContainer {
-			position:relative;
-			overflow:scroll;
-			width:1000px;
-			height:1000px;
-			cursor:default;
+			position: relative;
+			overflow: scroll;
+			width: 1000px;
+			height: 1000px;
+			cursor: default;
 			border: 1px solid;
 			margin-top: 100px;
 			margin-left: 100px;
