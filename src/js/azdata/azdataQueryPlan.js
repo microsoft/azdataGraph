@@ -10,12 +10,22 @@ const GRAPH_PADDING_LEFT = 80;
 const CELL_WIDTH = 70;
 const CELL_HEIGHT = 70;
 
+class PolygonRoot {
+    constructor(cell, fillColor, strokeColor, strokeWidth) {
+        this.cell = cell;
+        this.fillColor = fillColor;
+        this.strokeColor = strokeColor;
+        this.strokeWidth = strokeWidth;
+    }
+}
+
 class Point {
     constructor(x, y) {
         this.x = x;
         this.y = y;
     }
 }
+
 class GraphNodeLayoutHelper {
     constructor() {
         this.layoutPoints = [];
@@ -139,6 +149,8 @@ function azdataQueryPlan(container, queryPlanGraph, iconPaths, badgeIconPaths) {
 
 azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths) {
     this.container = container;
+    this.polygonRoots = [];
+    this.drawnPolygons = [];
     this.badges = [];
     mxEvent.addListener(window, 'unload', mxUtils.bind(this, function () {
         this.destroy();
@@ -507,25 +519,35 @@ azdataQueryPlan.prototype.setNodeYPositionRecursive = function (node, layoutHelp
 }
 
 
-azdataQueryPlan.prototype.zoomIn = function(){
+azdataQueryPlan.prototype.zoomIn = function() {
+    this.removeDrawnPolygons();
+
     if(this.graph.view.getScale() * this.graph.zoomFactor <= 2){
         this.graph.zoomIn();
     } else {
         this.graph.zoomTo(2)
     }
     this.redrawBadges();
+    this.redrawPolygons();
 }
 
 azdataQueryPlan.prototype.zoomOut = function(){
+    this.removeDrawnPolygons();
+
     this.graph.zoomOut();
     this.redrawBadges();
+    this.redrawPolygons();
 }
 
 azdataQueryPlan.prototype.zoomToFit = function(){
+    this.removeDrawnPolygons();
+
     this.graph.fit(undefined, true, 20);
     this.redrawBadges();
     this.graph.view.rendering = true;
     this.graph.refresh();
+
+    this.redrawPolygons();
 }
 
 azdataQueryPlan.prototype.registerGraphCallback = function (eventType, callback) {
@@ -539,6 +561,8 @@ azdataQueryPlan.prototype.getZoomLevelPercentage = function () {
 };
 
 azdataQueryPlan.prototype.zoomTo = function (zoomPercentage) {
+    this.removeDrawnPolygons();
+
     const ZOOM_PERCENTAGE_MINIMUM = 1;
     const ZOOM_PERCENTAGE_MAXIMUM = 200;
 
@@ -638,22 +662,51 @@ azdataQueryPlan.prototype.redrawBadges = function(){
 
 /**
  * Draws a polygon using the points given
- * @param {*} pts  array of points for all the corners of the polygon. A point has x and y attributes. 
+ * @param {*} cell starting cell where the polygon will start to be drawn. 
  * @param {*} fillColor string value for the fill color. Supported values are hex, rbg and rbga
  * @param {*} strokeColor string value for the stroke/border color. Supported values are hex, rbg and rbga
  * @param {*} strokeWidth thickness of the stroke
  */
-azdataQueryPlan.prototype.drawPolygon = function(pts, fillColor, strokeColor, strokeWidth){
+azdataQueryPlan.prototype.drawPolygon = function(cell, fillColor, strokeColor, strokeWidth){
+    let scale = this.graph.view.getScale();
+    let points = this.getPolygonPerimeter(cell);
 
-    var samplePolygon = new mxPolygon(
-        pts.map(p => new mxPoint(p.x, p.y)),
+    var polygon = new mxPolygon(
+        points.map(p => new mxPoint(p.x * scale, p.y * scale)),
         fillColor,
         strokeColor,
         strokeWidth
-    )
-    samplePolygon.init(this.graph.getView().getBackgroundPane());
-    samplePolygon.isDashed = true;
-    samplePolygon.redraw();
+    );
+    polygon.init(this.graph.getView().getBackgroundPane());
+    polygon.isDashed = true;
+    polygon.redraw();
+
+    this.polygonRoots.push(new PolygonRoot(cell, fillColor, strokeColor, strokeWidth));
+    this.drawnPolygons.push(polygon);
+}
+
+/**
+ * Removes all drawn polygons on the execution plan.
+ */
+azdataQueryPlan.prototype.removeDrawnPolygons = function() {
+    while (this.drawnPolygons.length !== 0) {
+        let polygon = this.drawnPolygons.pop();
+        polygon.destroy();
+    }
+}
+
+/**
+ * Redraws all polygons on the execution plan.
+ */
+azdataQueryPlan.prototype.redrawPolygons = function () {
+    let polygonCount = this.polygonRoots.length;
+
+    while (polygonCount !== 0) {
+        let polygonRoot = this.polygonRoots.pop();
+        this.drawPolygon(polygonRoot.cell, polygonRoot.fillColor, polygonRoot.strokeColor, polygonRoot.strokeWidth);
+
+        polygonCount--;
+    }
 }
 
 /**
@@ -680,8 +733,9 @@ const NODE_WIDTH = 100;
  */
 azdataQueryPlan.prototype.getLeftSidePoints = function(cell) {
     let points = [];
-    points.push({ x: cell.geometry.x, y: cell.geometry.y });
-    points.push({ x: cell.geometry.x, y: cell.geometry.y + NODE_HEIGHT })
+    let xPosition = cell.geometry.x - 15; // subtracting to push the x coordinate to the left.
+    points.push({ x: xPosition, y: cell.geometry.y });
+    points.push({ x: xPosition, y: cell.geometry.y + NODE_HEIGHT })
 
     return points;
 }

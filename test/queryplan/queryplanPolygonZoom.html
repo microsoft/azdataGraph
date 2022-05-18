@@ -1,0 +1,74 @@
+<!--
+  Test page for manually testing query plan polygons
+-->
+<html>
+
+<head>
+	<title>Query Plan test</title>
+	<script type="text/javascript">
+		mxForceIncludes = true;
+		mxBasePath = '../../src';
+	</script>
+	<script type="text/javascript" src="./src/js/graph.js"></script>
+	<script type="text/javascript" src="../../src/js/mxClient.js"></script>
+	<script type="text/javascript" src="./src/js/queryPlanSetup.js"></script>
+	<script type="text/javascript">
+
+		function main(container) {
+			var graph = getGraph();
+
+			var imageBasePath = './icons/';
+			var iconPaths = getIconPaths(imageBasePath);
+			var badgePaths = getBadgePaths(imageBasePath);
+
+			var azdataGraph = new azdataQueryPlan(container, graph, iconPaths, badgePaths);
+
+			let zoomInButton = document.getElementById('zoomInBtn');
+			zoomInButton.addEventListener('click', () => {
+				azdataGraph.zoomIn();
+			});
+
+			let zoomOutButton = document.getElementById('zoomOutBtn');
+			zoomOutButton.addEventListener('click', () => {
+				azdataGraph.zoomOut();
+			});
+
+			let zoomToFitButton = document.getElementById('zoomToFitBtn');
+			zoomToFitButton.addEventListener('click', () => {
+				azdataGraph.zoomToFit();
+			});
+
+			const cell = azdataGraph.graph.model.getCell('element-7');
+			var samplePolygon = azdataGraph.drawPolygon(
+				cell,
+				"rgba(236, 0, 140,0.1)",
+				"rgba(236, 0, 140)",
+				2
+			)
+		};
+
+	</script>
+	<style>
+		#graphContainer {
+			position: relative;
+			overflow: scroll;
+			width: 1000px;
+			height: 1000px;
+			cursor: default;
+			border: 1px solid;
+			margin-top: 100px;
+			margin-left: 100px;
+		}
+	</style>
+</head>
+
+<body onload="main(document.getElementById('graphContainer'))">
+	<div id="graphContainer"></div>
+	<div style="position: relative; overflow: visible; bottom: -25px; left: 8px;">
+		<button id="zoomInBtn" type="button" style="font-size:20px;">+</button>
+		<button id="zoomOutBtn" type="button" style="font-size:20px;">-</button>
+		<button id="zoomToFitBtn" type="button" style="font-size:20px;">To Fit</button>
+	</div>
+</body>
+
+</html>
