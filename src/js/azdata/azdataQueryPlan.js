@@ -522,7 +522,7 @@ azdataQueryPlan.prototype.setNodeYPositionRecursive = function (node, layoutHelp
 azdataQueryPlan.prototype.adjustGraphNodeHorizontalPositions = function(node) {
     let levelsTable = this.getNodesByHorizontalLevel(node);
 
-    Object.keys(levelsTable).reverse().map(key => {
+    Object.keys(levelsTable).map(key => {
         for (let levelNodeIndex = 1; levelNodeIndex < levelsTable[key].length; ++levelNodeIndex) {
             let previousNode = levelsTable[key][levelNodeIndex - 1];
             let currentNode = levelsTable[key][levelNodeIndex]
