@@ -345,22 +345,22 @@ mxGraphView.prototype.getScale = function()
  *
  * value - Decimal value that specifies the new scale (1 is 100%).
  */
-mxGraphView.prototype.setScale = function(value)
-{
+mxGraphView.prototype.setScale = function (value) {
+	this.graph.container.style.display = 'none';
 	var previousScale = this.scale;
-	
-	if (this.scale != value)
-	{
+
+	if (this.scale != value) {
 		this.scale = value;
 
-		if (this.isEventsEnabled())
-		{
+		if (this.isEventsEnabled()) {
 			this.viewStateChanged();
 		}
 	}
-	
+
 	this.fireEvent(new mxEventObject(mxEvent.SCALE,
 		'scale', value, 'previousScale', previousScale));
+
+	this.graph.container.style.display = '';
 };
 
 /**
