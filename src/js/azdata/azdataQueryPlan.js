@@ -9,6 +9,8 @@ const GRAPH_PADDING_BOTTOM = 80;
 const GRAPH_PADDING_LEFT = 80;
 const CELL_WIDTH = 70;
 const CELL_HEIGHT = 70;
+const STANDARD_NODE_DISTANCE = 173;
+const IDEAL_LONG_LABEL_NODE_DISTANCE = 240;
 
 class PolygonRoot {
     constructor(cell, fillColor, strokeColor, strokeWidth) {
@@ -303,12 +305,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
             let splitLabel = cell.value.label.split(/\r\n|\n/);
             let cellLabel = splitLabel.map(str => {
                 let label = '';
-                if (str.length > 20) {
-                    label += str.substring(0, 17) + '...';
-                }
-                else {
-                    label += str;
-                }
+                label += str;
 
                 return label;
             });
@@ -454,16 +451,16 @@ azdataQueryPlan.prototype.placeGraphNodes = function () {
     var startY = (this.paddingY + 150) / 2;
 
     // Recursively layout all nodes starting with root
-    this.SetNodePositionRecursive(this.queryPlanGraph, startX, startY);
+    this.setNodePositionRecursive(this.queryPlanGraph, startX, startY);
 }
 
-azdataQueryPlan.prototype.SetNodePositionRecursive = function (node, x, y) {
+azdataQueryPlan.prototype.setNodePositionRecursive = function (node, x, y) {
 
     // Recursively setting all the x positions in the graph.
     this.setNodeXPositionRecursive(node, x);
     var layoutHelper = new GraphNodeLayoutHelper();
     this.setNodeYPositionRecursive(node, layoutHelper, this.spacingY, y);
-
+    this.adjustGraphNodeHorizontalPositions(node);
 }
 
 azdataQueryPlan.prototype.setNodeXPositionRecursive = function (node, x) {
@@ -475,7 +472,7 @@ azdataQueryPlan.prototype.setNodeXPositionRecursive = function (node, x) {
 
     // Using a mxUtils function to determine how much space is needed for the label.
     // Cleaning the label string as mention in the mxGraph docs https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxUtils-js.html#mxUtils.getSizeForString 
-    var cleanedLabel = node.label.replace(/\n/g, "<br>");
+    var cleanedLabel = node.label.replace(/\n|\r\n/g, "<br>");
 
     // Assuming default stylings for 
     var size = mxUtils.getSizeForString(cleanedLabel, mxConstants.DEFAULT_FONTSIZE,
@@ -497,12 +494,11 @@ azdataQueryPlan.prototype.setNodeXPositionRecursive = function (node, x) {
     // This will later help us in determining the y coordinates for them.
     node.maxChildrenXPosition = node.position.x;
     // Display each child node at the X position just computed
-    node.children.forEach(n => {
-        n.parent = node;
-        this.setNodeXPositionRecursive(n, x);
-        node.maxChildrenXPosition = Math.max(node.maxChildrenXPosition, n.maxChildrenXPosition);
+    node.children.forEach(childNode => {
+        childNode.parent = node;
+        this.setNodeXPositionRecursive(childNode, x);
+        node.maxChildrenXPosition = Math.max(node.maxChildrenXPosition, childNode.maxChildrenXPosition);
     });
-
 }
 
 azdataQueryPlan.prototype.setNodeYPositionRecursive = function (node, layoutHelper, y) {
@@ -523,6 +519,65 @@ azdataQueryPlan.prototype.setNodeYPositionRecursive = function (node, layoutHelp
     layoutHelper.updateNodeLayout(leftPosition, yToUpdate);
 }
 
+azdataQueryPlan.prototype.adjustGraphNodeHorizontalPositions = function(node) {
+    let levelsTable = this.getNodesByHorizontalLevel(node);
+
+    Object.keys(levelsTable).reverse().map(key => {
+        for (let levelNodeIndex = 1; levelNodeIndex < levelsTable[key].length; ++levelNodeIndex) {
+            let previousNode = levelsTable[key][levelNodeIndex - 1];
+            let currentNode = levelsTable[key][levelNodeIndex]
+
+            let previousLabel = previousNode.label.split(/\r\n|\n/).filter(str => str.length > 20);
+            if (previousLabel.length !== 0) {
+                let distanceFromPreviousNode = currentNode.position.x - previousNode.position.x;
+                if (distanceFromPreviousNode <= STANDARD_NODE_DISTANCE) {
+                    let shiftToRightAmount = IDEAL_LONG_LABEL_NODE_DISTANCE - distanceFromPreviousNode;
+                    currentNode.position.x += shiftToRightAmount;
+                    
+                    this.shiftParentAndChildNodePositionsHorizontally(currentNode.parent, shiftToRightAmount);
+                }
+            }
+        }
+    });
+}
+
+azdataQueryPlan.prototype.shiftParentAndChildNodePositionsHorizontally = function(parent, shiftAmount) {
+    let stack = [...parent.children];
+
+    while (stack.length !== 0) {
+        let currentNode = stack.pop();
+        let currentNodeParent = currentNode.parent;
+        if (currentNode.position.x - currentNodeParent.position.x < IDEAL_LONG_LABEL_NODE_DISTANCE) {
+            currentNode.position.x += shiftAmount;
+        }
+
+        for (let childIndex = 0; childIndex < currentNode.children.length; ++childIndex) {
+            stack.push(currentNode.children[childIndex]);
+        }
+    }
+}
+
+azdataQueryPlan.prototype.getNodesByHorizontalLevel = function(node) {
+    let table = {};
+    let stack = [node];
+
+    while (stack.length !== 0) {
+        let entry = stack.pop();
+        if (entry.position.y in table) {
+            table[entry.position.y].push(entry);
+        }
+        else {
+            table[entry.position.y] = [];
+            table[entry.position.y].push(entry);
+        }
+
+        for (let i = 0; i < entry.children.length; ++i) {
+            stack.push(entry.children[i]);
+        }
+    }
+    
+    return table;
+}
 
 azdataQueryPlan.prototype.zoomIn = function () {
     this.removeDrawnPolygons();
