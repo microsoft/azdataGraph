@@ -23,9 +23,8 @@
 
 			var azdataGraph = new azdataQueryPlan(container, graph, iconPaths, badgePaths);
 			const cell = azdataGraph.graph.model.getCell('element-7')
-			var points = azdataGraph.getPolygonPerimeter(cell);
 			var samplePolygon = azdataGraph.drawPolygon(
-				points,
+				cell,
 				"rgba(236, 0, 140,0.1)",
 				"rgba(236, 0, 140)",
 				2
