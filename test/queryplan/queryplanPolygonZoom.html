@@ -22,10 +22,25 @@
 			var badgePaths = getBadgePaths(imageBasePath);
 
 			var azdataGraph = new azdataQueryPlan(container, graph, iconPaths, badgePaths);
-			const cell = azdataGraph.graph.model.getCell('element-7')
-			var points = azdataGraph.getPolygonPerimeter(cell);
+
+			let zoomInButton = document.getElementById('zoomInBtn');
+			zoomInButton.addEventListener('click', () => {
+				azdataGraph.zoomIn();
+			});
+
+			let zoomOutButton = document.getElementById('zoomOutBtn');
+			zoomOutButton.addEventListener('click', () => {
+				azdataGraph.zoomOut();
+			});
+
+			let zoomToFitButton = document.getElementById('zoomToFitBtn');
+			zoomToFitButton.addEventListener('click', () => {
+				azdataGraph.zoomToFit();
+			});
+
+			const cell = azdataGraph.graph.model.getCell('element-7');
 			var samplePolygon = azdataGraph.drawPolygon(
-				points,
+				cell,
 				"rgba(236, 0, 140,0.1)",
 				"rgba(236, 0, 140)",
 				2
@@ -49,6 +64,11 @@
 
 <body onload="main(document.getElementById('graphContainer'))">
 	<div id="graphContainer"></div>
+	<div style="position: relative; overflow: visible; bottom: -25px; left: 8px;">
+		<button id="zoomInBtn" type="button" style="font-size:20px;">+</button>
+		<button id="zoomOutBtn" type="button" style="font-size:20px;">-</button>
+		<button id="zoomToFitBtn" type="button" style="font-size:20px;">To Fit</button>
+	</div>
 </body>
 
 </html>
