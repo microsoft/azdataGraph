@@ -93374,34 +93374,25 @@ azdataQueryPlan.prototype.setNodeYPositionRecursive = function (node, layoutHelp
 
 
 azdataQueryPlan.prototype.zoomIn = function () {
-    this.removeDrawnPolygons();
-
     if (this.graph.view.getScale() * this.graph.zoomFactor <= 2) {
         this.graph.zoomIn();
     } else {
         this.graph.zoomTo(2)
     }
     this.redrawBadges();
-    this.redrawPolygons();
+    this.renderPolygons();
 }
 
 azdataQueryPlan.prototype.zoomOut = function () {
-    this.removeDrawnPolygons();
-
     this.graph.zoomOut();
     this.redrawBadges();
-    this.redrawPolygons();
+    this.renderPolygons();
 }
 
 azdataQueryPlan.prototype.zoomToFit = function () {
-    this.removeDrawnPolygons();
-
     this.graph.fit(undefined, true, 20);
     this.redrawBadges();
-    this.graph.view.rendering = true;
-    this.graph.refresh();
-
-    this.redrawPolygons();
+    this.renderPolygons();
 }
 
 azdataQueryPlan.prototype.registerGraphCallback = function (eventType, callback) {
@@ -93415,8 +93406,6 @@ azdataQueryPlan.prototype.getZoomLevelPercentage = function () {
 };
 
 azdataQueryPlan.prototype.zoomTo = function (zoomPercentage) {
-    this.removeDrawnPolygons();
-
     const ZOOM_PERCENTAGE_MINIMUM = 1;
     const ZOOM_PERCENTAGE_MAXIMUM = 200;
 
@@ -93436,6 +93425,7 @@ azdataQueryPlan.prototype.zoomTo = function (zoomPercentage) {
     let zoomScale = parsedZoomLevel / 100;
     this.graph.zoomTo(zoomScale);
     this.redrawBadges();
+    this.renderPolygons();
 };
 
 azdataQueryPlan.prototype.addZoomInRectListener = function () {
@@ -93522,45 +93512,50 @@ azdataQueryPlan.prototype.redrawBadges = function () {
  * @param {*} strokeWidth thickness of the stroke
  */
 azdataQueryPlan.prototype.drawPolygon = function (cell, fillColor, strokeColor, strokeWidth) {
-    let scale = this.graph.view.getScale();
-    let points = this.getPolygonPerimeter(cell);
-
-    var polygon = new mxPolygon(
-        points.map(p => new mxPoint(p.x * scale, p.y * scale)),
-        fillColor,
-        strokeColor,
-        strokeWidth
-    );
-    polygon.init(this.graph.getView().getBackgroundPane());
-    polygon.isDashed = true;
-    polygon.redraw();
-
-    this.polygonRoots.push(new PolygonRoot(cell, fillColor, strokeColor, strokeWidth));
-    this.drawnPolygons.push(polygon);
+    if(!this.polygonModels){
+        this.polygonModels = [];
+    }
+    this.polygonModels.push({
+        root: cell,
+        fillColor: fillColor,
+        strokeColor: strokeColor,
+        strokWidth: strokeWidth
+    });
+    this.renderPolygons();
 }
 
 /**
  * Removes all drawn polygons on the execution plan.
  */
 azdataQueryPlan.prototype.removeDrawnPolygons = function () {
-    while (this.drawnPolygons.length !== 0) {
-        let polygon = this.drawnPolygons.pop();
+    this.drawnPolygons.forEach(polygon => {
         polygon.destroy();
-    }
+    });
+    this.drawnPolygons = [];
+    this.polygonModels = [];
 }
 
-/**
- * Redraws all polygons on the execution plan.
- */
-azdataQueryPlan.prototype.redrawPolygons = function () {
-    let polygonCount = this.polygonRoots.length;
-
-    while (polygonCount !== 0) {
-        let polygonRoot = this.polygonRoots.pop();
-        this.drawPolygon(polygonRoot.cell, polygonRoot.fillColor, polygonRoot.strokeColor, polygonRoot.strokeWidth);
-
-        polygonCount--;
+azdataQueryPlan.prototype.renderPolygons = function () {
+    if(this.drawnPolygons?.length > 0){
+        this.drawnPolygons.forEach(polygon => {
+            polygon.destroy();
+        });
     }
+    this.drawnPolygons = [];
+    this.polygonModels.forEach(p => {
+        const points = this.getPolygonPerimeter(p.root);
+        const scale = this.graph.view.getScale();
+        var polygon = new mxPolygon(
+            points.map(point => new mxPoint(point.x * scale, point.y * scale)),
+            p.fillColor,
+            p.strokeColor,
+            p.strokeWidth
+        );
+        this.drawnPolygons.push(polygon);
+        polygon.init(this.graph.getView().getBackgroundPane());
+        polygon.isDashed = true;
+        polygon.redraw();
+    });
 }
 
 /**
