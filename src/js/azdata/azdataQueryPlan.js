@@ -525,7 +525,6 @@ azdataQueryPlan.prototype.setNodeYPositionRecursive = function (node, layoutHelp
 
 
 azdataQueryPlan.prototype.zoomIn = function () {
-    this.removeDrawnPolygons();
     if (this.graph.view.getScale() * this.graph.zoomFactor <= 2) {
         this.graph.zoomIn();
     } else {
@@ -536,14 +535,12 @@ azdataQueryPlan.prototype.zoomIn = function () {
 }
 
 azdataQueryPlan.prototype.zoomOut = function () {
-    this.removeDrawnPolygons();
     this.graph.zoomOut();
     this.redrawBadges();
     this.renderPolygons();
 }
 
 azdataQueryPlan.prototype.zoomToFit = function () {
-    this.removeDrawnPolygons();
     this.graph.fit(undefined, true, 20);
     this.redrawBadges();
     this.renderPolygons();
@@ -560,8 +557,6 @@ azdataQueryPlan.prototype.getZoomLevelPercentage = function () {
 };
 
 azdataQueryPlan.prototype.zoomTo = function (zoomPercentage) {
-    this.removeDrawnPolygons();
-
     const ZOOM_PERCENTAGE_MINIMUM = 1;
     const ZOOM_PERCENTAGE_MAXIMUM = 200;
 
@@ -581,6 +576,7 @@ azdataQueryPlan.prototype.zoomTo = function (zoomPercentage) {
     let zoomScale = parsedZoomLevel / 100;
     this.graph.zoomTo(zoomScale);
     this.redrawBadges();
+    this.renderPolygons();
 };
 
 azdataQueryPlan.prototype.addZoomInRectListener = function () {
@@ -691,7 +687,7 @@ azdataQueryPlan.prototype.removeDrawnPolygons = function () {
 }
 
 azdataQueryPlan.prototype.renderPolygons = function () {
-    if(this.drawPolygon?.length > 0){
+    if(this.drawnPolygons?.length > 0){
         this.drawnPolygons.forEach(polygon => {
             polygon.destroy();
         });
