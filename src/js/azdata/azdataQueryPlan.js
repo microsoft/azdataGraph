@@ -835,8 +835,12 @@ azdataQueryPlan.prototype.getRightSidePoints = function (cell) {
     for (let nodeIndex = 0; nodeIndex < leafNodes.length; ++nodeIndex) {
         let leafNode = leafNodes[nodeIndex];
 
-        points.push({ x: leafNode.geometry.x + NODE_WIDTH, y: leafNode.geometry.y + NODE_HEIGHT });
-        points.push({ x: leafNode.geometry.x + NODE_WIDTH, y: leafNode.geometry.y });
+        let longestSubLabel = Math.max(...(leafNode.value.label.split(/\r\n|\n/).map(str => str.length)));
+        // These values to work best for drawing regions around labels of different lengths, so the label is always inside the polygon.
+        let additionalRightSideSpacing = longestSubLabel % 10 * 25;
+
+        points.push({ x: leafNode.geometry.x + NODE_WIDTH + additionalRightSideSpacing, y: leafNode.geometry.y + NODE_HEIGHT });
+        points.push({ x: leafNode.geometry.x + NODE_WIDTH + additionalRightSideSpacing, y: leafNode.geometry.y });
     }
 
     return points;
