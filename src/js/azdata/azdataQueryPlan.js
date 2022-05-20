@@ -748,20 +748,23 @@ azdataQueryPlan.prototype.renderPolygons = function () {
         });
     }
     this.drawnPolygons = [];
-    this.polygonModels.forEach(p => {
-        const points = this.getPolygonPerimeter(p.root);
-        const scale = this.graph.view.getScale();
-        var polygon = new mxPolygon(
-            points.map(point => new mxPoint(point.x * scale, point.y * scale)),
-            p.fillColor,
-            p.strokeColor,
-            p.strokeWidth
-        );
-        this.drawnPolygons.push(polygon);
-        polygon.init(this.graph.getView().getBackgroundPane());
-        polygon.isDashed = true;
-        polygon.redraw();
-    });
+
+    if (this.polygonModels) {
+        this.polygonModels.forEach(p => {
+            const points = this.getPolygonPerimeter(p.root);
+            const scale = this.graph.view.getScale();
+            var polygon = new mxPolygon(
+                points.map(point => new mxPoint(point.x * scale, point.y * scale)),
+                p.fillColor,
+                p.strokeColor,
+                p.strokeWidth
+            );
+            this.drawnPolygons.push(polygon);
+            polygon.init(this.graph.getView().getBackgroundPane());
+            polygon.isDashed = true;
+            polygon.redraw();
+        });
+    }
 }
 
 /**
