@@ -68,7 +68,7 @@ class GraphNodeLayoutHelper {
             else {
                 this.layoutPoints.push(new Point(xPosition, yPosition));
             }
-            
+
             return;
         }
 
@@ -807,23 +807,28 @@ azdataQueryPlan.prototype.getBottomSidePoints = function (cell, polygonRightSide
     let bottomSideLeafNodes = this.getBottomSideLeafNodes(cell, polygonRightSideConstraint);
 
     for (let index = 0; index < bottomSideLeafNodes.length; ++index) {
-        let currentNode = bottomSideLeafNodes[index];
+        let leafNode = bottomSideLeafNodes[index].value;
+        let leftOfLeafNode = leafNode;
 
-        if (points.length !== 0 && points[points.length - 1].y - NODE_HEIGHT !== currentNode.geometry.y) {
-            debugger;
-            // traverse backwards
-            let travel = currentNode.value;
-            while (travel.position.y === travel.parent.position.y) {
-                travel = travel.parent;
-            }
-
-            let auxiliaryPoint = { x: travel.position.x - NODE_WIDTH, y: points[points.length - 1].y };
-            points.push(auxiliaryPoint);
-            points.push({ x: travel.position.x - NODE_WIDTH, y: travel.position.y + NODE_HEIGHT });
+        // Finds the left most node directly to the left of the leaf node.
+        while (leftOfLeafNode.position.y === leftOfLeafNode.parent.position.y) {
+            leftOfLeafNode = leftOfLeafNode.parent;
         }
-        else {
-            points.push({ x: currentNode.geometry.x, y: currentNode.geometry.y + NODE_HEIGHT });
-            points.push({ x: currentNode.geometry.x + NODE_WIDTH, y: currentNode.geometry.y + NODE_HEIGHT });
+
+        if (points.length === 0) {
+            let parent = leftOfLeafNode.parent;
+            let auxiliaryPoint = { x: leftOfLeafNode.position.x - NODE_WIDTH, y: parent.position.y + NODE_HEIGHT };
+            points.push(auxiliaryPoint);
+        }
+        else if (points.length !== 0 && points[points.length - 1].y - NODE_HEIGHT !== leftOfLeafNode.position.y) {
+            let auxiliaryPoint = { x: leftOfLeafNode.position.x - NODE_WIDTH, y: points[points.length - 1].y };
+            points.push(auxiliaryPoint);
+        }
+
+        points.push({ x: leftOfLeafNode.position.x - NODE_WIDTH, y: leftOfLeafNode.position.y + NODE_HEIGHT });
+
+        if (leftOfLeafNode.position.x < leafNode.position.x) {
+            points.push({ x: leafNode.position.x + NODE_WIDTH, y: leafNode.position.y + NODE_HEIGHT});
         }
     }
 
