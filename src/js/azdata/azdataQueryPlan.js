@@ -68,7 +68,7 @@ class GraphNodeLayoutHelper {
             else {
                 this.layoutPoints.push(new Point(xPosition, yPosition));
             }
-            
+
             return;
         }
 
@@ -519,7 +519,7 @@ azdataQueryPlan.prototype.setNodeYPositionRecursive = function (node, layoutHelp
     layoutHelper.updateNodeLayout(leftPosition, yToUpdate);
 }
 
-azdataQueryPlan.prototype.adjustGraphNodeHorizontalPositions = function(node) {
+azdataQueryPlan.prototype.adjustGraphNodeHorizontalPositions = function (node) {
     let levelsTable = this.getNodesByHorizontalLevel(node);
 
     Object.keys(levelsTable).map(key => {
@@ -533,7 +533,7 @@ azdataQueryPlan.prototype.adjustGraphNodeHorizontalPositions = function(node) {
                 if (distanceFromPreviousNode <= STANDARD_NODE_DISTANCE) {
                     let shiftToRightAmount = IDEAL_LONG_LABEL_NODE_DISTANCE - distanceFromPreviousNode;
                     currentNode.position.x += shiftToRightAmount;
-                    
+
                     this.shiftParentAndChildNodePositionsHorizontally(currentNode.parent, shiftToRightAmount);
                 }
             }
@@ -541,7 +541,7 @@ azdataQueryPlan.prototype.adjustGraphNodeHorizontalPositions = function(node) {
     });
 }
 
-azdataQueryPlan.prototype.shiftParentAndChildNodePositionsHorizontally = function(parent, shiftAmount) {
+azdataQueryPlan.prototype.shiftParentAndChildNodePositionsHorizontally = function (parent, shiftAmount) {
     let stack = [...parent.children];
 
     while (stack.length !== 0) {
@@ -557,7 +557,7 @@ azdataQueryPlan.prototype.shiftParentAndChildNodePositionsHorizontally = functio
     }
 }
 
-azdataQueryPlan.prototype.getNodesByHorizontalLevel = function(node) {
+azdataQueryPlan.prototype.getNodesByHorizontalLevel = function (node) {
     let table = {};
     let stack = [node];
 
@@ -575,7 +575,7 @@ azdataQueryPlan.prototype.getNodesByHorizontalLevel = function(node) {
             stack.push(entry.children[i]);
         }
     }
-    
+
     return table;
 }
 
@@ -718,7 +718,7 @@ azdataQueryPlan.prototype.redrawBadges = function () {
  * @param {*} strokeWidth thickness of the stroke
  */
 azdataQueryPlan.prototype.drawPolygon = function (cell, fillColor, strokeColor, strokeWidth) {
-    if(!this.polygonModels){
+    if (!this.polygonModels) {
         this.polygonModels = [];
     }
     this.polygonModels.push({
@@ -742,7 +742,7 @@ azdataQueryPlan.prototype.removeDrawnPolygons = function () {
 }
 
 azdataQueryPlan.prototype.renderPolygons = function () {
-    if(this.drawnPolygons?.length > 0){
+    if (this.drawnPolygons?.length > 0) {
         this.drawnPolygons.forEach(polygon => {
             polygon.destroy();
         });
@@ -772,8 +772,10 @@ azdataQueryPlan.prototype.renderPolygons = function () {
 azdataQueryPlan.prototype.getPolygonPerimeter = function (cell) {
     let points = [];
     points = points.concat(this.getLeftSidePoints(cell));
-    points = points.concat(this.getBottomSidePoints(cell));
-    points = points.concat(this.getRightSidePoints(cell));
+
+    let rightSidePoints = this.getRightSidePoints(cell);
+    points = points.concat(this.getBottomSidePoints(cell, rightSidePoints[0].x));
+    points = points.concat(rightSidePoints);
 
     return points;
 }
@@ -790,7 +792,7 @@ azdataQueryPlan.prototype.getLeftSidePoints = function (cell) {
     let points = [];
     let xPosition = cell.geometry.x - 15; // subtracting to push the x coordinate to the left.
     points.push({ x: xPosition, y: cell.geometry.y });
-    points.push({ x: xPosition, y: cell.geometry.y + NODE_HEIGHT })
+    points.push({ x: xPosition, y: cell.geometry.y + NODE_HEIGHT });
 
     return points;
 }
@@ -800,27 +802,66 @@ azdataQueryPlan.prototype.getLeftSidePoints = function (cell) {
  * @param {*} cell The starting node where highlighting will begin.
  * @returns An array of points for the bottom side of the polygon.
  */
-azdataQueryPlan.prototype.getBottomSidePoints = function (cell) {
+azdataQueryPlan.prototype.getBottomSidePoints = function (cell, polygonRightSideConstraint) {
     let points = [];
-    var stack = [cell];
+    let bottomSideLeafNodes = this.getBottomSideLeafNodes(cell, polygonRightSideConstraint);
 
-    while (stack.length !== 0) {
-        let entry = stack.pop();
-        points.push({ x: entry.geometry.x + NODE_HEIGHT, y: entry.geometry.y + NODE_WIDTH });
+    for (let index = 0; index < bottomSideLeafNodes.length; ++index) {
+        let leafNode = bottomSideLeafNodes[index].value;
+        let leftOfLeafNode = leafNode;
 
-        if (entry?.value?.children?.length > 0) {
-            let nextNode = this.graph.model.getCell(entry.value.children[entry.value.children.length - 1].id);
+        // Finds the left most node directly to the left of the leaf node.
+        while (leftOfLeafNode.position.y === leftOfLeafNode.parent.position.y) {
+            leftOfLeafNode = leftOfLeafNode.parent;
+        }
 
-            if (entry.value.children.length > 1) {
-                let auxiliaryPoint = { x: entry.geometry.x + NODE_WIDTH, y: nextNode.geometry.y + NODE_HEIGHT };
-                points.push(auxiliaryPoint);
-            }
+        if (points.length === 0) {
+            let parent = leftOfLeafNode.parent;
+            let auxiliaryPoint = { x: leftOfLeafNode.position.x - NODE_WIDTH, y: parent.position.y + NODE_HEIGHT };
+            points.push(auxiliaryPoint);
+        }
+        else if (points.length !== 0 && points[points.length - 1].y - NODE_HEIGHT !== leftOfLeafNode.position.y) {
+            let auxiliaryPoint = { x: leftOfLeafNode.position.x - NODE_WIDTH, y: points[points.length - 1].y };
+            points.push(auxiliaryPoint);
+        }
 
-            stack.push(nextNode);
+        points.push({ x: leftOfLeafNode.position.x - NODE_WIDTH, y: leftOfLeafNode.position.y + NODE_HEIGHT });
+
+        if (leftOfLeafNode.position.x < leafNode.position.x) {
+            points.push({ x: leafNode.position.x + NODE_WIDTH, y: leafNode.position.y + NODE_HEIGHT});
         }
     }
 
     return points;
+}
+
+azdataQueryPlan.prototype.getBottomSideLeafNodes = function (cell, polygonRightSideConstraint) {
+    let leafNodeTable = {};
+    let stack = [cell];
+
+    while (stack.length !== 0) {
+        let entry = stack.pop();
+
+        if (entry.value.children.length === 0 && entry.geometry.x <= polygonRightSideConstraint) {
+            if (entry.geometry.x in leafNodeTable) {
+                let previouslyCachedEntry = leafNodeTable[entry.geometry.x];
+                if (entry.geometry.y > previouslyCachedEntry.geometry.y) {
+                    leafNodeTable[entry.geometry.x] = entry;
+                }
+            }
+            else {
+                leafNodeTable[entry.geometry.x] = entry;
+            }
+        }
+
+        for (let nodeIndex = 0; nodeIndex < entry.value.children.length; ++nodeIndex) {
+            stack.push(this.graph.model.getCell(entry.value.children[nodeIndex].id));
+        }
+    }
+
+    let leafNodes = Object.keys(leafNodeTable).map(key => leafNodeTable[key])
+
+    return leafNodes;
 }
 
 /**
@@ -835,8 +876,12 @@ azdataQueryPlan.prototype.getRightSidePoints = function (cell) {
     for (let nodeIndex = 0; nodeIndex < leafNodes.length; ++nodeIndex) {
         let leafNode = leafNodes[nodeIndex];
 
-        points.push({ x: leafNode.geometry.x + NODE_WIDTH, y: leafNode.geometry.y + NODE_HEIGHT });
-        points.push({ x: leafNode.geometry.x + NODE_WIDTH, y: leafNode.geometry.y });
+        let longestSubLabel = Math.max(...(leafNode.value.label.split(/\r\n|\n/).map(str => str.length)));
+        // These values to work best for drawing regions around labels of different lengths, so the label is always inside the polygon.
+        let additionalRightSideSpacing = longestSubLabel % 10 * 25;
+
+        points.push({ x: leafNode.geometry.x + NODE_WIDTH + additionalRightSideSpacing, y: leafNode.geometry.y + NODE_HEIGHT });
+        points.push({ x: leafNode.geometry.x + NODE_WIDTH + additionalRightSideSpacing, y: leafNode.geometry.y });
     }
 
     return points;
