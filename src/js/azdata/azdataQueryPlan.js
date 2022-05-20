@@ -9,6 +9,8 @@ const GRAPH_PADDING_BOTTOM = 80;
 const GRAPH_PADDING_LEFT = 80;
 const CELL_WIDTH = 70;
 const CELL_HEIGHT = 70;
+const STANDARD_NODE_DISTANCE = 173;
+const IDEAL_LONG_LABEL_NODE_DISTANCE = 240;
 
 class PolygonRoot {
     constructor(cell, fillColor, strokeColor, strokeWidth) {
@@ -66,7 +68,7 @@ class GraphNodeLayoutHelper {
             else {
                 this.layoutPoints.push(new Point(xPosition, yPosition));
             }
-            
+
             return;
         }
 
@@ -303,12 +305,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
             let splitLabel = cell.value.label.split(/\r\n|\n/);
             let cellLabel = splitLabel.map(str => {
                 let label = '';
-                if (str.length > 20) {
-                    label += str.substring(0, 17) + '...';
-                }
-                else {
-                    label += str;
-                }
+                label += str;
 
                 return label;
             });
@@ -454,16 +451,16 @@ azdataQueryPlan.prototype.placeGraphNodes = function () {
     var startY = (this.paddingY + 150) / 2;
 
     // Recursively layout all nodes starting with root
-    this.SetNodePositionRecursive(this.queryPlanGraph, startX, startY);
+    this.setNodePositionRecursive(this.queryPlanGraph, startX, startY);
 }
 
-azdataQueryPlan.prototype.SetNodePositionRecursive = function (node, x, y) {
+azdataQueryPlan.prototype.setNodePositionRecursive = function (node, x, y) {
 
     // Recursively setting all the x positions in the graph.
     this.setNodeXPositionRecursive(node, x);
     var layoutHelper = new GraphNodeLayoutHelper();
     this.setNodeYPositionRecursive(node, layoutHelper, this.spacingY, y);
-
+    this.adjustGraphNodeHorizontalPositions(node);
 }
 
 azdataQueryPlan.prototype.setNodeXPositionRecursive = function (node, x) {
@@ -475,7 +472,7 @@ azdataQueryPlan.prototype.setNodeXPositionRecursive = function (node, x) {
 
     // Using a mxUtils function to determine how much space is needed for the label.
     // Cleaning the label string as mention in the mxGraph docs https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxUtils-js.html#mxUtils.getSizeForString 
-    var cleanedLabel = node.label.replace(/\n/g, "<br>");
+    var cleanedLabel = node.label.replace(/\n|\r\n/g, "<br>");
 
     // Assuming default stylings for 
     var size = mxUtils.getSizeForString(cleanedLabel, mxConstants.DEFAULT_FONTSIZE,
@@ -497,12 +494,11 @@ azdataQueryPlan.prototype.setNodeXPositionRecursive = function (node, x) {
     // This will later help us in determining the y coordinates for them.
     node.maxChildrenXPosition = node.position.x;
     // Display each child node at the X position just computed
-    node.children.forEach(n => {
-        n.parent = node;
-        this.setNodeXPositionRecursive(n, x);
-        node.maxChildrenXPosition = Math.max(node.maxChildrenXPosition, n.maxChildrenXPosition);
+    node.children.forEach(childNode => {
+        childNode.parent = node;
+        this.setNodeXPositionRecursive(childNode, x);
+        node.maxChildrenXPosition = Math.max(node.maxChildrenXPosition, childNode.maxChildrenXPosition);
     });
-
 }
 
 azdataQueryPlan.prototype.setNodeYPositionRecursive = function (node, layoutHelper, y) {
@@ -523,6 +519,65 @@ azdataQueryPlan.prototype.setNodeYPositionRecursive = function (node, layoutHelp
     layoutHelper.updateNodeLayout(leftPosition, yToUpdate);
 }
 
+azdataQueryPlan.prototype.adjustGraphNodeHorizontalPositions = function (node) {
+    let levelsTable = this.getNodesByHorizontalLevel(node);
+
+    Object.keys(levelsTable).map(key => {
+        for (let levelNodeIndex = 1; levelNodeIndex < levelsTable[key].length; ++levelNodeIndex) {
+            let previousNode = levelsTable[key][levelNodeIndex - 1];
+            let currentNode = levelsTable[key][levelNodeIndex]
+
+            let previousLabel = previousNode.label.split(/\r\n|\n/).filter(str => str.length > 20);
+            if (previousLabel.length !== 0) {
+                let distanceFromPreviousNode = currentNode.position.x - previousNode.position.x;
+                if (distanceFromPreviousNode <= STANDARD_NODE_DISTANCE) {
+                    let shiftToRightAmount = IDEAL_LONG_LABEL_NODE_DISTANCE - distanceFromPreviousNode;
+                    currentNode.position.x += shiftToRightAmount;
+
+                    this.shiftParentAndChildNodePositionsHorizontally(currentNode.parent, shiftToRightAmount);
+                }
+            }
+        }
+    });
+}
+
+azdataQueryPlan.prototype.shiftParentAndChildNodePositionsHorizontally = function (parent, shiftAmount) {
+    let stack = [...parent.children];
+
+    while (stack.length !== 0) {
+        let currentNode = stack.pop();
+        let currentNodeParent = currentNode.parent;
+        if (currentNode.position.x - currentNodeParent.position.x < IDEAL_LONG_LABEL_NODE_DISTANCE) {
+            currentNode.position.x += shiftAmount;
+        }
+
+        for (let childIndex = 0; childIndex < currentNode.children.length; ++childIndex) {
+            stack.push(currentNode.children[childIndex]);
+        }
+    }
+}
+
+azdataQueryPlan.prototype.getNodesByHorizontalLevel = function (node) {
+    let table = {};
+    let stack = [node];
+
+    while (stack.length !== 0) {
+        let entry = stack.pop();
+        if (entry.position.y in table) {
+            table[entry.position.y].push(entry);
+        }
+        else {
+            table[entry.position.y] = [];
+            table[entry.position.y].push(entry);
+        }
+
+        for (let i = 0; i < entry.children.length; ++i) {
+            stack.push(entry.children[i]);
+        }
+    }
+
+    return table;
+}
 
 azdataQueryPlan.prototype.zoomIn = function () {
     if (this.graph.view.getScale() * this.graph.zoomFactor <= 2) {
@@ -663,7 +718,7 @@ azdataQueryPlan.prototype.redrawBadges = function () {
  * @param {*} strokeWidth thickness of the stroke
  */
 azdataQueryPlan.prototype.drawPolygon = function (cell, fillColor, strokeColor, strokeWidth) {
-    if(!this.polygonModels){
+    if (!this.polygonModels) {
         this.polygonModels = [];
     }
     this.polygonModels.push({
@@ -687,26 +742,29 @@ azdataQueryPlan.prototype.removeDrawnPolygons = function () {
 }
 
 azdataQueryPlan.prototype.renderPolygons = function () {
-    if(this.drawnPolygons?.length > 0){
+    if (this.drawnPolygons?.length > 0) {
         this.drawnPolygons.forEach(polygon => {
             polygon.destroy();
         });
     }
     this.drawnPolygons = [];
-    this.polygonModels.forEach(p => {
-        const points = this.getPolygonPerimeter(p.root);
-        const scale = this.graph.view.getScale();
-        var polygon = new mxPolygon(
-            points.map(point => new mxPoint(point.x * scale, point.y * scale)),
-            p.fillColor,
-            p.strokeColor,
-            p.strokeWidth
-        );
-        this.drawnPolygons.push(polygon);
-        polygon.init(this.graph.getView().getBackgroundPane());
-        polygon.isDashed = true;
-        polygon.redraw();
-    });
+
+    if (this.polygonModels) {
+        this.polygonModels.forEach(p => {
+            const points = this.getPolygonPerimeter(p.root);
+            const scale = this.graph.view.getScale();
+            var polygon = new mxPolygon(
+                points.map(point => new mxPoint(point.x * scale, point.y * scale)),
+                p.fillColor,
+                p.strokeColor,
+                p.strokeWidth
+            );
+            this.drawnPolygons.push(polygon);
+            polygon.init(this.graph.getView().getBackgroundPane());
+            polygon.isDashed = true;
+            polygon.redraw();
+        });
+    }
 }
 
 /**
@@ -717,8 +775,10 @@ azdataQueryPlan.prototype.renderPolygons = function () {
 azdataQueryPlan.prototype.getPolygonPerimeter = function (cell) {
     let points = [];
     points = points.concat(this.getLeftSidePoints(cell));
-    points = points.concat(this.getBottomSidePoints(cell));
-    points = points.concat(this.getRightSidePoints(cell));
+
+    let rightSidePoints = this.getRightSidePoints(cell);
+    points = points.concat(this.getBottomSidePoints(cell, rightSidePoints[0].x));
+    points = points.concat(rightSidePoints);
 
     return points;
 }
@@ -735,7 +795,7 @@ azdataQueryPlan.prototype.getLeftSidePoints = function (cell) {
     let points = [];
     let xPosition = cell.geometry.x - 15; // subtracting to push the x coordinate to the left.
     points.push({ x: xPosition, y: cell.geometry.y });
-    points.push({ x: xPosition, y: cell.geometry.y + NODE_HEIGHT })
+    points.push({ x: xPosition, y: cell.geometry.y + NODE_HEIGHT });
 
     return points;
 }
@@ -745,27 +805,66 @@ azdataQueryPlan.prototype.getLeftSidePoints = function (cell) {
  * @param {*} cell The starting node where highlighting will begin.
  * @returns An array of points for the bottom side of the polygon.
  */
-azdataQueryPlan.prototype.getBottomSidePoints = function (cell) {
+azdataQueryPlan.prototype.getBottomSidePoints = function (cell, polygonRightSideConstraint) {
     let points = [];
-    var stack = [cell];
+    let bottomSideLeafNodes = this.getBottomSideLeafNodes(cell, polygonRightSideConstraint);
 
-    while (stack.length !== 0) {
-        let entry = stack.pop();
-        points.push({ x: entry.geometry.x + NODE_HEIGHT, y: entry.geometry.y + NODE_WIDTH });
+    for (let index = 0; index < bottomSideLeafNodes.length; ++index) {
+        let leafNode = bottomSideLeafNodes[index].value;
+        let leftOfLeafNode = leafNode;
 
-        if (entry?.value?.children?.length > 0) {
-            let nextNode = this.graph.model.getCell(entry.value.children[entry.value.children.length - 1].id);
+        // Finds the left most node directly to the left of the leaf node.
+        while (leftOfLeafNode.position.y === leftOfLeafNode.parent.position.y) {
+            leftOfLeafNode = leftOfLeafNode.parent;
+        }
 
-            if (entry.value.children.length > 1) {
-                let auxiliaryPoint = { x: entry.geometry.x + NODE_WIDTH, y: nextNode.geometry.y + NODE_HEIGHT };
-                points.push(auxiliaryPoint);
-            }
+        if (points.length === 0) {
+            let parent = leftOfLeafNode.parent;
+            let auxiliaryPoint = { x: leftOfLeafNode.position.x - NODE_WIDTH, y: parent.position.y + NODE_HEIGHT };
+            points.push(auxiliaryPoint);
+        }
+        else if (points.length !== 0 && points[points.length - 1].y - NODE_HEIGHT !== leftOfLeafNode.position.y) {
+            let auxiliaryPoint = { x: leftOfLeafNode.position.x - NODE_WIDTH, y: points[points.length - 1].y };
+            points.push(auxiliaryPoint);
+        }
 
-            stack.push(nextNode);
+        points.push({ x: leftOfLeafNode.position.x - NODE_WIDTH, y: leftOfLeafNode.position.y + NODE_HEIGHT });
+
+        if (leftOfLeafNode.position.x < leafNode.position.x) {
+            points.push({ x: leafNode.position.x + NODE_WIDTH, y: leafNode.position.y + NODE_HEIGHT});
         }
     }
 
     return points;
+}
+
+azdataQueryPlan.prototype.getBottomSideLeafNodes = function (cell, polygonRightSideConstraint) {
+    let leafNodeTable = {};
+    let stack = [cell];
+
+    while (stack.length !== 0) {
+        let entry = stack.pop();
+
+        if (entry.value.children.length === 0 && entry.geometry.x <= polygonRightSideConstraint) {
+            if (entry.geometry.x in leafNodeTable) {
+                let previouslyCachedEntry = leafNodeTable[entry.geometry.x];
+                if (entry.geometry.y > previouslyCachedEntry.geometry.y) {
+                    leafNodeTable[entry.geometry.x] = entry;
+                }
+            }
+            else {
+                leafNodeTable[entry.geometry.x] = entry;
+            }
+        }
+
+        for (let nodeIndex = 0; nodeIndex < entry.value.children.length; ++nodeIndex) {
+            stack.push(this.graph.model.getCell(entry.value.children[nodeIndex].id));
+        }
+    }
+
+    let leafNodes = Object.keys(leafNodeTable).map(key => leafNodeTable[key])
+
+    return leafNodes;
 }
 
 /**
@@ -780,8 +879,12 @@ azdataQueryPlan.prototype.getRightSidePoints = function (cell) {
     for (let nodeIndex = 0; nodeIndex < leafNodes.length; ++nodeIndex) {
         let leafNode = leafNodes[nodeIndex];
 
-        points.push({ x: leafNode.geometry.x + NODE_WIDTH, y: leafNode.geometry.y + NODE_HEIGHT });
-        points.push({ x: leafNode.geometry.x + NODE_WIDTH, y: leafNode.geometry.y });
+        let longestSubLabel = Math.max(...(leafNode.value.label.split(/\r\n|\n/).map(str => str.length)));
+        // These values to work best for drawing regions around labels of different lengths, so the label is always inside the polygon.
+        let additionalRightSideSpacing = longestSubLabel % 10 * 25;
+
+        points.push({ x: leafNode.geometry.x + NODE_WIDTH + additionalRightSideSpacing, y: leafNode.geometry.y + NODE_HEIGHT });
+        points.push({ x: leafNode.geometry.x + NODE_WIDTH + additionalRightSideSpacing, y: leafNode.geometry.y });
     }
 
     return points;
