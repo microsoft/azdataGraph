@@ -812,7 +812,7 @@ azdataQueryPlan.prototype.getBottomSidePoints = function (cell, polygonRightSide
     let points = [];
     let bottomSideNodes = this.getBottomSideNodes(cell, polygonRightSideConstraint);
 
-    bottomSideNodes.forEach((node) => {
+    bottomSideNodes.forEach(node => {
         let lastPoint = points.length > 0 ? points[points.length - 1] : null;
 
         let newPoint = { x: node.geometry.x, y: node.geometry.y + NODE_HEIGHT };
