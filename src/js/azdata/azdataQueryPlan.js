@@ -823,16 +823,10 @@ azdataQueryPlan.prototype.getBottomSidePoints = function (cell, polygonRightSide
         }
 
         let cell = this.graph.model.getCell(node.id);
+        let additionalSpacing = Math.max(...(cell.value.label.split(/\r\n|\n/).map(str => str.length))) > 20 ? this.calcAdditionalSpacingForNode(cell) : 0;
+
         points.push({ x: node.geometry.x, y: node.geometry.y + NODE_HEIGHT });
-        
-        if (Math.max(...(cell.value.label.split(/\r\n|\n/).map(str => str.length))) > 20) {
-            let additionalSpacing = this.calcAdditionalSpacingForNode(cell)
-            points.push({ x: node.geometry.x + NODE_WIDTH + additionalSpacing, y: node.geometry.y + NODE_HEIGHT });
-        }
-        else {
-            points.push({ x: node.geometry.x + NODE_WIDTH, y: node.geometry.y + NODE_HEIGHT });
-        }
-        
+        points.push({ x: node.geometry.x + NODE_WIDTH + additionalSpacing, y: node.geometry.y + NODE_HEIGHT });
     });
 
     return points;
