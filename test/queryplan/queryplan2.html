@@ -25,10 +25,26 @@
 			var badgePaths = getBadgePaths(imageBasePath);
 
 			var azdataGraph = new azdataQueryPlan(container, graph, iconPaths, badgePaths);
-			const cell = azdataGraph.graph.model.getCell('element-6')
+            let cell = azdataGraph.graph.model.getCell('element-6');
 			var samplePolygon = azdataGraph.drawPolygon(
 				cell,
-				"rgba(236, 0, 140,0.1)",
+				"rgba(75, 168, 255, 0.1)",
+				"rgba(75, 168, 255)",
+				2
+			);
+
+            cell = azdataGraph.graph.model.getCell('element-55');
+			var samplePolygon = azdataGraph.drawPolygon(
+				cell,
+				"rgba(12, 173, 171, 0.1)",
+				"rgba(12, 173, 171)",
+				2
+			);
+
+			cell = azdataGraph.graph.model.getCell('element-58');
+			var samplePolygon = azdataGraph.drawPolygon(
+				cell,
+				"rgba(236, 0, 140, 0.1)",
 				"rgba(236, 0, 140)",
 				2
 			)
