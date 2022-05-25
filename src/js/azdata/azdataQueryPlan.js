@@ -303,9 +303,19 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
         if (cell.value != null && cell.value.label != null) {
             let hasWindowsEOL = cell.value.label.includes('\r\n');
             let splitLabel = cell.value.label.split(/\r\n|\n/);
-            let cellLabel = splitLabel.map(str => {
+            let cellLabel = splitLabel.map((str, index) => {
                 let label = '';
-                label += str;
+
+                if (index === 0) {
+                    label += str.replace(/\(([^)]+)\)/g, '');
+                }
+                else if (index === 2 && splitLabel.length >= 3) {
+                    debugger;
+                    console.log(str);
+                }
+                else {
+                    label += str;
+                }
 
                 return label;
             });
@@ -525,7 +535,7 @@ azdataQueryPlan.prototype.adjustGraphNodeHorizontalPositions = function (node) {
     Object.keys(levelsTable).map(key => {
         for (let levelNodeIndex = 1; levelNodeIndex < levelsTable[key].length; ++levelNodeIndex) {
             let previousNode = levelsTable[key][levelNodeIndex - 1];
-            let currentNode = levelsTable[key][levelNodeIndex]
+            let currentNode = levelsTable[key][levelNodeIndex];
 
             let previousLabel = previousNode.label.split(/\r\n|\n/).filter(str => str.length > 20);
             if (previousLabel.length !== 0) {
