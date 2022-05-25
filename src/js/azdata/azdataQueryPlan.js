@@ -302,6 +302,16 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
     graph.convertValueToString = function (cell) {
         if (cell.value != null && cell.value.label != null) {
             let hasWindowsEOL = cell.value.label.includes('\r\n');
+            const joinStrings = (strArray) => {
+                if (hasWindowsEOL) {
+                    return strArray.join('\r\n');
+                }
+                else {
+                    return strArray.join('\n');
+                }
+            };
+
+
             let splitLabel = cell.value.label.split(/\r\n|\n/);
             let cellLabel = splitLabel.map((str, index) => {
                 let label = '';
@@ -309,9 +319,18 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
                 if (index === 0) {
                     label += str.replace(/\(([^)]+)\)/g, '');
                 }
-                else if (index === 2 && splitLabel.length >= 3) {
-                    debugger;
-                    console.log(str);
+                else if (index === 1 && splitLabel.length >= 3 && str.includes('].[')) {
+                    let splitStr = str.split(' ');
+                    splitStr = splitStr.map(str => {
+                        if (str.length >= 38) {
+                            return str.substring(0, 35) + '...';
+                        }
+                        else {
+                            return str;
+                        }
+                    });
+                    
+                    label += joinStrings(splitStr);
                 }
                 else {
                     label += str;
@@ -320,12 +339,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
                 return label;
             });
 
-            if (hasWindowsEOL) {
-                cellLabel = cellLabel.join('\r\n');
-            }
-            else {
-                cellLabel = cellLabel.join('\n');
-            }
+            cellLabel = joinStrings(cellLabel);
 
             return cellLabel;
         }
@@ -450,7 +464,7 @@ azdataQueryPlan.prototype.placeGraphNodes = function () {
     // for entire showplan. For starters, we set this to 100px. However,
     // if a node has label with many lines, this value will be updated to 
     // better fit that node.
-    this.spacingY = 100;
+    this.spacingY = 105;
 
     // Getting the node padding values from SSMS.
     this.paddingX = GRAPH_PADDING_RIGHT;
@@ -792,7 +806,7 @@ azdataQueryPlan.prototype.getPolygonPerimeter = function (cell) {
     return points;
 }
 
-const NODE_HEIGHT = 100;
+const NODE_HEIGHT = 105;
 const NODE_WIDTH = 100;
 
 /**
