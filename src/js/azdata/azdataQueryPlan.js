@@ -12,6 +12,12 @@ const CELL_HEIGHT = 70;
 const STANDARD_NODE_DISTANCE = 173;
 const IDEAL_LONG_LABEL_NODE_DISTANCE = 240;
 
+// Setting this to 38 because SSMS truncates labels longer than 38 characters
+const LABEL_LENGTH_LIMIT = 38;
+
+const NODE_HEIGHT = 105;
+const NODE_WIDTH = 100;
+
 class PolygonRoot {
     constructor(cell, fillColor, strokeColor, strokeWidth) {
         this.cell = cell;
@@ -317,13 +323,16 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
                 let label = '';
 
                 if (index === 0) {
+                    // This regex removes any text contained in parenthesis in the operation name
+                    // i.e. "Clustered Index Seek (Clustered)" becomes "Clustered Index Seek"
                     label += str.replace(/\(([^)]+)\)/g, '');
                 }
                 else if (index === 1 && splitLabel.length >= 3 && str.includes('].[')) {
                     let splitStr = str.split(' ');
                     splitStr = splitStr.map(str => {
-                        if (str.length >= 38) {
-                            return str.substring(0, 35) + '...';
+                        if (str.length >= LABEL_LENGTH_LIMIT) {
+                            // subtracting 3 for ellipse to fit in character limit
+                            return str.substring(0, LABEL_LENGTH_LIMIT - 3) + '...';
                         }
                         else {
                             return str;
@@ -464,7 +473,7 @@ azdataQueryPlan.prototype.placeGraphNodes = function () {
     // for entire showplan. For starters, we set this to 100px. However,
     // if a node has label with many lines, this value will be updated to 
     // better fit that node.
-    this.spacingY = 105;
+    this.spacingY = NODE_HEIGHT;
 
     // Getting the node padding values from SSMS.
     this.paddingX = GRAPH_PADDING_RIGHT;
@@ -806,9 +815,6 @@ azdataQueryPlan.prototype.getPolygonPerimeter = function (cell) {
     return points;
 }
 
-const NODE_HEIGHT = 105;
-const NODE_WIDTH = 100;
-
 /**
  * Gets the left side points for the starting node in the polygon from top to bottom.
  * @param {*} cell The starting node for the left side perimeter points.
@@ -904,6 +910,9 @@ azdataQueryPlan.prototype.getRightSidePoints = function (cell) {
 
 azdataQueryPlan.prototype.calcAdditionalSpacingForNode = function(cell) {
     let longestSubLabel = Math.max(...(cell.value.label.split(/\r\n|\n/).map(str => str.length)));
+    if (longestSubLabel > LABEL_LENGTH_LIMIT) {
+        longestSubLabel = LABEL_LENGTH_LIMIT;
+    }
     // These values to work best for drawing regions around labels of different lengths, so the label is always inside the polygon.
     return longestSubLabel / 10 * 15;
 }
