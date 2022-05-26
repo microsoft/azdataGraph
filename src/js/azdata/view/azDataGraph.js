@@ -142,7 +142,7 @@ azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
                 tooltip += `<hr />`;
             }
 
-            tooltip += `</div>`
+            tooltip += `</div>`;
         }
 
         // tooltip footer for vertices only

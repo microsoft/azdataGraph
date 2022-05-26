@@ -322,7 +322,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
             let cellLabel = splitLabel.map((str, index) => {
                 let label = '';
 
-                if (index === 0) {
+                if (index === 0 && !cell.value.icon?.includes('columnstore')) {
                     // This regex removes any text contained in parenthesis in the operation name
                     // i.e. "Clustered Index Seek (Clustered)" becomes "Clustered Index Seek"
                     label += str.replace(/\(([^)]+)\)/g, '');
