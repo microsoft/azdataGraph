@@ -562,10 +562,26 @@ azdataQueryPlan.prototype.adjustGraphNodeHorizontalPositions = function (node) {
 
             let previousLabel = previousNode.label.split(/\r\n|\n/).filter(str => str.length > 20);
             if (previousLabel.length !== 0) {
+                let longestString = '';
+                let labelPartitions = currentNode.label.split(/\r\n|\n/g);
+                labelPartitions.forEach(str => {
+                    if (longestString.length < str.length) {
+                        longestString = str;
+                    }
+                });
+
+                var size = mxUtils.getSizeForString(longestString.substring(0, LABEL_LENGTH_LIMIT),
+                    mxConstants.DEFAULT_FONTSIZE,
+                    mxConstants.DEFAULT_FONTFAMILY,
+                    undefined,
+                    mxConstants.DEFAULT_FONTSTYLE);
+
                 let distanceFromPreviousNode = currentNode.position.x - previousNode.position.x;
+
                 if (distanceFromPreviousNode <= STANDARD_NODE_DISTANCE) {
-                    let shiftToRightAmount = IDEAL_LONG_LABEL_NODE_DISTANCE - distanceFromPreviousNode;
+                    let shiftToRightAmount = Math.max(size.width, IDEAL_LONG_LABEL_NODE_DISTANCE) - distanceFromPreviousNode;
                     currentNode.position.x += shiftToRightAmount;
+                    console.log(shiftToRightAmount);
 
                     this.shiftParentAndChildNodePositionsHorizontally(currentNode.parent, shiftToRightAmount);
                 }
