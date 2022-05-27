@@ -321,13 +321,12 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
             let splitLabel = cell.value.label.split(/\r\n|\n/);
             let cellLabel = splitLabel.map((str, index) => {
                 let label = '';
-
                 if (index === 0 && !cell.value.icon?.includes('columnstore')) {
                     // This regex removes any text contained in parenthesis in the operation name
                     // i.e. "Clustered Index Seek (Clustered)" becomes "Clustered Index Seek"
                     label += str.replace(/\(([^)]+)\)/g, '');
                 }
-                else if (index === 1 && splitLabel.length >= 3 && str.includes('].[')) {
+                else if (index === 1 && splitLabel.length >= 3 && str.includes('.')) {
                     let splitStr = str.split(' ');
                     splitStr = splitStr.map(str => {
                         if (str.length >= LABEL_LENGTH_LIMIT) {
