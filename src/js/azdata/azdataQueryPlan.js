@@ -580,7 +580,6 @@ azdataQueryPlan.prototype.adjustGraphNodeHorizontalPositions = function (node) {
                 if (distanceFromPreviousNode <= STANDARD_NODE_DISTANCE) {
                     let shiftToRightAmount = Math.max(size.width, IDEAL_LONG_LABEL_NODE_DISTANCE) - distanceFromPreviousNode;
                     currentNode.position.x += shiftToRightAmount;
-                    console.log(shiftToRightAmount);
 
                     this.shiftParentAndChildNodePositionsHorizontally(currentNode.parent, shiftToRightAmount);
                 }
