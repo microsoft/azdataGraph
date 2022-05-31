@@ -12,6 +12,12 @@ const CELL_HEIGHT = 70;
 const STANDARD_NODE_DISTANCE = 173;
 const IDEAL_LONG_LABEL_NODE_DISTANCE = 240;
 
+// Setting this to 38 because SSMS truncates labels longer than 38 characters
+const LABEL_LENGTH_LIMIT = 38;
+
+const NODE_HEIGHT = 105;
+const NODE_WIDTH = 100;
+
 class PolygonRoot {
     constructor(cell, fillColor, strokeColor, strokeWidth) {
         this.cell = cell;
@@ -302,20 +308,46 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
     graph.convertValueToString = function (cell) {
         if (cell.value != null && cell.value.label != null) {
             let hasWindowsEOL = cell.value.label.includes('\r\n');
+            const joinStrings = (strArray) => {
+                if (hasWindowsEOL) {
+                    return strArray.join('\r\n');
+                }
+                else {
+                    return strArray.join('\n');
+                }
+            };
+
+
             let splitLabel = cell.value.label.split(/\r\n|\n/);
-            let cellLabel = splitLabel.map(str => {
+            let cellLabel = splitLabel.map((str, index) => {
                 let label = '';
-                label += str;
+                if (index === 0 && !cell.value.icon?.includes('columnstore')) {
+                    // This regex removes any text contained in parenthesis in the operation name
+                    // i.e. "Clustered Index Seek (Clustered)" becomes "Clustered Index Seek"
+                    label += str.replace(/\(([^)]+)\)/g, '');
+                }
+                else if (index === 1 && splitLabel.length >= 3 && str.includes('.')) {
+                    let splitStr = str.split(' ');
+                    splitStr = splitStr.map(str => {
+                        if (str.length >= LABEL_LENGTH_LIMIT) {
+                            // subtracting 3 for ellipse to fit in character limit
+                            return str.substring(0, LABEL_LENGTH_LIMIT - 3) + '...';
+                        }
+                        else {
+                            return str;
+                        }
+                    });
+                    
+                    label += joinStrings(splitStr);
+                }
+                else {
+                    label += str;
+                }
 
                 return label;
             });
 
-            if (hasWindowsEOL) {
-                cellLabel = cellLabel.join('\r\n');
-            }
-            else {
-                cellLabel = cellLabel.join('\n');
-            }
+            cellLabel = joinStrings(cellLabel);
 
             return cellLabel;
         }
@@ -440,7 +472,7 @@ azdataQueryPlan.prototype.placeGraphNodes = function () {
     // for entire showplan. For starters, we set this to 100px. However,
     // if a node has label with many lines, this value will be updated to 
     // better fit that node.
-    this.spacingY = 100;
+    this.spacingY = NODE_HEIGHT;
 
     // Getting the node padding values from SSMS.
     this.paddingX = GRAPH_PADDING_RIGHT;
@@ -525,13 +557,28 @@ azdataQueryPlan.prototype.adjustGraphNodeHorizontalPositions = function (node) {
     Object.keys(levelsTable).map(key => {
         for (let levelNodeIndex = 1; levelNodeIndex < levelsTable[key].length; ++levelNodeIndex) {
             let previousNode = levelsTable[key][levelNodeIndex - 1];
-            let currentNode = levelsTable[key][levelNodeIndex]
+            let currentNode = levelsTable[key][levelNodeIndex];
 
             let previousLabel = previousNode.label.split(/\r\n|\n/).filter(str => str.length > 20);
             if (previousLabel.length !== 0) {
+                let longestString = '';
+                let labelPartitions = currentNode.label.split(/\r\n|\n/g);
+                labelPartitions.forEach(str => {
+                    if (longestString.length < str.length) {
+                        longestString = str;
+                    }
+                });
+
+                var size = mxUtils.getSizeForString(longestString.substring(0, LABEL_LENGTH_LIMIT),
+                    mxConstants.DEFAULT_FONTSIZE,
+                    mxConstants.DEFAULT_FONTFAMILY,
+                    undefined,
+                    mxConstants.DEFAULT_FONTSTYLE);
+
                 let distanceFromPreviousNode = currentNode.position.x - previousNode.position.x;
+
                 if (distanceFromPreviousNode <= STANDARD_NODE_DISTANCE) {
-                    let shiftToRightAmount = IDEAL_LONG_LABEL_NODE_DISTANCE - distanceFromPreviousNode;
+                    let shiftToRightAmount = Math.max(size.width, IDEAL_LONG_LABEL_NODE_DISTANCE) - distanceFromPreviousNode;
                     currentNode.position.x += shiftToRightAmount;
 
                     this.shiftParentAndChildNodePositionsHorizontally(currentNode.parent, shiftToRightAmount);
@@ -782,9 +829,6 @@ azdataQueryPlan.prototype.getPolygonPerimeter = function (cell) {
     return points;
 }
 
-const NODE_HEIGHT = 100;
-const NODE_WIDTH = 100;
-
 /**
  * Gets the left side points for the starting node in the polygon from top to bottom.
  * @param {*} cell The starting node for the left side perimeter points.
@@ -880,6 +924,9 @@ azdataQueryPlan.prototype.getRightSidePoints = function (cell) {
 
 azdataQueryPlan.prototype.calcAdditionalSpacingForNode = function(cell) {
     let longestSubLabel = Math.max(...(cell.value.label.split(/\r\n|\n/).map(str => str.length)));
+    if (longestSubLabel > LABEL_LENGTH_LIMIT) {
+        longestSubLabel = LABEL_LENGTH_LIMIT;
+    }
     // These values to work best for drawing regions around labels of different lengths, so the label is always inside the polygon.
     return longestSubLabel / 10 * 15;
 }
