@@ -93356,8 +93356,8 @@ azdataQueryPlan.prototype.placeGraphNodes = function () {
     this.paddingY = GRAPH_PADDING_TOP;
 
     // Getting a good enough start value for the root node.
-    var startX = (this.paddingX + 150) / 2;
-    var startY = (this.paddingY + 150) / 2;
+    var startX = (this.paddingX + 10) / 2;
+    var startY = (this.paddingY + 10) / 2;
 
     // Recursively layout all nodes starting with root
     this.setNodePositionRecursive(this.queryPlanGraph, startX, startY);
@@ -93368,7 +93368,7 @@ azdataQueryPlan.prototype.setNodePositionRecursive = function (node, x, y) {
     // Recursively setting all the x positions in the graph.
     this.setNodeXPositionRecursive(node, x);
     var layoutHelper = new GraphNodeLayoutHelper();
-    this.setNodeYPositionRecursive(node, layoutHelper, this.spacingY, y);
+    this.setNodeYPositionRecursive(node, layoutHelper, y);
     this.adjustGraphNodeHorizontalPositions(node);
 }
 
