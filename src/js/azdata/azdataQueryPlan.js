@@ -369,17 +369,18 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
         return this.model.getOutgoingEdges(cell).length > 0;
     };
 
+    let self = this;
     // Defines the position for the folding icon
     graph.cellRenderer.getControlBounds = function (state) {
         if (state.control != null) {
-            let oldScale = state.control.scale;
-            let w = state.control.bounds.width / oldScale;
-            let h = state.control.bounds.height / oldScale;
-            let s = state.view.scale;
+            let controlScale = state.control.scale;
+            let boundWidth = state.control.bounds.width / controlScale;
+            let boundHeight = state.control.bounds.height / controlScale;
+            let scale = self.graph.view.getScale();
 
-            return new mxRectangle(state.x + state.width - 20 * s,
-                state.y * s,
-                w * s, h * s);
+            return new mxRectangle(state.x + state.width - 20 * scale,
+                state.cell.geometry.y * scale,
+                boundWidth * scale, boundHeight * scale);
         }
 
         return null;
