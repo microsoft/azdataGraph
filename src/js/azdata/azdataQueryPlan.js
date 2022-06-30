@@ -293,6 +293,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
     var style = graph.getStylesheet().getDefaultEdgeStyle();
     style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
 
+    graph.keepEdgesInBackground = true;
     graph.centerZoom = false;
     this.enablePanning(true);
     graph.setTooltips(true);
@@ -337,7 +338,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
                             return str;
                         }
                     });
-                    
+
                     label += joinStrings(splitStr);
                 }
                 else {
@@ -361,6 +362,38 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
 
     graph.isCellEditable = function (cell) {
         return false;
+    };
+
+    // Defines condition for showing the folding icon
+    graph.isCellFoldable = function (cell) {
+        return this.model.getOutgoingEdges(cell).length > 0;
+    };
+
+    // Defines the position for the folding icon
+    graph.cellRenderer.getControlBounds = function (state) {
+        if (state.control != null) {
+            let oldScale = state.control.scale;
+            let w = state.control.bounds.width / oldScale;
+            let h = state.control.bounds.height / oldScale;
+            let s = state.view.scale;
+
+            return new mxRectangle(state.x + state.width / 2 - w / 2 * s,
+                state.y + state.height + 20 * s - h / 2 * s,
+                w * s, h * s);
+        }
+
+        return null;
+    };
+
+    graph.foldCells = function (collapse, recurse, cells) {
+        this.model.beginUpdate();
+        try {
+            toggleSubtree(this, cells[0], !collapse);
+            this.model.setCollapsed(cells[0], collapse);
+        }
+        finally {
+            this.model.endUpdate();
+        }
     };
 
     graph.getTooltipForCell = azdataGraph.prototype.getStyledTooltipForCell;
@@ -746,7 +779,7 @@ azdataQueryPlan.prototype.addBadges = function (cell, badgeIconPaths) {
             this.badges.push(img);
         });
     }
-}
+};
 
 azdataQueryPlan.prototype.redrawBadges = function () {
     this.badges.forEach(b => {
@@ -839,7 +872,7 @@ azdataQueryPlan.prototype.getLeftSidePoints = function (cell) {
 
     // let additionalLeftSideSpacing = longestSubLabel % 10 * 25;
     let additionalLeftSideSpacing = this.calcAdditionalSpacingForNode(cell);
-    
+
     let xPosition = cell.geometry.x - 15; // subtracting to push the x coordinate to the left.
     points.push({ x: xPosition - additionalLeftSideSpacing, y: cell.geometry.y });
     points.push({ x: xPosition - additionalLeftSideSpacing, y: cell.geometry.y + NODE_HEIGHT });
@@ -922,7 +955,7 @@ azdataQueryPlan.prototype.getRightSidePoints = function (cell) {
     return points;
 }
 
-azdataQueryPlan.prototype.calcAdditionalSpacingForNode = function(cell) {
+azdataQueryPlan.prototype.calcAdditionalSpacingForNode = function (cell) {
     let longestSubLabel = Math.max(...(cell.value.label.split(/\r\n|\n/).map(str => str.length)));
     if (longestSubLabel > LABEL_LENGTH_LIMIT) {
         longestSubLabel = LABEL_LENGTH_LIMIT;
@@ -963,4 +996,40 @@ azdataQueryPlan.prototype.getLeafNodes = function (cell) {
     let leafNodes = Object.keys(leafNodeTable).map(key => leafNodeTable[key]).reverse();
 
     return leafNodes;
+}
+
+// Hides or shows execution plan subtree nodes and corresponding icons
+function toggleSubtree(graph, cell, show) {
+    show = (show != null) ? show : true;
+    var cells = [];
+
+    graph.traverse(cell, true, function (vertex) {
+        if (vertex != cell) {
+            cells.push(vertex);
+
+
+            if (vertex.value.badges.length > 0) {
+                if (!show) {
+                    if (!!!vertex.value.badgeImgs) {
+                        vertex.value.badgeImgs = [];
+                    }
+
+                    for (let i = vertex.value.badges.length - 1; i >= 0; --i) {
+                        let childImgToRemove = graph.container.lastChild;
+                        vertex.value.badgeImgs.push(childImgToRemove);
+                        graph.container.removeChild(graph.container.lastChild);
+                    }
+                }
+                else {
+                    vertex.value.badgeImgs.forEach(img => {
+                        graph.container.appendChild(img);
+                    });
+                }
+            }
+        }
+
+        return vertex == cell || !graph.isCellCollapsed(vertex);
+    });
+
+    graph.toggleCells(show, cells, true);
 }
