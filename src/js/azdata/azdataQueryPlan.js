@@ -377,8 +377,8 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
             let h = state.control.bounds.height / oldScale;
             let s = state.view.scale;
 
-            return new mxRectangle(state.x + state.width / 2 - w / 2 * s,
-                state.y + state.height + 20 * s - h / 2 * s,
+            return new mxRectangle(state.x + state.width - 20 * s,
+                state.y * s,
                 w * s, h * s);
         }
 
