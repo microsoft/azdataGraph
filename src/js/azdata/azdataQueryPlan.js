@@ -780,7 +780,7 @@ azdataQueryPlan.prototype.addBadges = function (cell, badgeIconPaths) {
             this.badges.push(img);
         });
     }
-};
+}
 
 azdataQueryPlan.prototype.redrawBadges = function () {
     this.badges.forEach(b => {
