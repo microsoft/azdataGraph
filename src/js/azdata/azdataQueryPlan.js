@@ -163,6 +163,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
     this.polygonRoots = [];
     this.drawnPolygons = [];
     this.badges = [];
+    this.isCompareMode = false;
     mxEvent.addListener(window, 'unload', mxUtils.bind(this, function () {
         this.destroy();
     }));
@@ -387,6 +388,10 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
     };
 
     graph.foldCells = function (collapse, recurse, cells) {
+        if (isCompareMode) {
+            return;
+        }
+
         this.model.beginUpdate();
         try {
             toggleSubtree(this, cells[0], !collapse);
@@ -518,6 +523,10 @@ azdataQueryPlan.prototype.placeGraphNodes = function () {
 
     // Recursively layout all nodes starting with root
     this.setNodePositionRecursive(this.queryPlanGraph, startX, startY);
+}
+
+azdataQueryPlan.prototype.setCompareMode = function (isCompareMode) {
+    this.isCompareMode = isCompareMode;
 }
 
 azdataQueryPlan.prototype.setNodePositionRecursive = function (node, x, y) {
