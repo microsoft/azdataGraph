@@ -388,7 +388,7 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
     };
 
     graph.foldCells = function (collapse, recurse, cells) {
-        if (isCompareMode) {
+        if (self.isCompareMode) {
             return;
         }
 
