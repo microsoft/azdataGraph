@@ -524,13 +524,15 @@ azdataQueryPlan.prototype.disableNodeCollapse = function (disableCollapse) {
     const allVertices = this.graph.model.getChildCells(this.graph.getDefaultParent()).filter(v => v?.vertex);
     allVertices.forEach(v => {
         let state = this.graph.view.getState(v);
-        if (disableCollapse && state.control != null && state.control.node != null) {
+        if ((state.control == null || state.control.node == null)) {
+            return;
+        }
+
+        if (disableCollapse) {
             state.control.node.style.visibility = 'hidden';
         }
-        else if (state.control != null && state.control.node != null) {
-            if (this.graph.model.getOutgoingEdges(cell).length > 0) {
-                state.control.node.style.visibility = 'visible';
-            }
+        else if (this.graph.model.getOutgoingEdges(v).length > 0) {
+            state.control.node.style.visibility = 'visible';
         }
     });
 };
