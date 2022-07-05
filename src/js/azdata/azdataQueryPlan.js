@@ -163,7 +163,6 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
     this.polygonRoots = [];
     this.drawnPolygons = [];
     this.badges = [];
-    this.isCompareMode = false;
     mxEvent.addListener(window, 'unload', mxUtils.bind(this, function () {
         this.destroy();
     }));
@@ -388,10 +387,6 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
     };
 
     graph.foldCells = function (collapse, recurse, cells) {
-        if (self.isCompareMode) {
-            return;
-        }
-
         this.model.beginUpdate();
         try {
             toggleSubtree(this, cells[0], !collapse);
@@ -525,9 +520,20 @@ azdataQueryPlan.prototype.placeGraphNodes = function () {
     this.setNodePositionRecursive(this.queryPlanGraph, startX, startY);
 }
 
-azdataQueryPlan.prototype.setCompareMode = function (isCompareMode) {
-    this.isCompareMode = isCompareMode;
-}
+azdataQueryPlan.prototype.disableNodeCollapse = function (disableCollapse) {
+    const allVertices = this.graph.model.getChildCells(this.graph.getDefaultParent()).filter(v => v?.vertex);
+    allVertices.forEach(v => {
+        let state = this.graph.view.getState(v);
+        if (disableCollapse && state.control != null && state.control.node != null) {
+            state.control.node.style.visibility = 'hidden';
+        }
+        else if (state.control != null && state.control.node != null) {
+            if (this.graph.model.getOutgoingEdges(cell).length > 0) {
+                state.control.node.style.visibility = 'visible';
+            }
+        }
+    });
+};
 
 azdataQueryPlan.prototype.setNodePositionRecursive = function (node, x, y) {
 

@@ -25,7 +25,7 @@
 			var badgePaths = getBadgePaths(imageBasePath);
 
 			var azdataGraph = new azdataQueryPlan(container, graph, iconPaths, badgePaths);
-			azdataGraph.setCompareMode(true);
+			azdataGraph.disableNodeCollapse(true);
             let cell = azdataGraph.graph.model.getCell('element-6');
 			var samplePolygon = azdataGraph.drawPolygon(
 				cell,
