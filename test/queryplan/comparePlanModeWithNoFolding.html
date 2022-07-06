@@ -1,0 +1,73 @@
+<!--
+  Test page for manually testing query plan polygons.
+
+  This test page covers an edge case where the bottom side of the polygon
+  doesn't display correctly.
+-->
+<html>
+
+<head>
+	<title>Query Plan test</title>
+	<script type="text/javascript">
+		mxForceIncludes = true;
+		mxBasePath = '../../src';
+	</script>
+	<script type="text/javascript" src="./src/js/graph2.js"></script>
+	<script type="text/javascript" src="../../src/js/mxClient.js"></script>
+	<script type="text/javascript" src="./src/js/queryPlanSetup.js"></script>
+	<script type="text/javascript">
+
+		function main(container) {
+			var graph = getGraph();
+
+			var imageBasePath = './icons/';
+			var iconPaths = getIconPaths(imageBasePath);
+			var badgePaths = getBadgePaths(imageBasePath);
+
+			var azdataGraph = new azdataQueryPlan(container, graph, iconPaths, badgePaths);
+			azdataGraph.disableNodeCollapse(true);
+            let cell = azdataGraph.graph.model.getCell('element-6');
+			var samplePolygon = azdataGraph.drawPolygon(
+				cell,
+				"rgba(75, 168, 255, 0.1)",
+				"rgba(75, 168, 255)",
+				2
+			);
+
+            cell = azdataGraph.graph.model.getCell('element-55');
+			var samplePolygon = azdataGraph.drawPolygon(
+				cell,
+				"rgba(12, 173, 171, 0.1)",
+				"rgba(12, 173, 171)",
+				2
+			);
+
+			cell = azdataGraph.graph.model.getCell('element-58');
+			var samplePolygon = azdataGraph.drawPolygon(
+				cell,
+				"rgba(236, 0, 140, 0.1)",
+				"rgba(236, 0, 140)",
+				2
+			)
+		};
+
+	</script>
+	<style>
+		#graphContainer {
+			position: relative;
+			overflow: scroll;
+			width: 1000px;
+			height: 1000px;
+			cursor: default;
+			border: 1px solid;
+			margin-top: 100px;
+			margin-left: 100px;
+		}
+	</style>
+</head>
+
+<body onload="main(document.getElementById('graphContainer'))">
+	<div id="graphContainer"></div>
+</body>
+
+</html>
