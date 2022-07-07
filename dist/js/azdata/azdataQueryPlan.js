@@ -150,15 +150,14 @@ class GraphNodeLayoutHelper {
 }
 
 
-
-function azdataQueryPlan(container, queryPlanGraph, iconPaths, badgeIconPaths) {
+function azdataQueryPlan(container, queryPlanGraph, iconPaths, badgeIconPaths, expandCollapsePaths) {
     this.queryPlanGraph = queryPlanGraph;
     if (container != null && iconPaths != null) {
-        this.init(container, iconPaths, badgeIconPaths);
+        this.init(container, iconPaths, badgeIconPaths, expandCollapsePaths);
     }
-};
+}
 
-azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths) {
+azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths, expandCollapsePaths) {
     this.container = container;
     this.polygonRoots = [];
     this.drawnPolygons = [];
@@ -168,6 +167,11 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
     }));
 
     mxEvent.disableContextMenu(container);
+
+    if (expandCollapsePaths) {
+        mxGraph.prototype.collapsedImage = new mxImage(expandCollapsePaths.collapse, 11, 11);
+        mxGraph.prototype.expandedImage = new mxImage(expandCollapsePaths.expand, 11, 11);
+    }
 
     var graph = new azdataGraph(container);
     this.graph = graph;
@@ -518,7 +522,7 @@ azdataQueryPlan.prototype.placeGraphNodes = function () {
 
     // Recursively layout all nodes starting with root
     this.setNodePositionRecursive(this.queryPlanGraph, startX, startY);
-}
+};
 
 azdataQueryPlan.prototype.disableNodeCollapse = function (disableCollapse) {
     const allVertices = this.graph.model.getChildCells(this.graph.getDefaultParent()).filter(v => v?.vertex);
@@ -544,7 +548,7 @@ azdataQueryPlan.prototype.setNodePositionRecursive = function (node, x, y) {
     var layoutHelper = new GraphNodeLayoutHelper();
     this.setNodeYPositionRecursive(node, layoutHelper, y);
     this.adjustGraphNodeHorizontalPositions(node);
-}
+};
 
 azdataQueryPlan.prototype.setNodeXPositionRecursive = function (node, x) {
     // Place the node at given position
@@ -582,7 +586,7 @@ azdataQueryPlan.prototype.setNodeXPositionRecursive = function (node, x) {
         this.setNodeXPositionRecursive(childNode, x);
         node.maxChildrenXPosition = Math.max(node.maxChildrenXPosition, childNode.maxChildrenXPosition);
     });
-}
+};
 
 azdataQueryPlan.prototype.setNodeYPositionRecursive = function (node, layoutHelper, y) {
     var newY = Math.max(y, layoutHelper.getYPositionForXPosition(node.maxChildrenXPosition));
@@ -600,7 +604,7 @@ azdataQueryPlan.prototype.setNodeYPositionRecursive = function (node, layoutHelp
     var leftPosition = node.position.x;
 
     layoutHelper.updateNodeLayout(leftPosition, yToUpdate);
-}
+};
 
 azdataQueryPlan.prototype.adjustGraphNodeHorizontalPositions = function (node) {
     let levelsTable = this.getNodesByHorizontalLevel(node);
@@ -637,7 +641,7 @@ azdataQueryPlan.prototype.adjustGraphNodeHorizontalPositions = function (node) {
             }
         }
     });
-}
+};
 
 azdataQueryPlan.prototype.shiftParentAndChildNodePositionsHorizontally = function (parent, shiftAmount) {
     let stack = [...parent.children];
@@ -653,7 +657,7 @@ azdataQueryPlan.prototype.shiftParentAndChildNodePositionsHorizontally = functio
             stack.push(currentNode.children[childIndex]);
         }
     }
-}
+};
 
 azdataQueryPlan.prototype.getNodesByHorizontalLevel = function (node) {
     let table = {};
@@ -675,7 +679,7 @@ azdataQueryPlan.prototype.getNodesByHorizontalLevel = function (node) {
     }
 
     return table;
-}
+};
 
 azdataQueryPlan.prototype.zoomIn = function () {
     if (this.graph.view.getScale() * this.graph.zoomFactor <= 2) {
@@ -685,19 +689,19 @@ azdataQueryPlan.prototype.zoomIn = function () {
     }
     this.redrawBadges();
     this.renderPolygons();
-}
+};
 
 azdataQueryPlan.prototype.zoomOut = function () {
     this.graph.zoomOut();
     this.redrawBadges();
     this.renderPolygons();
-}
+};
 
 azdataQueryPlan.prototype.zoomToFit = function () {
     this.graph.fit(undefined, true, 20);
     this.redrawBadges();
     this.renderPolygons();
-}
+};
 
 azdataQueryPlan.prototype.registerGraphCallback = function (eventType, callback) {
     this.graph.addListener(eventType, (sender, event) => {
@@ -797,7 +801,7 @@ azdataQueryPlan.prototype.addBadges = function (cell, badgeIconPaths) {
             this.badges.push(img);
         });
     }
-}
+};
 
 azdataQueryPlan.prototype.redrawBadges = function () {
     this.badges.forEach(b => {
@@ -806,7 +810,7 @@ azdataQueryPlan.prototype.redrawBadges = function () {
         b.style.width = b.getAttribute('initWidth') * this.graph.view.getScale() + 'px';
         b.style.height = b.getAttribute('initHeight') * this.graph.view.getScale() + 'px';
     });
-}
+};
 
 /**
  * Draws a polygon using the points given
@@ -826,7 +830,7 @@ azdataQueryPlan.prototype.drawPolygon = function (cell, fillColor, strokeColor, 
         strokWidth: strokeWidth
     });
     this.renderPolygons();
-}
+};
 
 /**
  * Removes all drawn polygons on the execution plan.
@@ -837,7 +841,7 @@ azdataQueryPlan.prototype.removeDrawnPolygons = function () {
     });
     this.drawnPolygons = [];
     this.polygonModels = [];
-}
+};
 
 azdataQueryPlan.prototype.renderPolygons = function () {
     if (this.drawnPolygons?.length > 0) {
@@ -863,7 +867,7 @@ azdataQueryPlan.prototype.renderPolygons = function () {
             polygon.redraw();
         });
     }
-}
+};
 
 /**
  * Gets an array of points that represents the perimeter for a polygon.
@@ -878,7 +882,7 @@ azdataQueryPlan.prototype.getPolygonPerimeter = function (cell) {
     points = points.concat(rightSidePoints);
 
     return points;
-}
+};
 
 /**
  * Gets the left side points for the starting node in the polygon from top to bottom.
@@ -896,7 +900,7 @@ azdataQueryPlan.prototype.getLeftSidePoints = function (cell) {
     points.push({ x: xPosition - additionalLeftSideSpacing, y: cell.geometry.y + NODE_HEIGHT });
 
     return points;
-}
+};
 
 /**
  * Gets the points for what will be the bottom side of the polygon from left to right.
@@ -925,7 +929,7 @@ azdataQueryPlan.prototype.getBottomSidePoints = function (cell, polygonRightSide
     });
 
     return points;
-}
+};
 
 azdataQueryPlan.prototype.getBottomSideNodes = function (cell, polygonRightSideConstraint) {
     let queue = [cell];
@@ -950,7 +954,7 @@ azdataQueryPlan.prototype.getBottomSideNodes = function (cell, polygonRightSideC
     }
 
     return nodes;
-}
+};
 
 /**
  * Gets the points for what will be the right side of the polygon from left to right.
@@ -971,7 +975,7 @@ azdataQueryPlan.prototype.getRightSidePoints = function (cell) {
     }
 
     return points;
-}
+};
 
 azdataQueryPlan.prototype.calcAdditionalSpacingForNode = function (cell) {
     let longestSubLabel = Math.max(...(cell.value.label.split(/\r\n|\n/).map(str => str.length)));
@@ -980,7 +984,7 @@ azdataQueryPlan.prototype.calcAdditionalSpacingForNode = function (cell) {
     }
     // These values to work best for drawing regions around labels of different lengths, so the label is always inside the polygon.
     return longestSubLabel / 10 * 15;
-}
+};
 
 /**
  * Helper function to get the right most nodes of the polygon in a execution plan
@@ -1014,7 +1018,8 @@ azdataQueryPlan.prototype.getLeafNodes = function (cell) {
     let leafNodes = Object.keys(leafNodeTable).map(key => leafNodeTable[key]).reverse();
 
     return leafNodes;
-}
+};
+
 
 // Hides or shows execution plan subtree nodes and corresponding icons
 function toggleSubtree(graph, cell, show) {

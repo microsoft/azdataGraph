@@ -23,8 +23,9 @@
 			var imageBasePath = './icons/';
 			var iconPaths = getIconPaths(imageBasePath);
 			var badgePaths = getBadgePaths(imageBasePath);
+			var collapseExpandPaths = getCollapseExpandPaths(imageBasePath);
 
-			var azdataGraph = new azdataQueryPlan(container, graph, iconPaths, badgePaths);
+			var azdataGraph = new azdataQueryPlan(container, graph, iconPaths, badgePaths, collapseExpandPaths);
             let cell = azdataGraph.graph.model.getCell('element-6');
 			var samplePolygon = azdataGraph.drawPolygon(
 				cell,
