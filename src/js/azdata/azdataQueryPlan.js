@@ -1015,6 +1015,14 @@ azdataQueryPlan.prototype.getLeafNodes = function (cell) {
     return leafNodes;
 };
 
+azdataQueryPlan.prototype.setCollapsedImage = function(src, width, height) {
+    mxGraph.prototype.collapsedImage = new mxImage(src, width, height);
+};
+
+azdataQueryPlan.prototype.setExpandedImage = function(src, width, height) {
+    mxGraph.prototype.expandedImage = new mxImage(src, width, height);
+};
+
 // Hides or shows execution plan subtree nodes and corresponding icons
 function toggleSubtree(graph, cell, show) {
     show = (show != null) ? show : true;
