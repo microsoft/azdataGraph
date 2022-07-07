@@ -265,4 +265,10 @@ function getBadgePaths(imageBasePath) {
 	};
 }
 
+function getCollapseExpandPaths(imageBasePath) {
+	return {
+		expand: imageBasePath + 'expand.svg',
 
+		collapse: imageBasePath + 'collapse.svg'
+	};
+}
