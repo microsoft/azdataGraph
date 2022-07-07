@@ -150,14 +150,14 @@ class GraphNodeLayoutHelper {
 }
 
 
-function azdataQueryPlan(container, queryPlanGraph, iconPaths, badgeIconPaths) {
+function azdataQueryPlan(container, queryPlanGraph, iconPaths, badgeIconPaths, expandCollapsePaths) {
     this.queryPlanGraph = queryPlanGraph;
     if (container != null && iconPaths != null) {
-        this.init(container, iconPaths, badgeIconPaths);
+        this.init(container, iconPaths, badgeIconPaths, expandCollapsePaths);
     }
 }
 
-azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths) {
+azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths, expandCollapsePaths) {
     this.container = container;
     this.polygonRoots = [];
     this.drawnPolygons = [];
@@ -167,6 +167,11 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths)
     }));
 
     mxEvent.disableContextMenu(container);
+
+    if (expandCollapsePaths) {
+        mxGraph.prototype.collapsedImage = new mxImage(expandCollapsePaths.collapse, 11, 11);
+        mxGraph.prototype.expandedImage = new mxImage(expandCollapsePaths.expand, 11, 11);
+    }
 
     var graph = new azdataGraph(container);
     this.graph = graph;
@@ -1015,13 +1020,6 @@ azdataQueryPlan.prototype.getLeafNodes = function (cell) {
     return leafNodes;
 };
 
-azdataQueryPlan.prototype.setCollapsedImage = function(src, width, height) {
-    mxGraph.prototype.collapsedImage = new mxImage(src, width, height);
-};
-
-azdataQueryPlan.prototype.setExpandedImage = function(src, width, height) {
-    mxGraph.prototype.expandedImage = new mxImage(src, width, height);
-};
 
 // Hides or shows execution plan subtree nodes and corresponding icons
 function toggleSubtree(graph, cell, show) {
