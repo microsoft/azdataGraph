@@ -93046,8 +93046,8 @@ azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths,
     mxEvent.disableContextMenu(container);
 
     if (expandCollapsePaths) {
-        mxGraph.prototype.collapsedImage = new mxImage(expandCollapsePaths.collapse, 11, 11);
-        mxGraph.prototype.expandedImage = new mxImage(expandCollapsePaths.expand, 11, 11);
+        mxGraph.prototype.collapsedImage = new mxImage(expandCollapsePaths.expand, 11, 11);
+        mxGraph.prototype.expandedImage = new mxImage(expandCollapsePaths.collapse, 11, 11);
     }
 
     var graph = new azdataGraph(container);
