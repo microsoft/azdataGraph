@@ -23,7 +23,14 @@
 			var badgePaths = getBadgePaths(imageBasePath);
 			var collapseExpandPaths = getCollapseExpandPaths(imageBasePath);
 
-			queryPlan = new azdataQueryPlan(container, graph, iconPaths, badgePaths, collapseExpandPaths);
+			let queryPlanConfiguration = {
+				container: container,
+				queryPlanGraph: graph,
+				iconPaths: iconPaths,
+				badgeIconPaths: badgePaths,
+				expandCollapsePaths: collapseExpandPaths
+			};
+			queryPlan = new azdataQueryPlan(queryPlanConfiguration);
 			queryPlan.enablePanning(false);
 			queryPlan.addZoomInRectListener();
 
