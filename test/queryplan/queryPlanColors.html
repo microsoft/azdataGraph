@@ -19,13 +19,20 @@
 
 			var imageBasePath = './icons/';
 			var iconPaths = getIconPaths(imageBasePath);
-			var badgePaths = getBadgePath(badgePaths);
+			var badgePaths = getBadgePaths(badgePaths);
 
 			let iconBackgroundColor = 'black';
 			let fontColor = 'white';
 			let edgeColor = 'white';
 
-			let queryPlan = new azdataQueryPlan(container, graph, iconPaths, badgePaths);
+			let queryPlanConfiguration = {
+				container: container,
+				queryPlanGraph: graph,
+				iconPaths: iconPaths,
+				badgeIconPaths: badgePaths,
+				expandCollapsePaths: undefined
+			};
+			let queryPlan = new azdataQueryPlan(queryPlanConfiguration);
 			queryPlan.setIconBackgroundColor(iconBackgroundColor);
 			queryPlan.setTextFontColor(fontColor);
 			queryPlan.setEdgeColor(edgeColor);
