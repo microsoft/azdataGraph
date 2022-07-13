@@ -21,14 +21,7 @@
 			var iconPaths = getIconPaths(imageBasePath);
 			var badgePaths = getBadgePaths(imageBasePath);
 
-			let queryPlanConfiguration = {
-				container: container,
-				queryPlanGraph: graph,
-				iconPaths: iconPaths,
-				badgeIconPaths: badgePaths,
-				expandCollapsePaths: undefined
-			};
-			var azdataGraph = new azdataQueryPlan(queryPlanConfiguration);
+			var azdataGraph = new azdataQueryPlan(container, graph, iconPaths, badgePaths);
 			const cell = azdataGraph.graph.model.getCell('element-7')
 			var samplePolygon = azdataGraph.drawPolygon(
 				cell,

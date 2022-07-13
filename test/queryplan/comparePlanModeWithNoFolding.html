@@ -25,14 +25,7 @@
 			var badgePaths = getBadgePaths(imageBasePath);
 			var collapseExpandPaths = getCollapseExpandPaths(imageBasePath);
 
-			let queryPlanConfiguration = {
-				container: container,
-				queryPlanGraph: graph,
-				iconPaths: iconPaths,
-				badgeIconPaths: badgePaths,
-				expandCollapsePaths: undefined
-			};
-			var azdataGraph = new azdataQueryPlan(queryPlanConfiguration);
+			var azdataGraph = new azdataQueryPlan(container, graph, iconPaths, badgePaths, collapseExpandPaths);
 			azdataGraph.disableNodeCollapse(true);
             let cell = azdataGraph.graph.model.getCell('element-6');
 			var samplePolygon = azdataGraph.drawPolygon(
