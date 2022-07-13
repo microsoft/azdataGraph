@@ -21,7 +21,14 @@
 			var iconPaths = getIconPaths(imageBasePath);
 			var badgePaths = getBadgePaths(badgePaths);
 
-			new azdataQueryPlan(container, graph, iconPaths, badgePaths);
+			let queryPlanConfiguration = {
+				container: container,
+				queryPlanGraph: graph,
+				iconPaths: iconPaths,
+				badgeIconPaths: badgePaths,
+				expandCollapsePaths: undefined
+			};
+			new azdataQueryPlan(queryPlanConfiguration);
 		};
 
 	</script>
