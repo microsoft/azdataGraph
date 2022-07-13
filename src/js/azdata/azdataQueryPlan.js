@@ -158,7 +158,7 @@ function azdataQueryPlan(queryPlanConfiguration) {
 }
 
 azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
-    const {container, iconPaths, badgeIconPaths, expandCollapsePaths} = queryPlanConfiguration;
+    const { container, iconPaths, badgeIconPaths, expandCollapsePaths } = queryPlanConfiguration;
 
     this.container = container;
     this.polygonRoots = [];
