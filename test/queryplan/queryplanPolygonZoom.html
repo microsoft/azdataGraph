@@ -21,7 +21,14 @@
 			var iconPaths = getIconPaths(imageBasePath);
 			var badgePaths = getBadgePaths(imageBasePath);
 
-			var azdataGraph = new azdataQueryPlan(container, graph, iconPaths, badgePaths);
+			let queryPlanConfiguration = {
+				container: container,
+				queryPlanGraph: graph,
+				iconPaths: iconPaths,
+				badgeIconPaths: badgePaths,
+				expandCollapsePaths: undefined
+			};
+			var azdataGraph = new azdataQueryPlan(queryPlanConfiguration);
 
 			let zoomInButton = document.getElementById('zoomInBtn');
 			zoomInButton.addEventListener('click', () => {

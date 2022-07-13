@@ -93027,14 +93027,16 @@ class GraphNodeLayoutHelper {
 }
 
 
-function azdataQueryPlan(container, queryPlanGraph, iconPaths, badgeIconPaths, expandCollapsePaths) {
-    this.queryPlanGraph = queryPlanGraph;
-    if (container != null && iconPaths != null) {
-        this.init(container, iconPaths, badgeIconPaths, expandCollapsePaths);
+function azdataQueryPlan(queryPlanConfiguration) {
+    this.queryPlanGraph = queryPlanConfiguration.queryPlanGraph;
+    if (queryPlanConfiguration.container != null && queryPlanConfiguration.iconPaths != null) {
+        this.init(queryPlanConfiguration);
     }
 }
 
-azdataQueryPlan.prototype.init = function (container, iconPaths, badgeIconPaths, expandCollapsePaths) {
+azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
+    const { container, iconPaths, badgeIconPaths, expandCollapsePaths } = queryPlanConfiguration;
+
     this.container = container;
     this.polygonRoots = [];
     this.drawnPolygons = [];
