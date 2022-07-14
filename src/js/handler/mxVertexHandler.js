@@ -1805,7 +1805,7 @@ mxVertexHandler.prototype.redraw = function(ignoreHandles)
 	const y = this.state.text ? Math.min(this.selectionBounds.y, this.state.text.boundingBox.y) : this.selectionBounds.y;
 	const w = this.state.text ? Math.max(this.selectionBounds.x + this.selectionBounds.width, this.state.text.boundingBox.x + this.state.text.boundingBox.width) - x : this.selectionBounds.width;
 	const h = this.state.text ? Math.max(this.selectionBounds.y + this.selectionBounds.height, this.state.text.boundingBox.y + this.state.text.boundingBox.height) - y : this.selectionBounds.height;
-	this.bounds = new mxRectangle(x-5, y-5, w+10, h+10);
+	this.bounds = new mxRectangle(x-2, y-2, w+5, h+3);
 	this.drawPreview();
 
 	if (!ignoreHandles)
