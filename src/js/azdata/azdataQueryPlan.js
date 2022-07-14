@@ -311,6 +311,9 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     graph.autoSizeCellsOnAdd = true;
     graph.autoExtend = false; //disables the size of the graph automatically extending if the mouse goes near the container edge while dragging.
     graph.getSelectionModel().setSingleSelection(true); //Forcing only single cell selection in graph
+    graph.cellsResizable = false;
+    graph.cellsMovable = false;
+
 
     graph.convertValueToString = function (cell) {
         if (cell.value != null && cell.value.label != null) {
@@ -422,6 +425,9 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     style[mxConstants.STYLE_IMAGE_HEIGHT] = '32';
     style[mxConstants.STYLE_SPACING_TOP] = '43';
     style[mxConstants.STYLE_SPACING] = '8';
+    style[mxConstants.STYLE_CELL_HIGHLIGHT_COLOR] = '#0090F1'
+    style[mxConstants.STYLE_CELL_HIGHLIGHT_DASHED] = false;
+    style[mxConstants.STYLE_CELL_HIGHLIGHT_STROKE_WIDTH] = '2';
 
     var icons = new Array();
     for (const iconName in iconPaths) {
@@ -771,6 +777,10 @@ azdataQueryPlan.prototype.setTextFontColor = function (color) {
 azdataQueryPlan.prototype.setEdgeColor = function (color) {
     this.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, color, this.graph.model.getChildEdges(this.graph.getDefaultParent()));
 };
+
+azdataQueryPlan.prototype.setCellHighLightColor = function (color) {
+    this.graph.setCellStyles(mxConstants.STYLE_CELL_HIGHLIGHT_COLOR, color, this.graph.model.getChildCells(this.graph.getDefaultParent()));
+}
 
 azdataQueryPlan.prototype.destroy = function () {
     if (!this.destroyed) {

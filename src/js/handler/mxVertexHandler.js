@@ -389,7 +389,7 @@ mxVertexHandler.prototype.createSelectionShape = function(bounds)
  */
 mxVertexHandler.prototype.getSelectionColor = function()
 {
-	return mxConstants.VERTEX_SELECTION_COLOR;
+	return this.state.style[mxConstants.STYLE_CELL_HIGHLIGHT_COLOR] ?? mxConstants.VERTEX_SELECTION_COLOR;
 };
 
 /**
@@ -399,7 +399,7 @@ mxVertexHandler.prototype.getSelectionColor = function()
  */
 mxVertexHandler.prototype.getSelectionStrokeWidth = function()
 {
-	return mxConstants.VERTEX_SELECTION_STROKEWIDTH;
+	return this.state.style[mxConstants.STYLE_CELL_HIGHLIGHT_STROKE_WIDTH] ?? mxConstants.VERTEX_SELECTION_STROKEWIDTH;
 };
 
 /**
@@ -409,7 +409,7 @@ mxVertexHandler.prototype.getSelectionStrokeWidth = function()
  */
 mxVertexHandler.prototype.isSelectionDashed = function()
 {
-	return mxConstants.VERTEX_SELECTION_DASHED;
+	return this.state.style[mxConstants.STYLE_CELL_HIGHLIGHT_DASHED] ?? mxConstants.VERTEX_SELECTION_DASHED;
 };
 
 /**
@@ -1800,8 +1800,12 @@ mxVertexHandler.prototype.union = function(bounds, dx, dy, index, gridEnabled, s
 mxVertexHandler.prototype.redraw = function(ignoreHandles)
 {
 	this.selectionBounds = this.getSelectionBounds(this.state);
-	this.bounds = new mxRectangle(this.selectionBounds.x, this.selectionBounds.y,
-		this.selectionBounds.width, this.selectionBounds.height);
+	
+	const x = this.state.text ? Math.min(this.selectionBounds.x, this.state.text.boundingBox.x) : this.selectionBounds.x;
+	const y = this.state.text ? Math.min(this.selectionBounds.y, this.state.text.boundingBox.y) : this.selectionBounds.y;
+	const w = this.state.text ? Math.max(this.selectionBounds.x + this.selectionBounds.width, this.state.text.boundingBox.x + this.state.text.boundingBox.width) - x : this.selectionBounds.width;
+	const h = this.state.text ? Math.max(this.selectionBounds.y + this.selectionBounds.height, this.state.text.boundingBox.y + this.state.text.boundingBox.height) - y : this.selectionBounds.height;
+	this.bounds = new mxRectangle(x-5, y-5, w+10, h+10);
 	this.drawPreview();
 
 	if (!ignoreHandles)
