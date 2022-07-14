@@ -425,7 +425,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     style[mxConstants.STYLE_IMAGE_HEIGHT] = '32';
     style[mxConstants.STYLE_SPACING_TOP] = '43';
     style[mxConstants.STYLE_SPACING] = '8';
-    style[mxConstants.STYLE_CELL_HIGHLIGHT_COLOR] = '#0090F1'
+    style[mxConstants.STYLE_CELL_HIGHLIGHT_COLOR] = '#00BA34'
     style[mxConstants.STYLE_CELL_HIGHLIGHT_DASHED] = false;
     style[mxConstants.STYLE_CELL_HIGHLIGHT_STROKE_WIDTH] = '2';
 
