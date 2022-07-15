@@ -1797,26 +1797,29 @@ mxVertexHandler.prototype.union = function(bounds, dx, dy, index, gridEnabled, s
  * 
  * Redraws the handles and the preview.
  */
-mxVertexHandler.prototype.redraw = function(ignoreHandles)
-{
-	this.selectionBounds = this.getSelectionBounds(this.state);
-	this.bounds = this.selectionBounds;
-	if(this.state && this.state.text && this.selectionBounds){
-		const x = this.state.text ? Math.min(this.selectionBounds.x, this.state.text.boundingBox.x) : this.selectionBounds.x;
-		const y = this.state.text ? Math.min(this.selectionBounds.y, this.state.text.boundingBox.y) : this.selectionBounds.y;
-		const w = this.state.text ? Math.max(this.selectionBounds.x + this.selectionBounds.width, this.state.text.boundingBox.x + this.state.text.boundingBox.width) - x : this.selectionBounds.width;
-		const h = this.state.text ? Math.max(this.selectionBounds.y + this.selectionBounds.height, this.state.text.boundingBox.y + this.state.text.boundingBox.height) - y : this.selectionBounds.height;
-		this.bounds = new mxRectangle(x-2, y-2, w+5, h+3);
-	}
-
-	this.drawPreview();
-
-	if (!ignoreHandles)
-	{
-		this.redrawHandles();
-	}
-};
-
+ mxVertexHandler.prototype.redraw = function(ignoreHandles)
+ {
+	 this.selectionBounds = this.getSelectionBounds(this.state);
+	 this.bounds = this.selectionBounds;
+	 //Sometimes, the text boundingBox is not initialized and needs to be manually updated.
+	 if(this.state.text){
+		 this.state.text.updateBoundingBox();
+	 }
+	 if(this.state && this.state?.text?.boundingBox && this.selectionBounds){
+		 const x = this.state.text ? Math.min(this.selectionBounds.x, this.state.text.boundingBox.x) : this.selectionBounds.x;
+		 const y = this.state.text ? Math.min(this.selectionBounds.y, this.state.text.boundingBox.y) : this.selectionBounds.y;
+		 const w = this.state.text ? Math.max(this.selectionBounds.x + this.selectionBounds.width, this.state.text.boundingBox.x + this.state.text.boundingBox.width) - x : this.selectionBounds.width;
+		 const h = this.state.text ? Math.max(this.selectionBounds.y + this.selectionBounds.height, this.state.text.boundingBox.y + this.state.text.boundingBox.height) - y : this.selectionBounds.height;
+		 this.bounds = new mxRectangle(x-2, y-2, w+5, h+3);
+	 }
+ 
+	 this.drawPreview();
+ 
+	 if (!ignoreHandles)
+	 {
+		 this.redrawHandles();
+	 }
+ };
 /**
  * Returns the padding to be used for drawing handles for the current <bounds>.
  */
