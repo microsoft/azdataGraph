@@ -8735,6 +8735,21 @@ __mxOutput.mxUtils = typeof mxUtils !== 'undefined' ? mxUtils : undefined;
 	STYLE_ROUTING_CENTER_Y: 'routingCenterY',
 
 	/**
+	 * Variable: STYLE_CELL_HIGHLIGHT_COLOR
+	 */
+	STYLE_CELL_HIGHLIGHT_COLOR: 'cellHighlightColor',
+
+	/**
+	 * Variable: STYLE_CELL_HIGHLIGHT_STROKE_WIDTH
+	 */
+	STYLE_CELL_HIGHLIGHT_STROKE_WIDTH: 'cellHightlightStrokeWidth',
+
+	/**
+	 * Variable: STYLE_CELL_HIGHLIGHT_DASHED
+	 */
+	STYLE_CELL_HIGHLIGHT_DASHED: 'cellHighlightDashed',
+
+	/**
 	 * Variable: FONT_BOLD
 	 * 
 	 * Constant for bold fonts. Default is 1.
@@ -78708,7 +78723,7 @@ mxVertexHandler.prototype.createSelectionShape = function(bounds)
  */
 mxVertexHandler.prototype.getSelectionColor = function()
 {
-	return mxConstants.VERTEX_SELECTION_COLOR;
+	return this.state.style[mxConstants.STYLE_CELL_HIGHLIGHT_COLOR] ?? mxConstants.VERTEX_SELECTION_COLOR;
 };
 
 /**
@@ -78718,7 +78733,7 @@ mxVertexHandler.prototype.getSelectionColor = function()
  */
 mxVertexHandler.prototype.getSelectionStrokeWidth = function()
 {
-	return mxConstants.VERTEX_SELECTION_STROKEWIDTH;
+	return this.state.style[mxConstants.STYLE_CELL_HIGHLIGHT_STROKE_WIDTH] ?? mxConstants.VERTEX_SELECTION_STROKEWIDTH;
 };
 
 /**
@@ -78728,7 +78743,7 @@ mxVertexHandler.prototype.getSelectionStrokeWidth = function()
  */
 mxVertexHandler.prototype.isSelectionDashed = function()
 {
-	return mxConstants.VERTEX_SELECTION_DASHED;
+	return this.state.style[mxConstants.STYLE_CELL_HIGHLIGHT_DASHED] ?? mxConstants.VERTEX_SELECTION_DASHED;
 };
 
 /**
@@ -80119,8 +80134,12 @@ mxVertexHandler.prototype.union = function(bounds, dx, dy, index, gridEnabled, s
 mxVertexHandler.prototype.redraw = function(ignoreHandles)
 {
 	this.selectionBounds = this.getSelectionBounds(this.state);
-	this.bounds = new mxRectangle(this.selectionBounds.x, this.selectionBounds.y,
-		this.selectionBounds.width, this.selectionBounds.height);
+	
+	const x = this.state.text ? Math.min(this.selectionBounds.x, this.state.text.boundingBox.x) : this.selectionBounds.x;
+	const y = this.state.text ? Math.min(this.selectionBounds.y, this.state.text.boundingBox.y) : this.selectionBounds.y;
+	const w = this.state.text ? Math.max(this.selectionBounds.x + this.selectionBounds.width, this.state.text.boundingBox.x + this.state.text.boundingBox.width) - x : this.selectionBounds.width;
+	const h = this.state.text ? Math.max(this.selectionBounds.y + this.selectionBounds.height, this.state.text.boundingBox.y + this.state.text.boundingBox.height) - y : this.selectionBounds.height;
+	this.bounds = new mxRectangle(x-2, y-2, w+5, h+3);
 	this.drawPreview();
 
 	if (!ignoreHandles)
@@ -93188,6 +93207,9 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     graph.autoSizeCellsOnAdd = true;
     graph.autoExtend = false; //disables the size of the graph automatically extending if the mouse goes near the container edge while dragging.
     graph.getSelectionModel().setSingleSelection(true); //Forcing only single cell selection in graph
+    graph.cellsResizable = false;
+    graph.cellsMovable = false;
+
 
     graph.convertValueToString = function (cell) {
         if (cell.value != null && cell.value.label != null) {
@@ -93299,6 +93321,9 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     style[mxConstants.STYLE_IMAGE_HEIGHT] = '32';
     style[mxConstants.STYLE_SPACING_TOP] = '43';
     style[mxConstants.STYLE_SPACING] = '8';
+    style[mxConstants.STYLE_CELL_HIGHLIGHT_COLOR] = '#00BA34'
+    style[mxConstants.STYLE_CELL_HIGHLIGHT_DASHED] = false;
+    style[mxConstants.STYLE_CELL_HIGHLIGHT_STROKE_WIDTH] = '2';
 
     var icons = new Array();
     for (const iconName in iconPaths) {
@@ -93648,6 +93673,10 @@ azdataQueryPlan.prototype.setTextFontColor = function (color) {
 azdataQueryPlan.prototype.setEdgeColor = function (color) {
     this.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, color, this.graph.model.getChildEdges(this.graph.getDefaultParent()));
 };
+
+azdataQueryPlan.prototype.setCellHighLightColor = function (color) {
+    this.graph.setCellStyles(mxConstants.STYLE_CELL_HIGHLIGHT_COLOR, color, this.graph.model.getChildCells(this.graph.getDefaultParent()));
+}
 
 azdataQueryPlan.prototype.destroy = function () {
     if (!this.destroyed) {

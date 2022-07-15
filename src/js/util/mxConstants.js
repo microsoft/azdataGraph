@@ -1864,6 +1864,21 @@
 	STYLE_ROUTING_CENTER_Y: 'routingCenterY',
 
 	/**
+	 * Variable: STYLE_CELL_HIGHLIGHT_COLOR
+	 */
+	STYLE_CELL_HIGHLIGHT_COLOR: 'cellHighlightColor',
+
+	/**
+	 * Variable: STYLE_CELL_HIGHLIGHT_STROKE_WIDTH
+	 */
+	STYLE_CELL_HIGHLIGHT_STROKE_WIDTH: 'cellHightlightStrokeWidth',
+
+	/**
+	 * Variable: STYLE_CELL_HIGHLIGHT_DASHED
+	 */
+	STYLE_CELL_HIGHLIGHT_DASHED: 'cellHighlightDashed',
+
+	/**
 	 * Variable: FONT_BOLD
 	 * 
 	 * Constant for bold fonts. Default is 1.
