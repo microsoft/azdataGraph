@@ -400,6 +400,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
         try {
             toggleSubtree(this, cells[0], !collapse);
             this.model.setCollapsed(cells[0], collapse);
+            self.renderPolygons();
         }
         finally {
             this.model.endUpdate();
@@ -887,6 +888,11 @@ azdataQueryPlan.prototype.renderPolygons = function () {
  * @returns an array of points
  */
 azdataQueryPlan.prototype.getPolygonPerimeter = function (cell) {
+    if (!cell.isVisible()) {
+        return [];
+    }
+
+    debugger;
     let points = [];
     points = points.concat(this.getLeftSidePoints(cell));
     let rightSidePoints = this.getRightSidePoints(cell);
@@ -1010,7 +1016,7 @@ azdataQueryPlan.prototype.getLeafNodes = function (cell) {
     while (stack.length !== 0) {
         let entry = stack.pop();
 
-        if (entry.value.children.length === 0) {
+        if (entry.value.children.length === 0 || !this.isChildCellVisible(entry)) {
             if (entry.geometry.y in leafNodeTable) {
                 let previouslyCachedEntry = leafNodeTable[entry.geometry.y];
                 if (entry.geometry.x > previouslyCachedEntry.geometry.x) {
@@ -1022,14 +1028,21 @@ azdataQueryPlan.prototype.getLeafNodes = function (cell) {
             }
         }
 
-        for (let nodeIndex = 0; nodeIndex < entry.value.children.length; ++nodeIndex) {
-            stack.push(this.graph.model.getCell(entry.value.children[nodeIndex].id));
+        for (let nodeIndex = 0; nodeIndex < entry.value.children.length && this.isChildCellVisible(entry); ++nodeIndex) {
+            let childCell = this.graph.model.getCell(entry.value.children[nodeIndex].id);
+            stack.push(childCell);
         }
     }
 
     let leafNodes = Object.keys(leafNodeTable).map(key => leafNodeTable[key]).reverse();
 
     return leafNodes;
+};
+
+azdataQueryPlan.prototype.isChildCellVisible = function (vertex) {
+    let childCell = this.graph.model.getCell(vertex.value.children[0].id);
+    
+    return childCell.isVisible();
 };
 
 
