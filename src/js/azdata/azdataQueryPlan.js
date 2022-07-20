@@ -1040,8 +1040,11 @@ azdataQueryPlan.prototype.getLeafNodes = function (cell) {
 };
 
 azdataQueryPlan.prototype.isChildCellVisible = function (vertex) {
+    if (vertex.value.children.length === 0) {
+        return false;
+    }
+
     let childCell = this.graph.model.getCell(vertex.value.children[0].id);
-    
     return childCell.isVisible();
 };
 
