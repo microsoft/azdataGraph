@@ -400,6 +400,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
         try {
             toggleSubtree(this, cells[0], !collapse);
             this.model.setCollapsed(cells[0], collapse);
+            self.renderPolygons();
         }
         finally {
             this.model.endUpdate();
@@ -887,6 +888,10 @@ azdataQueryPlan.prototype.renderPolygons = function () {
  * @returns an array of points
  */
 azdataQueryPlan.prototype.getPolygonPerimeter = function (cell) {
+    if (!cell.isVisible()) {
+        return [];
+    }
+
     let points = [];
     points = points.concat(this.getLeftSidePoints(cell));
     let rightSidePoints = this.getRightSidePoints(cell);
@@ -975,15 +980,36 @@ azdataQueryPlan.prototype.getBottomSideNodes = function (cell, polygonRightSideC
  */
 azdataQueryPlan.prototype.getRightSidePoints = function (cell) {
     let points = [];
-    let leafs = this.getLeafNodes(cell);
+    let leafNodes = this.getLeafNodes(cell);
 
-    for (let leafIndex = 0; leafIndex < leafs.length; ++leafIndex) {
-        let leaf = leafs[leafIndex];
-
+    for (let leafIndex = 0; leafIndex < leafNodes.length; ++leafIndex) {
+        let leaf = leafNodes[leafIndex];
         let additionalRightSideSpacing = this.calcAdditionalSpacingForNode(leaf);
 
-        points.push({ x: leaf.geometry.x + NODE_WIDTH + additionalRightSideSpacing, y: leaf.geometry.y + NODE_HEIGHT });
-        points.push({ x: leaf.geometry.x + NODE_WIDTH + additionalRightSideSpacing, y: leaf.geometry.y });
+        let lastLeaf = undefined;
+        if (leafIndex > 0) {
+            lastLeaf = leafNodes[leafIndex - 1];
+        }
+
+        let nextLeaf = undefined;
+        if (leafIndex + 1 < leafNodes.length) {
+            nextLeaf = leafNodes[leafIndex + 1];
+        }
+
+        let lastLeafPositionX = -1;
+        if (lastLeaf) {
+            lastLeafPositionX = lastLeaf.geometry.x;
+        }
+
+        let nextLeafPositionX = -1;
+        if (nextLeaf) {
+            nextLeafPositionX = nextLeaf.geometry.x;
+        }
+        
+        let leafPositionX = Math.min(Math.max(lastLeafPositionX, leaf.geometry.x), Math.max(nextLeafPositionX, leaf.geometry.x));
+
+        points.push({ x: leafPositionX + NODE_WIDTH + additionalRightSideSpacing, y: leaf.geometry.y + NODE_HEIGHT });
+        points.push({ x: leafPositionX + NODE_WIDTH + additionalRightSideSpacing, y: leaf.geometry.y });
     }
 
     return points;
@@ -1010,7 +1036,7 @@ azdataQueryPlan.prototype.getLeafNodes = function (cell) {
     while (stack.length !== 0) {
         let entry = stack.pop();
 
-        if (entry.value.children.length === 0) {
+        if (entry.value.children.length === 0 || !this.isChildCellVisible(entry)) {
             if (entry.geometry.y in leafNodeTable) {
                 let previouslyCachedEntry = leafNodeTable[entry.geometry.y];
                 if (entry.geometry.x > previouslyCachedEntry.geometry.x) {
@@ -1022,14 +1048,24 @@ azdataQueryPlan.prototype.getLeafNodes = function (cell) {
             }
         }
 
-        for (let nodeIndex = 0; nodeIndex < entry.value.children.length; ++nodeIndex) {
-            stack.push(this.graph.model.getCell(entry.value.children[nodeIndex].id));
+        for (let nodeIndex = 0; nodeIndex < entry.value.children.length && this.isChildCellVisible(entry); ++nodeIndex) {
+            let childCell = this.graph.model.getCell(entry.value.children[nodeIndex].id);
+            stack.push(childCell);
         }
     }
 
     let leafNodes = Object.keys(leafNodeTable).map(key => leafNodeTable[key]).reverse();
 
     return leafNodes;
+};
+
+azdataQueryPlan.prototype.isChildCellVisible = function (vertex) {
+    if (vertex.value.children.length === 0) {
+        return false;
+    }
+
+    let childCell = this.graph.model.getCell(vertex.value.children[0].id);
+    return childCell.isVisible();
 };
 
 
