@@ -893,7 +893,6 @@ azdataQueryPlan.prototype.getPolygonPerimeter = function (cell) {
         return [];
     }
 
-    debugger;
     let points = [];
     points = points.concat(this.getLeftSidePoints(cell));
     let rightSidePoints = this.getRightSidePoints(cell);
@@ -988,16 +987,27 @@ azdataQueryPlan.prototype.getRightSidePoints = function (cell) {
         let leaf = leafs[leafIndex];
         let additionalRightSideSpacing = this.calcAdditionalSpacingForNode(leaf);
 
-        debugger;
         let lastLeaf = undefined;
         if (leafIndex > 0) {
             lastLeaf = leafs[leafIndex - 1];
         }
 
-        let leafPositionX = leaf.geometry.x;
-        if (lastLeaf !== undefined && leafPositionX < lastLeaf.geometry.x) {
-            leafPositionX = lastLeaf.geometry.x;
+        let nextLeaf = undefined;
+        if (leafIndex + 1 < leafs.length) {
+            nextLeaf = leafs[leafIndex + 1];
         }
+
+        let lastLeafPositionX = -1;
+        if (lastLeaf) {
+            lastLeafPositionX = lastLeaf.geometry.x;
+        }
+
+        let nextLeafPositionX = -1;
+        if (nextLeaf) {
+            nextLeafPositionX = nextLeaf.geometry.x;
+        }
+        
+        let leafPositionX = Math.min(Math.max(lastLeafPositionX, leaf.geometry.x), Math.max(nextLeafPositionX, leaf.geometry.x));
 
         points.push({ x: leafPositionX + NODE_WIDTH + additionalRightSideSpacing, y: leaf.geometry.y + NODE_HEIGHT });
         points.push({ x: leafPositionX + NODE_WIDTH + additionalRightSideSpacing, y: leaf.geometry.y });
