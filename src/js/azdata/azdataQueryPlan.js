@@ -400,12 +400,11 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
         try {
             toggleSubtree(this, cells[0], !collapse);
             this.model.setCollapsed(cells[0], collapse);
+            self.renderPolygons();
         }
         finally {
             this.model.endUpdate();
         }
-
-        self.renderPolygons();
     };
 
     graph.getTooltipForCell = azdataGraph.prototype.getStyledTooltipForCell;
