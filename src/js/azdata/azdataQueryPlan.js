@@ -400,11 +400,12 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
         try {
             toggleSubtree(this, cells[0], !collapse);
             this.model.setCollapsed(cells[0], collapse);
-            self.renderPolygons();
         }
         finally {
             this.model.endUpdate();
         }
+
+        self.renderPolygons();
     };
 
     graph.getTooltipForCell = azdataGraph.prototype.getStyledTooltipForCell;
@@ -985,11 +986,21 @@ azdataQueryPlan.prototype.getRightSidePoints = function (cell) {
 
     for (let leafIndex = 0; leafIndex < leafs.length; ++leafIndex) {
         let leaf = leafs[leafIndex];
-
         let additionalRightSideSpacing = this.calcAdditionalSpacingForNode(leaf);
 
-        points.push({ x: leaf.geometry.x + NODE_WIDTH + additionalRightSideSpacing, y: leaf.geometry.y + NODE_HEIGHT });
-        points.push({ x: leaf.geometry.x + NODE_WIDTH + additionalRightSideSpacing, y: leaf.geometry.y });
+        debugger;
+        let lastLeaf = undefined;
+        if (leafIndex > 0) {
+            lastLeaf = leafs[leafIndex - 1];
+        }
+
+        let leafPositionX = leaf.geometry.x;
+        if (lastLeaf !== undefined && leafPositionX < lastLeaf.geometry.x) {
+            leafPositionX = lastLeaf.geometry.x;
+        }
+
+        points.push({ x: leafPositionX + NODE_WIDTH + additionalRightSideSpacing, y: leaf.geometry.y + NODE_HEIGHT });
+        points.push({ x: leafPositionX + NODE_WIDTH + additionalRightSideSpacing, y: leaf.geometry.y });
     }
 
     return points;
