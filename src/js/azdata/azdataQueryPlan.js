@@ -980,20 +980,20 @@ azdataQueryPlan.prototype.getBottomSideNodes = function (cell, polygonRightSideC
  */
 azdataQueryPlan.prototype.getRightSidePoints = function (cell) {
     let points = [];
-    let leafs = this.getLeafNodes(cell);
+    let leafNodes = this.getLeafNodes(cell);
 
-    for (let leafIndex = 0; leafIndex < leafs.length; ++leafIndex) {
-        let leaf = leafs[leafIndex];
+    for (let leafIndex = 0; leafIndex < leafNodes.length; ++leafIndex) {
+        let leaf = leafNodes[leafIndex];
         let additionalRightSideSpacing = this.calcAdditionalSpacingForNode(leaf);
 
         let lastLeaf = undefined;
         if (leafIndex > 0) {
-            lastLeaf = leafs[leafIndex - 1];
+            lastLeaf = leafNodes[leafIndex - 1];
         }
 
         let nextLeaf = undefined;
-        if (leafIndex + 1 < leafs.length) {
-            nextLeaf = leafs[leafIndex + 1];
+        if (leafIndex + 1 < leafNodes.length) {
+            nextLeaf = leafNodes[leafIndex + 1];
         }
 
         let lastLeafPositionX = -1;
