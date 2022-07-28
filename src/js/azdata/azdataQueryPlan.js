@@ -296,25 +296,15 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     };
     this.keyHandler.bindKey(arrowDownKey, selectBottom);
 
-    const enterKey = 13;
-    const expandNode = (evt) => {
-        const collapse = false;
+    const spaceKey = 32;    
+    const toggleNodeCollapse = (evt) => {
         const currentCell = this.graph.getSelectionCell();
+        const collapse = !currentCell.collapsed;
 
         // undefined for the middle parameter since it is unused in the method definition for foldCells
         this.graph.foldCells(collapse, undefined, [currentCell]);
     };
-    this.keyHandler.bindKey(enterKey, expandNode);
-    
-    const spaceKey = 32;
-    const collapseNode = (evt) => {
-        const collapse = true;
-        const currentCell = this.graph.getSelectionCell();
-
-        // undefined for the middle parameter since it is unused in the method definition for foldCells
-        this.graph.foldCells(collapse, undefined, [currentCell]);
-    };
-    this.keyHandler.bindKey(spaceKey, collapseNode);
+    this.keyHandler.bindKey(spaceKey, toggleNodeCollapse);
 
     var style = graph.getStylesheet().getDefaultEdgeStyle();
     style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
