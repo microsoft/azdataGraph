@@ -296,7 +296,8 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     };
     this.keyHandler.bindKey(arrowDownKey, selectBottom);
 
-    const spaceKey = 32;    
+    const enterKey = 13;
+    const spaceKey = 32;
     const toggleNodeCollapse = (evt) => {
         const currentCell = this.graph.getSelectionCell();
         const collapse = !currentCell.collapsed;
@@ -305,6 +306,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
         this.graph.foldCells(collapse, undefined, [currentCell]);
     };
     this.keyHandler.bindKey(spaceKey, toggleNodeCollapse);
+    this.keyHandler.bindKey(enterKey, toggleNodeCollapse);
 
     var style = graph.getStylesheet().getDefaultEdgeStyle();
     style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
