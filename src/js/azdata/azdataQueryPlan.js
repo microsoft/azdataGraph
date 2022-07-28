@@ -305,8 +305,8 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
         // undefined is for the middle parameter since the overwritten definition of foldCells doesn't reference it.
         this.graph.foldCells(collapse, undefined, [currentCell]);
     };
-    this.keyHandler.bindKey(spaceKey, toggleNodeCollapse);
     this.keyHandler.bindKey(enterKey, toggleNodeCollapse);
+    this.keyHandler.bindKey(spaceKey, toggleNodeCollapse);
 
     var style = graph.getStylesheet().getDefaultEdgeStyle();
     style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
