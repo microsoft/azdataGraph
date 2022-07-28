@@ -301,7 +301,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
         const currentCell = this.graph.getSelectionCell();
         const collapse = !currentCell.collapsed;
 
-        // undefined for the middle parameter since it is unused in the method definition for foldCells
+        // undefined is for the middle parameter since the overwritten definition of foldCells doesn't reference it.
         this.graph.foldCells(collapse, undefined, [currentCell]);
     };
     this.keyHandler.bindKey(spaceKey, toggleNodeCollapse);
