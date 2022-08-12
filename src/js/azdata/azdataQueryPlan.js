@@ -698,7 +698,7 @@ azdataQueryPlan.prototype.disableNodeCollapse = function (disableCollapse) {
 azdataQueryPlan.prototype.setNodePositionRecursive = function (node, x, y) {
 
     // Recursively setting all the x positions in the graph.
-    this.setNodeXPositionRecursive(node, x);
+    this.setNodeXPositionRecursive(node, x, 0);
     var layoutHelper = new GraphNodeLayoutHelper();
     this.setNodeYPositionRecursive(node, layoutHelper, y);
 };
@@ -756,9 +756,10 @@ azdataQueryPlan.prototype.updateSpacingY = function (node) {
     this.spacingY = Math.max(this.spacingY, this.getNodeHeight(node));
 }
 
-azdataQueryPlan.prototype.setNodeXPositionRecursive = function (node, x) {
+azdataQueryPlan.prototype.setNodeXPositionRecursive = function (node, x, level) {
     // Place the node at given position
     node.position = new Point(x, 0);
+    node.level = level;
     
     // Determining the right height for the node. Here, 50px is the appropriate space for node icons.
     this.updateSpacingY(node);
@@ -771,11 +772,11 @@ azdataQueryPlan.prototype.setNodeXPositionRecursive = function (node, x) {
 
     // Storing the max X position of the children. 
     // This will later help us in determining the y coordinates for them.
-    node.maxChildrenXPosition = node.position.x;
+    node.maxChildrenXPosition = node.level;
 
     node.children.forEach(childNode => {
         childNode.parent = node;
-        this.setNodeXPositionRecursive(childNode, x);
+        this.setNodeXPositionRecursive(childNode, x, level + 1);
         node.maxChildrenXPosition = Math.max(node.maxChildrenXPosition, childNode.maxChildrenXPosition);
     });
 };
@@ -805,20 +806,7 @@ azdataQueryPlan.prototype.setNodeYPositionRecursive = function (node, layoutHelp
         newY += this.spacingY;
     });
 
-    var leftPosition = node.position.x;
-    if(node.parent){
-        if(node.parent.position.y != node.position.y) {
-            let minMidPoint = Number.MAX_VALUE;
-            node.parent.children.forEach(c => {
-                minMidPoint = Math.min(minMidPoint, this.getYMidPoint(node, c));
-            });
-            leftPosition = minMidPoint;
-        }
-    }
-    if(node.label.includes('Filter') && node.rowCountDisplayString === '0'){
-        console.log('lol');
-    }
-    layoutHelper.updateNodeLayout(leftPosition, yToUpdate);
+    layoutHelper.updateNodeLayout(node.level, yToUpdate);
 };
 
 azdataQueryPlan.prototype.shiftParentAndChildNodePositionsHorizontally = function (parent, shiftAmount) {
