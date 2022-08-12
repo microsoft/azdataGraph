@@ -7,8 +7,8 @@ const GRAPH_PADDING_RIGHT = 48;
 const GRAPH_PADDING_TOP = 16;
 const GRAPH_PADDING_BOTTOM = 80;
 const GRAPH_PADDING_LEFT = 80;
-const CELL_WIDTH = 70;
-const CELL_HEIGHT = 70;
+const CELL_WIDTH = 80;
+const CELL_HEIGHT = 80;
 const STANDARD_NODE_DISTANCE = 173;
 const IDEAL_LONG_LABEL_NODE_DISTANCE = 240;
 
@@ -66,7 +66,7 @@ class GraphNodeLayoutHelper {
         // Single Element
         if (this.layoutPoints.length === 1) {
             if (xPosition < this.layoutPoints[0].x) {
-                this.layoutPoints.splice(0, 0, new Point(xPosition, yPosition));
+                this.layoutPoints.unshift(new Point(xPosition, yPosition));
             }
             else if (xPosition === this.layoutPoints[0].x) {
                 this.layoutPoints[0] = new Point(this.layoutPoints[0].x, Math.max(this.layoutPoints[0].y, yPosition));
@@ -81,7 +81,7 @@ class GraphNodeLayoutHelper {
         // Insert Before First Element
         if (xPosition < this.layoutPoints[0].x &&
             yPosition < this.layoutPoints[0].y) {
-            this.layoutPoints.splice(0, 0, new Point(xPosition, yPosition));
+            this.layoutPoints.unshift(new Point(xPosition, yPosition));
             return;
         }
 
@@ -93,7 +93,7 @@ class GraphNodeLayoutHelper {
         }
 
         // Update Last Element
-        if (this.layoutPoints[this.layoutPoints.length - 1].x == xPosition) {
+        if (this.layoutPoints[this.layoutPoints.length - 1].x === xPosition) {
             this.layoutPoints[this.layoutPoints.length - 1] = new Point(xPosition, Math.max(this.layoutPoints[this.layoutPoints.length - 1].y, yPosition));
             return;
         }
@@ -110,7 +110,7 @@ class GraphNodeLayoutHelper {
         }
 
         // Perform Insert or Update.
-        if (xPosition == this.layoutPoints[insertIndex].x) {
+        if (xPosition === this.layoutPoints[insertIndex].x) {
             this.layoutPoints[insertIndex] = new Point(xPosition, Math.max(this.layoutPoints[insertIndex].y, yPosition));
         }
         else {
@@ -122,15 +122,19 @@ class GraphNodeLayoutHelper {
 
         while (lastIndex < this.layoutPoints.length) {
             if (this.layoutPoints[lastIndex].y > yPosition) {
-                this.layoutPoints.splice(insertIndex + 1, lastIndex - insertIndex - 1);
+                if (lastIndex - insertIndex - 1 > 1){
+                    this.layoutPoints.splice(insertIndex + 1, lastIndex - insertIndex - 1);
+                } else {
+                    this.layoutPoints.splice(insertIndex + 1, lastIndex - insertIndex - 1);
+                }
+                //this.layoutPoints.splice(insertIndex + 1, lastIndex - insertIndex - 1);
                 return;
             }
-
             ++lastIndex;
         }
 
         // Last insert point had the highest Y value, remove elements after inserted point.
-        this.layoutPoints.splice(insertIndex + 1, this.layoutPoints.Count - insertIndex - 1);
+        this.layoutPoints.splice(insertIndex + 1, this.layoutPoints.length - insertIndex - 1);
     }
 
     getYPositionForXPosition(rowX) {
@@ -169,11 +173,6 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     }));
 
     mxEvent.disableContextMenu(container);
-
-    if (expandCollapsePaths) {
-        mxGraph.prototype.collapsedImage = new mxImage(expandCollapsePaths.expand, 11, 11);
-        mxGraph.prototype.expandedImage = new mxImage(expandCollapsePaths.collapse, 11, 11);
-    }
 
     var graph = new azdataGraph(container);
     this.graph = graph;
@@ -296,17 +295,17 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     };
     this.keyHandler.bindKey(arrowDownKey, selectBottom);
 
-    const enterKey = 13;
-    const spaceKey = 32;
-    const toggleNodeCollapse = (evt) => {
-        const currentCell = this.graph.getSelectionCell();
-        const collapse = !currentCell.collapsed;
+    // const enterKey = 13;
+    // const spaceKey = 32;
+    // const toggleNodeCollapse = (evt) => {
+    //     const currentCell = this.graph.getSelectionCell();
+    //     const collapse = !currentCell.collapsed;
 
-        // undefined is for the middle parameter since the overwritten definition of foldCells doesn't reference it.
-        this.graph.foldCells(collapse, undefined, [currentCell]);
-    };
-    this.keyHandler.bindKey(enterKey, toggleNodeCollapse);
-    this.keyHandler.bindKey(spaceKey, toggleNodeCollapse);
+    //     // undefined is for the middle parameter since the overwritten definition of foldCells doesn't reference it.
+    //     this.graph.foldCells(collapse, undefined, [currentCell]);
+    // };
+    // this.keyHandler.bindKey(enterKey, toggleNodeCollapse);
+    // this.keyHandler.bindKey(spaceKey, toggleNodeCollapse);
 
     var style = graph.getStylesheet().getDefaultEdgeStyle();
     style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
@@ -325,9 +324,137 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     graph.getSelectionModel().setSingleSelection(true); //Forcing only single cell selection in graph
     graph.cellsResizable = false;
     graph.cellsMovable = false;
+    graph.setHtmlLabels(true);
 
+    graph.getSelectionModel().addListener(mxEvent.CHANGE, function (sender, evt) {
+        if (graph.getSelectionCount() === 1) {
+            const cell = graph.getSelectionCell();
+            // if (cell.vertex) {
+            //     graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#ffffff', [cell]);
+            //     graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#000000', [cell]);
+            // }
+            // else if (cell.edge) {
+            //     graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#000000', [cell]);
+            // }
+
+            if (evt?.properties?.added) {
+                evt.properties.added.forEach(cell => {
+                    if (cell?.cellDivs?.body) {
+                        cell.cellDivs.body.tabIndex = -1;
+                    }
+                });
+            }
+
+            if (evt?.properties?.removed) {
+                evt.properties.removed.forEach(cell => {
+                    if (cell?.cellDivs?.body) {
+                        cell.cellDivs.body.tabIndex = 0;
+                    }
+                });
+            }
+            if (cell?.cellDivs?.body) {
+                cell.cellDivs.body.focus();
+            }
+
+
+
+        }
+    });
 
     graph.convertValueToString = function (cell) {
+        if (cell?.cellDivs?.cellContainer) {
+            return cell.cellDivs.cellContainer;
+        }
+        if (cell.value != null && cell.value.label != null && !cell.edge) {
+            const cellDivs = new Object();
+            cell.cellDivs = cellDivs;
+            const cellContainer = document.createElement('div');
+            cellDivs.container = cellContainer
+            cellContainer.setAttribute('class', 'graph-cell');
+
+            const cellbody = document.createElement('div');
+            cellbody.setAttribute('class', 'graph-cell-body');
+            cellContainer.appendChild(cellbody);
+            cellDivs.body = cellbody;
+
+            if (cell.edge) {
+                return;
+            }
+
+            const costContainer = document.createElement('div');
+            costContainer.setAttribute('class', 'graph-cell-cost');
+            costContainer.innerHTML = cell.value.costDisplayString;
+            cellbody.appendChild(costContainer);
+
+            const iconContainer = document.createElement('div');
+            iconContainer.setAttribute('class', 'graph-cell-icon');
+            iconContainer.style.backgroundImage = 'url(' + iconPaths[cell.value.icon] + ')';
+            cellbody.appendChild(iconContainer);
+
+            if (cell.value.badges) {
+                cell.value.badges.forEach(b => {
+                    const badgeIconPath = badgeIconPaths[b.type];
+                    const badgeIcon = document.createElement('div');
+                    badgeIcon.setAttribute('class', 'graph-icon-badge');
+                    badgeIcon.style.backgroundImage = 'url(' + badgeIconPath + ')';
+                    iconContainer.appendChild(badgeIcon);
+                });
+            }
+
+            let expandCollapse;
+            if (cell.value.children && cell.value.children.length > 0) {
+                expandCollapse = document.createElement('a');
+                expandCollapse.setAttribute('class', 'graph-icon-badge-expand');
+                const icon = cell.collapsed ? expandCollapsePaths.expand : expandCollapsePaths.collapse;
+                expandCollapse.style.backgroundImage = 'url(' + icon + ')';
+                cellbody.appendChild(expandCollapse);
+                mxEvent.addListener(expandCollapse, 'click', (evt) => {
+
+                    const currentCell = cell;
+                    const collapse = !currentCell.collapsed;
+                    const icon = collapse ? expandCollapsePaths.expand : expandCollapsePaths.collapse;
+                    expandCollapse.style.backgroundImage = 'url(' + icon + ')';
+
+                    // undefined is for the middle parameter since the overwritten definition of foldCells doesn't reference it.
+                    this.foldCells(collapse, undefined, [currentCell]);
+                    currentCell.cellDivs.body.focus();
+
+                });
+            }
+
+
+            const label = document.createElement('div');
+            label.innerText = cell.value.label;
+            cellbody.appendChild(label);
+
+
+            // Adding output row count to the left of graph cell;
+            const rows = document.createElement('div');
+            rows.setAttribute('class', 'graph-cell-row-count');
+            rows.innerText = cell.value.rowCountDisplayString;
+            cellContainer.appendChild(rows);
+
+            cellbody.ariaLabel = 'Level 1 Select Cost: 9% expanded'
+
+            mxEvent.addListener(cellbody, 'keydown', (evt) => {
+                if (evt.keyCode === 13) {
+                    const currentCell = cell;
+                    const collapse = !currentCell.collapsed;
+                    const icon = collapse ? expandCollapsePaths.expand : expandCollapsePaths.collapse;
+                    expandCollapse.style.backgroundImage = 'url(' + icon + ')';
+
+                    // undefined is for the middle parameter since the overwritten definition of foldCells doesn't reference it.
+                    this.foldCells(collapse, undefined, [currentCell]);
+                    cell.cellDivs.body.focus();
+                }
+            });
+
+            mxEvent.addListener(cellbody, 'focus', (evt) => {
+                this.setSelectionCell(cell);
+            });
+
+            return cellContainer;
+        }
         if (cell.value != null && cell.value.label != null) {
             let hasWindowsEOL = cell.value.label.includes('\r\n');
             const joinStrings = (strArray) => {
@@ -383,11 +510,6 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
 
     graph.isCellEditable = function (cell) {
         return false;
-    };
-
-    // Defines condition for showing the folding icon
-    graph.isCellFoldable = function (cell) {
-        return this.model.getOutgoingEdges(cell).length > 0;
     };
 
     let self = this;
@@ -465,11 +587,23 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
             iconName = 'azdataQueryplan-' + icons[rand];
         }
 
+
+        var cellStyle = new Object();
+        cellStyle[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
+        cellStyle[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
+        cellStyle[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_MIDDLE;
+        cellStyle[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
+        cellStyle[mxConstants.STYLE_FILLCOLOR] = 'transparent';
+        cellStyle[mxConstants.STYLE_STROKECOLOR] = 'transparent';
+        cellStyle[mxConstants.STYLE_CELL_HIGHLIGHT_DASHED] = false;
+        cellStyle[mxConstants.STYLE_CELL_HIGHLIGHT_COLOR] = '#59CE8F';
+
+        graph.getStylesheet().putDefaultVertexStyle(cellStyle);
+
         var maxX = this.queryPlanGraph.position.x;
         var maxY = this.queryPlanGraph.position.y;
 
-        var vertex = graph.insertVertex(parent, this.queryPlanGraph.id, this.queryPlanGraph, this.queryPlanGraph.position.x, this.queryPlanGraph.position.y, CELL_WIDTH, CELL_HEIGHT, iconName);
-        this.addBadges(vertex, badgeIconPaths);
+        var vertex = graph.insertVertex(parent, this.queryPlanGraph.id, this.queryPlanGraph, this.queryPlanGraph.position.x, this.queryPlanGraph.position.y, CELL_WIDTH, CELL_HEIGHT);
 
         var stack =
             [
@@ -500,8 +634,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                         maxY = node.position.y;
                     }
 
-                    vertex = graph.insertVertex(parent, node.id, node, node.position.x, node.position.y, CELL_WIDTH, CELL_HEIGHT, iconName);
-                    this.addBadges(vertex, badgeIconPaths);
+                    vertex = graph.insertVertex(parent, node.id, node, node.position.x, node.position.y, CELL_WIDTH, CELL_HEIGHT);
 
                     var edge = entry.node.edges[i];
                     graph.insertWeightedInvertedEdge(parent, edge.id, edge, entry.vertex, vertex);
@@ -549,7 +682,7 @@ azdataQueryPlan.prototype.disableNodeCollapse = function (disableCollapse) {
     const allVertices = this.graph.model.getChildCells(this.graph.getDefaultParent()).filter(v => v?.vertex);
     allVertices.forEach(v => {
         let state = this.graph.view.getState(v);
-        if ((state.control == null || state.control.node == null)) {
+        if ((state.control === null || state.control.node === null)) {
             return;
         }
 
@@ -568,31 +701,69 @@ azdataQueryPlan.prototype.setNodePositionRecursive = function (node, x, y) {
     this.setNodeXPositionRecursive(node, x);
     var layoutHelper = new GraphNodeLayoutHelper();
     this.setNodeYPositionRecursive(node, layoutHelper, y);
-    this.adjustGraphNodeHorizontalPositions(node);
 };
+
+azdataQueryPlan.prototype.isParentHierarchyTreeStructure = function (node) {
+    while (node != null) {
+        if (node.children.length >= 2) {
+            return true;
+        }
+        node = node.parent;
+    }
+    return false;
+}
+
+azdataQueryPlan.prototype.getCleanedNodeLabel  = function(node) {
+    return node.label.replace(/\n|\r\n/g, "<br>");
+}
+
+azdataQueryPlan.prototype.getNodeLabelLength = function (node) {
+    var cleanedLabel = this.getCleanedNodeLabel(node);
+    this.context = this.context ? this.context : document.createElement("canvas").getContext("2d");
+    this.context.font = "10px Arial";
+    return this.context.measureText(cleanedLabel).width;
+}
+
+azdataQueryPlan.prototype.getRecommendedNodeXSpacing = function (node) {
+    const currentNodeSize = this.getNodeLabelLength(node);
+    let maxNodeToWidth = 0;
+    node.children.forEach(c => {
+        maxNodeToWidth = Math.max(maxNodeToWidth, this.getNodeLabelLength(c));
+    });
+    let recommendedSpacing = currentNodeSize / 2 + maxNodeToWidth /2;
+    if(node.children.length > 1) {
+        if(this.isParentHierarchyTreeStructure(node)){
+            recommendedSpacing += Math.max(maxNodeToWidth - 200, 0);
+        }
+    }
+    return recommendedSpacing < 80 ? 80 : recommendedSpacing;  
+}
+
+azdataQueryPlan.prototype.getNodeHeight = function (node) {
+    const iconHeight = 30;
+    const costHeight = 15;
+    const labelText = document.createElement('div');
+    labelText.innerText = node.label;
+    labelText.style.visibility = 'hidden';
+    document.body.appendChild(labelText);
+    const nodeHeight = iconHeight + costHeight + labelText.clientHeight;
+    labelText.remove();
+    return nodeHeight; 
+}
+
+
+azdataQueryPlan.prototype.updateSpacingY = function (node) {
+    this.spacingY = Math.max(this.spacingY, this.getNodeHeight(node));
+}
 
 azdataQueryPlan.prototype.setNodeXPositionRecursive = function (node, x) {
     // Place the node at given position
     node.position = new Point(x, 0);
-
-    // Determining the recommended minimal amount of spacing needed 
-    // for them (when placing children), so they will look nice.
-
-    // Using a mxUtils function to determine how much space is needed for the label.
-    // Cleaning the label string as mention in the mxGraph docs https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxUtils-js.html#mxUtils.getSizeForString 
-    var cleanedLabel = node.label.replace(/\n|\r\n/g, "<br>");
-
-    // Assuming default stylings for 
-    var size = mxUtils.getSizeForString(cleanedLabel, mxConstants.DEFAULT_FONTSIZE,
-        mxConstants.DEFAULT_FONTFAMILY, undefined,
-        mxConstants.DEFAULT_FONTSTYLE);
-
+    
     // Determining the right height for the node. Here, 50px is the appropriate space for node icons.
-    this.spacingY = Math.max(this.spacingY, 50 + size.height);
+    this.updateSpacingY(node);
 
-    // There is no good logic for 125px here. However, trying this on 
-    // graph gives the best visual results.
-    var recommendedMinimumSpacing = size.width > 125 ? size.width : 125;
+    var recommendedMinimumSpacing = this.getRecommendedNodeXSpacing(node);
     var spacingX = recommendedMinimumSpacing + this.paddingX;
 
     // Compute locally optimized X position for node's children
@@ -601,13 +772,25 @@ azdataQueryPlan.prototype.setNodeXPositionRecursive = function (node, x) {
     // Storing the max X position of the children. 
     // This will later help us in determining the y coordinates for them.
     node.maxChildrenXPosition = node.position.x;
-    // Display each child node at the X position just computed
+
     node.children.forEach(childNode => {
         childNode.parent = node;
         this.setNodeXPositionRecursive(childNode, x);
         node.maxChildrenXPosition = Math.max(node.maxChildrenXPosition, childNode.maxChildrenXPosition);
     });
 };
+
+azdataQueryPlan.prototype.getYMidPoint = function (fromNode, toNode) {
+    var edgeMidpoint = (fromNode.position.x + this.getNodeLabelLength(fromNode) + toNode.position.x) /2;
+    for(let i = 0; i < fromNode.children.length; i++) {
+        if(fromNode.children[i] === toNode.id) {
+            break;
+        }
+        const minMidPointSpaceFromNodeBoundingRect = 6;
+        edgeMidpoint = Math.min(edgeMidpoint, fromNode.children[i].position.x - minMidPointSpaceFromNodeBoundingRect);
+    }
+    return edgeMidpoint;
+}
 
 azdataQueryPlan.prototype.setNodeYPositionRecursive = function (node, layoutHelper, y) {
     var newY = Math.max(y, layoutHelper.getYPositionForXPosition(node.maxChildrenXPosition));
@@ -623,45 +806,19 @@ azdataQueryPlan.prototype.setNodeYPositionRecursive = function (node, layoutHelp
     });
 
     var leftPosition = node.position.x;
-
-    layoutHelper.updateNodeLayout(leftPosition, yToUpdate);
-};
-
-azdataQueryPlan.prototype.adjustGraphNodeHorizontalPositions = function (node) {
-    let levelsTable = this.getNodesByHorizontalLevel(node);
-
-    Object.keys(levelsTable).map(key => {
-        for (let levelNodeIndex = 1; levelNodeIndex < levelsTable[key].length; ++levelNodeIndex) {
-            let previousNode = levelsTable[key][levelNodeIndex - 1];
-            let currentNode = levelsTable[key][levelNodeIndex];
-
-            let previousLabel = previousNode.label.split(/\r\n|\n/).filter(str => str.length > 20);
-            if (previousLabel.length !== 0) {
-                let longestString = '';
-                let labelPartitions = currentNode.label.split(/\r\n|\n/g);
-                labelPartitions.forEach(str => {
-                    if (longestString.length < str.length) {
-                        longestString = str;
-                    }
-                });
-
-                var size = mxUtils.getSizeForString(longestString.substring(0, LABEL_LENGTH_LIMIT),
-                    mxConstants.DEFAULT_FONTSIZE,
-                    mxConstants.DEFAULT_FONTFAMILY,
-                    undefined,
-                    mxConstants.DEFAULT_FONTSTYLE);
-
-                let distanceFromPreviousNode = currentNode.position.x - previousNode.position.x;
-
-                if (distanceFromPreviousNode <= STANDARD_NODE_DISTANCE) {
-                    let shiftToRightAmount = Math.max(size.width, IDEAL_LONG_LABEL_NODE_DISTANCE) - distanceFromPreviousNode;
-                    currentNode.position.x += shiftToRightAmount;
-
-                    this.shiftParentAndChildNodePositionsHorizontally(currentNode.parent, shiftToRightAmount);
-                }
-            }
+    if(node.parent){
+        if(node.parent.position.y != node.position.y) {
+            let minMidPoint = Number.MAX_VALUE;
+            node.parent.children.forEach(c => {
+                minMidPoint = Math.min(minMidPoint, this.getYMidPoint(node, c));
+            });
+            leftPosition = minMidPoint;
         }
-    });
+    }
+    if(node.label.includes('Filter') && node.rowCountDisplayString === '0'){
+        console.log('lol');
+    }
+    layoutHelper.updateNodeLayout(leftPosition, yToUpdate);
 };
 
 azdataQueryPlan.prototype.shiftParentAndChildNodePositionsHorizontally = function (parent, shiftAmount) {
@@ -708,19 +865,16 @@ azdataQueryPlan.prototype.zoomIn = function () {
     } else {
         this.graph.zoomTo(2)
     }
-    this.redrawBadges();
     this.renderPolygons();
 };
 
 azdataQueryPlan.prototype.zoomOut = function () {
     this.graph.zoomOut();
-    this.redrawBadges();
     this.renderPolygons();
 };
 
 azdataQueryPlan.prototype.zoomToFit = function () {
     this.graph.fit(undefined, true, 20);
-    this.redrawBadges();
     this.renderPolygons();
 };
 
@@ -753,7 +907,6 @@ azdataQueryPlan.prototype.zoomTo = function (zoomPercentage) {
 
     let zoomScale = parsedZoomLevel / 100;
     this.graph.zoomTo(zoomScale);
-    this.redrawBadges();
     this.renderPolygons();
 };
 
@@ -800,41 +953,6 @@ azdataQueryPlan.prototype.destroy = function () {
         this.destroyed = true;
         this.container = null;
     }
-};
-
-azdataQueryPlan.prototype.addBadges = function (cell, badgeIconPaths) {
-    let positionX = cell.geometry.x + 50;
-    const positionY = cell.geometry.y + 35;
-    const badgeWidth = 16;
-    const badgeHeight = 16;
-    if (cell.value.badges) {
-        cell.value.badges.forEach(b => {
-            var img = mxUtils.createImage(badgeIconPaths[b.type]);
-            img.setAttribute('title', b.tooltip);
-            img.style.position = 'absolute';
-            img.style.cursor = 'pointer';
-            img.style.width = `${badgeWidth}px`;
-            img.style.height = `${badgeHeight}px`;
-            img.style.left = `${positionX}px`;
-            img.style.top = `${positionY}px`;
-            img.setAttribute('initLeft', positionX);
-            img.setAttribute('initTop', positionY);
-            img.setAttribute('initHeight', badgeHeight);
-            img.setAttribute('initWidth', badgeWidth);
-            this.graph.container.appendChild(img);
-            positionX += badgeWidth;
-            this.badges.push(img);
-        });
-    }
-};
-
-azdataQueryPlan.prototype.redrawBadges = function () {
-    this.badges.forEach(b => {
-        b.style.left = b.getAttribute('initLeft') * this.graph.view.getScale() + 'px';
-        b.style.top = b.getAttribute('initTop') * this.graph.view.getScale() + 'px';
-        b.style.width = b.getAttribute('initWidth') * this.graph.view.getScale() + 'px';
-        b.style.height = b.getAttribute('initHeight') * this.graph.view.getScale() + 'px';
-    });
 };
 
 /**
@@ -1017,7 +1135,7 @@ azdataQueryPlan.prototype.getRightSidePoints = function (cell) {
         if (nextLeaf) {
             nextLeafPositionX = nextLeaf.geometry.x;
         }
-        
+
         let leafPositionX = Math.min(Math.max(lastLeafPositionX, leaf.geometry.x), Math.max(nextLeafPositionX, leaf.geometry.x));
 
         points.push({ x: leafPositionX + NODE_WIDTH + additionalRightSideSpacing, y: leaf.geometry.y + NODE_HEIGHT });
@@ -1111,7 +1229,7 @@ function toggleSubtree(graph, cell, show) {
             }
         }
 
-        return vertex == cell || !graph.isCellCollapsed(vertex);
+        return vertex === cell || !graph.isCellCollapsed(vertex);
     });
 
     graph.toggleCells(show, cells, true);

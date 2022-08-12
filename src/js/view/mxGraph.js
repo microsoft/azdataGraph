@@ -5236,6 +5236,10 @@ mxGraph.prototype.foldCells = function(collapse, recurse, cells, checkFoldable, 
 	{
 		this.model.endUpdate();
 	}
+	
+	if(cell?.cellDivs?.body){
+		cell.cellDivs.body.focus();
+	}
 
 	return cells;
 };

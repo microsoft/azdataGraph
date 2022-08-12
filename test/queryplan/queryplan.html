@@ -20,13 +20,14 @@
 			var imageBasePath = './icons/';
 			var iconPaths = getIconPaths(imageBasePath);
 			var badgePaths = getBadgePaths(badgePaths);
+			var collapseExpandPaths = getCollapseExpandPaths(imageBasePath);
 
 			let queryPlanConfiguration = {
 				container: container,
 				queryPlanGraph: graph,
 				iconPaths: iconPaths,
 				badgeIconPaths: badgePaths,
-				expandCollapsePaths: undefined
+				expandCollapsePaths: collapseExpandPaths
 			};
 			new azdataQueryPlan(queryPlanConfiguration);
 		};
@@ -36,7 +37,7 @@
 		#graphContainer {
 			position: relative;
 			overflow: scroll;
-			width: 800px;
+			width: 1500px;
 			height: 800px;
 			cursor: default;
 			border: 1px solid;
