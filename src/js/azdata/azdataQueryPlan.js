@@ -3,10 +3,10 @@
  *  Licensed under the Source EULA. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-const GRAPH_PADDING_RIGHT = 48;
-const GRAPH_PADDING_TOP = 16;
+const GRAPH_PADDING_RIGHT = 40;
+const GRAPH_PADDING_TOP = 0;
 const GRAPH_PADDING_BOTTOM = 80;
-const GRAPH_PADDING_LEFT = 80;
+const GRAPH_PADDING_LEFT = 40;
 const CELL_WIDTH = 80;
 const CELL_HEIGHT = 80;
 const STANDARD_NODE_DISTANCE = 173;
@@ -122,12 +122,7 @@ class GraphNodeLayoutHelper {
 
         while (lastIndex < this.layoutPoints.length) {
             if (this.layoutPoints[lastIndex].y > yPosition) {
-                if (lastIndex - insertIndex - 1 > 1){
-                    this.layoutPoints.splice(insertIndex + 1, lastIndex - insertIndex - 1);
-                } else {
-                    this.layoutPoints.splice(insertIndex + 1, lastIndex - insertIndex - 1);
-                }
-                //this.layoutPoints.splice(insertIndex + 1, lastIndex - insertIndex - 1);
+                this.layoutPoints.splice(insertIndex + 1, lastIndex - insertIndex - 1);
                 return;
             }
             ++lastIndex;
@@ -713,15 +708,15 @@ azdataQueryPlan.prototype.isParentHierarchyTreeStructure = function (node) {
     return false;
 }
 
-azdataQueryPlan.prototype.getCleanedNodeLabel  = function(node) {
+azdataQueryPlan.prototype.getCleanedNodeLabel = function (node) {
     return node.label.replace(/\n|\r\n/g, "<br>");
 }
 
 azdataQueryPlan.prototype.getNodeLabelLength = function (node) {
-    var cleanedLabel = this.getCleanedNodeLabel(node);
-    this.context = this.context ? this.context : document.createElement("canvas").getContext("2d");
-    this.context.font = "10px Arial";
-    return this.context.measureText(cleanedLabel).width;
+    this.canvas = this.canvas || document.createElement("canvas");
+    const context = this.canvas.getContext("2d");
+    const metrics = context.measureText(node.label);
+    return metrics.width;
 }
 
 azdataQueryPlan.prototype.getRecommendedNodeXSpacing = function (node) {
@@ -730,25 +725,21 @@ azdataQueryPlan.prototype.getRecommendedNodeXSpacing = function (node) {
     node.children.forEach(c => {
         maxNodeToWidth = Math.max(maxNodeToWidth, this.getNodeLabelLength(c));
     });
-    let recommendedSpacing = currentNodeSize / 2 + maxNodeToWidth /2;
-    if(node.children.length > 1) {
-        if(this.isParentHierarchyTreeStructure(node)){
+    let recommendedSpacing = currentNodeSize / 2 + maxNodeToWidth / 2;
+    if (node.children.length > 1) {
+        if (this.isParentHierarchyTreeStructure(node)) {
             recommendedSpacing += Math.max(maxNodeToWidth - 200, 0);
         }
     }
-    return recommendedSpacing < 80 ? 80 : recommendedSpacing;  
+    return recommendedSpacing < 80 ? 80 : recommendedSpacing;
 }
 
 azdataQueryPlan.prototype.getNodeHeight = function (node) {
     const iconHeight = 30;
     const costHeight = 15;
-    const labelText = document.createElement('div');
-    labelText.innerText = node.label;
-    labelText.style.visibility = 'hidden';
-    document.body.appendChild(labelText);
-    const nodeHeight = iconHeight + costHeight + labelText.clientHeight;
-    labelText.remove();
-    return nodeHeight; 
+    const lineCount = node.label.split(/\r\n|\r|\n/).length
+    const nodeHeight = iconHeight + costHeight + lineCount * 10;
+    return nodeHeight;
 }
 
 
@@ -782,9 +773,9 @@ azdataQueryPlan.prototype.setNodeXPositionRecursive = function (node, x, level) 
 };
 
 azdataQueryPlan.prototype.getYMidPoint = function (fromNode, toNode) {
-    var edgeMidpoint = (fromNode.position.x + this.getNodeLabelLength(fromNode) + toNode.position.x) /2;
-    for(let i = 0; i < fromNode.children.length; i++) {
-        if(fromNode.children[i] === toNode.id) {
+    var edgeMidpoint = (fromNode.position.x + this.getNodeLabelLength(fromNode) + toNode.position.x) / 2;
+    for (let i = 0; i < fromNode.children.length; i++) {
+        if (fromNode.children[i] === toNode.id) {
             break;
         }
         const minMidPointSpaceFromNodeBoundingRect = 6;

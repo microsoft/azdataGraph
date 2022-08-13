@@ -180,7 +180,6 @@ td.mxPopupMenuIcon {
 	flex-direction: column;
 	align-items: center;
 	padding: 2px 0px;
-	outline: none;
 	min-width: 70px;
 }
 
@@ -225,10 +224,7 @@ td.mxPopupMenuIcon {
 }
 
 .graph-cell-cost{
-	border: 1px solid;
 	border-radius: 15px;
 	width: fit-content;
 	padding: 1px 8px 0px 8px;
-	color: white;
-	background-color: #DB1F48;
 }
