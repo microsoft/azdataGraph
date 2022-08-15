@@ -176,6 +176,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
 
     const arrowRightKey = 39;
     const selectNext = (evt) => {
+        graph.tooltipHandler.hide();
         let currentCell = this.graph.getSelectionCell();
         if (currentCell && currentCell.vertex) {
             if (currentCell.edges.length === 1) {
@@ -195,6 +196,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
 
     const arrowLeftKey = 37;
     const selectPrevious = (evt) => {
+        graph.tooltipHandler.hide();
         let currentCell = this.graph.getSelectionCell();
         if (currentCell && currentCell.vertex) {
             if (currentCell.edges.length === 1) {
@@ -214,6 +216,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
 
     const arrowUpKey = 38;
     const selectTop = (evt) => {
+        graph.tooltipHandler.hide();
         let currentCell = this.graph.getSelectionCell();
         if (currentCell && currentCell.edge) {
             let source = currentCell.source;
@@ -253,6 +256,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
 
     const arrowDownKey = 40;
     const selectBottom = (evt) => {
+        graph.tooltipHandler.hide();
         let currentCell = this.graph.getSelectionCell();
         if (currentCell && currentCell.edge) {
             let source = currentCell.source;
@@ -290,18 +294,6 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     };
     this.keyHandler.bindKey(arrowDownKey, selectBottom);
 
-    // const enterKey = 13;
-    // const spaceKey = 32;
-    // const toggleNodeCollapse = (evt) => {
-    //     const currentCell = this.graph.getSelectionCell();
-    //     const collapse = !currentCell.collapsed;
-
-    //     // undefined is for the middle parameter since the overwritten definition of foldCells doesn't reference it.
-    //     this.graph.foldCells(collapse, undefined, [currentCell]);
-    // };
-    // this.keyHandler.bindKey(enterKey, toggleNodeCollapse);
-    // this.keyHandler.bindKey(spaceKey, toggleNodeCollapse);
-
     var style = graph.getStylesheet().getDefaultEdgeStyle();
     style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
 
@@ -324,13 +316,6 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     graph.getSelectionModel().addListener(mxEvent.CHANGE, function (sender, evt) {
         if (graph.getSelectionCount() === 1) {
             const cell = graph.getSelectionCell();
-            // if (cell.vertex) {
-            //     graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#ffffff', [cell]);
-            //     graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#000000', [cell]);
-            // }
-            // else if (cell.edge) {
-            //     graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#000000', [cell]);
-            // }
 
             if (evt?.properties?.added) {
                 evt.properties.added.forEach(cell => {
@@ -357,11 +342,13 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     });
 
     graph.convertValueToString = function (cell) {
-        if (cell?.cellDivs?.cellContainer) {
-            return cell.cellDivs.cellContainer;
-        }
         if (cell.value != null && cell.value.label != null && !cell.edge) {
             const cellDivs = new Object();
+            let oldTabIndex = -1;
+            if(cell?.cellDivs?.body?.tabIndex){
+                oldTabIndex = cell.cellDivs.body.tabIndex;
+            }
+
             cell.cellDivs = cellDivs;
             const cellContainer = document.createElement('div');
             cellDivs.container = cellContainer
@@ -432,7 +419,10 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
             cellbody.ariaLabel = 'Level 1 Select Cost: 9% expanded'
 
             mxEvent.addListener(cellbody, 'keydown', (evt) => {
-                if (evt.keyCode === 13) {
+                if (evt.keyCode === 13 || evt.keyCode === 32) {
+                    if(!expandCollapse){
+                        return;
+                    }
                     const currentCell = cell;
                     const collapse = !currentCell.collapsed;
                     const icon = collapse ? expandCollapsePaths.expand : expandCollapsePaths.collapse;
@@ -441,12 +431,20 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                     // undefined is for the middle parameter since the overwritten definition of foldCells doesn't reference it.
                     this.foldCells(collapse, undefined, [currentCell]);
                     cell.cellDivs.body.focus();
+                    evt.stopPropagation();
+                    evt.preventDefault();
                 }
             });
 
             mxEvent.addListener(cellbody, 'focus', (evt) => {
                 this.setSelectionCell(cell);
             });
+
+            mxEvent.addListener(cellContainer, 'click', (evt) => {
+                cellbody.focus();
+            });
+
+            cellDivs.body.tabIndex = oldTabIndex;
 
             return cellContainer;
         }
@@ -1186,26 +1184,6 @@ function toggleSubtree(graph, cell, show) {
     graph.traverse(cell, true, function (vertex) {
         if (vertex != cell) {
             cells.push(vertex);
-
-
-            if (vertex.value.badges.length > 0) {
-                if (!show) {
-                    if (!!!vertex.value.badgeImgs) {
-                        vertex.value.badgeImgs = [];
-                    }
-
-                    for (let i = vertex.value.badges.length - 1; i >= 0; --i) {
-                        let childImgToRemove = graph.container.lastChild;
-                        vertex.value.badgeImgs.push(childImgToRemove);
-                        graph.container.removeChild(graph.container.lastChild);
-                    }
-                }
-                else {
-                    vertex.value.badgeImgs.forEach(img => {
-                        graph.container.appendChild(img);
-                    });
-                }
-            }
         }
 
         return vertex === cell || !graph.isCellCollapsed(vertex);

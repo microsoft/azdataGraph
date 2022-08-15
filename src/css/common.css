@@ -181,6 +181,7 @@ td.mxPopupMenuIcon {
 	align-items: center;
 	padding: 2px 0px;
 	min-width: 70px;
+	outline: none;
 }
 
 .graph-cell-icon{
