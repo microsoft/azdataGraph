@@ -185,9 +185,9 @@ td.mxPopupMenuIcon {
 }
 
 .graph-cell-icon{
-	background-position: center; /* Center the image */
-	background-repeat: no-repeat; /* Do not repeat the image */
-	background-size: cover; /* Resize the background image to cover the entire container */
+	background-position: center; 
+	background-repeat: no-repeat; 
+	background-size: cover;
 	width:30px;
 	height:30px;
 	align-self: center;
@@ -196,9 +196,9 @@ td.mxPopupMenuIcon {
 
 .graph-cell-icon .graph-icon-badge {
 	position: absolute;
-	background-position: center; /* Center the image */
-	background-repeat: no-repeat; /* Do not repeat the image */
-	background-size: cover; /* Resize the background image to cover the entire container */
+	background-position: center; 
+	background-repeat: no-repeat;
+	background-size: cover; 
 	width:12px;
 	height:12px;
 	bottom: 0;
