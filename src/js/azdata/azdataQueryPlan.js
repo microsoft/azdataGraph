@@ -52,49 +52,55 @@ class GraphNodeLayoutHelper {
         }
     }
 
-    updateNodeLayout(xPosition, yPosition) {
+    /**
+     * Updated node layout to prevent overlapping nodes
+     * @param {*} nodeLevel: depth of the node from the root of the tree. 0 is the root node.
+     * @param {*} yPosition: y position of the node.
+     * @returns 
+     */
+    updateNodeLayout(nodeLevel, yPosition) {
         this.checkInvariant();
 
         // First cover edge cases
 
         // Empty list
         if (this.layoutPoints.length === 0) {
-            this.layoutPoints.push(new Point(xPosition, yPosition));
+            this.layoutPoints.push(new Point(nodeLevel, yPosition));
             return;
         }
 
         // Single Element
         if (this.layoutPoints.length === 1) {
-            if (xPosition < this.layoutPoints[0].x) {
-                this.layoutPoints.unshift(new Point(xPosition, yPosition));
+            if (nodeLevel < this.layoutPoints[0].x) {
+                this.layoutPoints.unshift(new Point(nodeLevel, yPosition));
             }
-            else if (xPosition === this.layoutPoints[0].x) {
+            else if (nodeLevel === this.layoutPoints[0].x) {
                 this.layoutPoints[0] = new Point(this.layoutPoints[0].x, Math.max(this.layoutPoints[0].y, yPosition));
             }
             else {
-                this.layoutPoints.push(new Point(xPosition, yPosition));
+                this.layoutPoints.push(new Point(nodeLevel, yPosition));
             }
 
             return;
         }
 
         // Insert Before First Element
-        if (xPosition < this.layoutPoints[0].x &&
+        if (nodeLevel < this.layoutPoints[0].x &&
             yPosition < this.layoutPoints[0].y) {
-            this.layoutPoints.unshift(new Point(xPosition, yPosition));
+            this.layoutPoints.unshift(new Point(nodeLevel, yPosition));
             return;
         }
 
         // Insert Last Element
-        if (this.layoutPoints[this.layoutPoints.length - 1].x < xPosition &&
+        if (this.layoutPoints[this.layoutPoints.length - 1].x < nodeLevel &&
             this.layoutPoints[this.layoutPoints.length - 1].y < yPosition) {
-            this.layoutPoints.push(new Point(xPosition, yPosition));
+            this.layoutPoints.push(new Point(nodeLevel, yPosition));
             return;
         }
 
         // Update Last Element
-        if (this.layoutPoints[this.layoutPoints.length - 1].x === xPosition) {
-            this.layoutPoints[this.layoutPoints.length - 1] = new Point(xPosition, Math.max(this.layoutPoints[this.layoutPoints.length - 1].y, yPosition));
+        if (this.layoutPoints[this.layoutPoints.length - 1].x === nodeLevel) {
+            this.layoutPoints[this.layoutPoints.length - 1] = new Point(nodeLevel, Math.max(this.layoutPoints[this.layoutPoints.length - 1].y, yPosition));
             return;
         }
 
@@ -103,18 +109,18 @@ class GraphNodeLayoutHelper {
         // First find insert index
         var insertIndex = 0;
         for (var i = 0; i < this.layoutPoints.length; i++) {
-            if (xPosition <= this.layoutPoints[i].x) {
+            if (nodeLevel <= this.layoutPoints[i].x) {
                 insertIndex = i;
                 break;
             }
         }
 
         // Perform Insert or Update.
-        if (xPosition === this.layoutPoints[insertIndex].x) {
-            this.layoutPoints[insertIndex] = new Point(xPosition, Math.max(this.layoutPoints[insertIndex].y, yPosition));
+        if (nodeLevel === this.layoutPoints[insertIndex].x) {
+            this.layoutPoints[insertIndex] = new Point(nodeLevel, Math.max(this.layoutPoints[insertIndex].y, yPosition));
         }
         else {
-            this.layoutPoints.splice(insertIndex, 0, new Point(xPosition, yPosition));
+            this.layoutPoints.splice(insertIndex, 0, new Point(nodeLevel, yPosition));
         }
 
         // After we insert the point we need to remove following points if they have lower Y value.
@@ -316,7 +322,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     graph.getSelectionModel().addListener(mxEvent.CHANGE, function (sender, evt) {
         if (graph.getSelectionCount() === 1) {
             const cell = graph.getSelectionCell();
-
+            
             if (evt?.properties?.added) {
                 evt.properties.added.forEach(cell => {
                     if (cell?.cellDivs?.body) {
@@ -335,29 +341,26 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
             if (cell?.cellDivs?.body) {
                 cell.cellDivs.body.focus();
             }
-
-
-
         }
     });
 
     graph.convertValueToString = function (cell) {
-        if (cell.value != null && cell.value.label != null && !cell.edge) {
+        if (cell.value != null && cell.value.label != null) {
             const cellDivs = new Object();
-            let oldTabIndex = -1;
-            if(cell?.cellDivs?.body?.tabIndex){
-                oldTabIndex = cell.cellDivs.body.tabIndex;
-            }
-
+            
+            // Getting the state of the old tabIndex of the cell. This is needed to restore the old tabIndex after the cell is re-rendered.
+            const oldTabIndex = cell?.cellDivs?.body?.tabIndex ?? -1;
+            
             cell.cellDivs = cellDivs;
+
             const cellContainer = document.createElement('div');
             cellDivs.container = cellContainer
             cellContainer.setAttribute('class', 'graph-cell');
 
-            const cellbody = document.createElement('div');
-            cellbody.setAttribute('class', 'graph-cell-body');
-            cellContainer.appendChild(cellbody);
-            cellDivs.body = cellbody;
+            const cellBodyContainer = document.createElement('div');
+            cellDivs.body = cellBodyContainer;
+            cellBodyContainer.setAttribute('class', 'graph-cell-body');
+            cellContainer.appendChild(cellBodyContainer);
 
             if (cell.edge) {
                 return;
@@ -366,12 +369,12 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
             const costContainer = document.createElement('div');
             costContainer.setAttribute('class', 'graph-cell-cost');
             costContainer.innerHTML = cell.value.costDisplayString;
-            cellbody.appendChild(costContainer);
+            cellBodyContainer.appendChild(costContainer);
 
             const iconContainer = document.createElement('div');
             iconContainer.setAttribute('class', 'graph-cell-icon');
             iconContainer.style.backgroundImage = 'url(' + iconPaths[cell.value.icon] + ')';
-            cellbody.appendChild(iconContainer);
+            cellBodyContainer.appendChild(iconContainer);
 
             if (cell.value.badges) {
                 cell.value.badges.forEach(b => {
@@ -389,7 +392,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                 expandCollapse.setAttribute('class', 'graph-icon-badge-expand');
                 const icon = cell.collapsed ? expandCollapsePaths.expand : expandCollapsePaths.collapse;
                 expandCollapse.style.backgroundImage = 'url(' + icon + ')';
-                cellbody.appendChild(expandCollapse);
+                cellBodyContainer.appendChild(expandCollapse);
                 mxEvent.addListener(expandCollapse, 'click', (evt) => {
 
                     const currentCell = cell;
@@ -407,7 +410,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
 
             const label = document.createElement('div');
             label.innerText = cell.value.label;
-            cellbody.appendChild(label);
+            cellBodyContainer.appendChild(label);
 
 
             // Adding output row count to the left of graph cell;
@@ -416,9 +419,9 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
             rows.innerText = cell.value.rowCountDisplayString;
             cellContainer.appendChild(rows);
 
-            cellbody.ariaLabel = 'Level 1 Select Cost: 9% expanded'
+            cellBodyContainer.ariaLabel = 'Level 1 Select Cost: 9% expanded'
 
-            mxEvent.addListener(cellbody, 'keydown', (evt) => {
+            mxEvent.addListener(cellBodyContainer, 'keydown', (evt) => {
                 if (evt.keyCode === 13 || evt.keyCode === 32) {
                     if(!expandCollapse){
                         return;
@@ -436,12 +439,12 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                 }
             });
 
-            mxEvent.addListener(cellbody, 'focus', (evt) => {
+            mxEvent.addListener(cellBodyContainer, 'focus', (evt) => {
                 this.setSelectionCell(cell);
             });
 
             mxEvent.addListener(cellContainer, 'click', (evt) => {
-                cellbody.focus();
+                cellBodyContainer.focus();
             });
 
             cellDivs.body.tabIndex = oldTabIndex;

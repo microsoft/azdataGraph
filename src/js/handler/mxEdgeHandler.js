@@ -458,7 +458,7 @@ mxEdgeHandler.prototype.getSelectionStrokeWidth = function()
  */
 mxEdgeHandler.prototype.isSelectionDashed = function()
 {
-	return mxConstants.EDGE_SELECTION_DASHED;
+	return false;
 };
 
 /**
