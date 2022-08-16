@@ -11,6 +11,10 @@ const CELL_WIDTH = 80;
 const CELL_HEIGHT = 80;
 const STANDARD_NODE_DISTANCE = 173;
 const IDEAL_LONG_LABEL_NODE_DISTANCE = 240;
+const CELL_ICON_HEIGHT = 30;
+const CELL_COST_HEIGHT = 15;
+const MAX_ALLOWED_NODE_WIDTH = 200;
+const MIN_ALLOWED_NODE_WIDTH = 80;
 
 // Setting this to 38 because SSMS truncates labels longer than 38 characters
 const LABEL_LENGTH_LIMIT = 38;
@@ -729,17 +733,17 @@ azdataQueryPlan.prototype.getRecommendedNodeXSpacing = function (node) {
     let recommendedSpacing = currentNodeSize / 2 + maxNodeToWidth / 2;
     if (node.children.length > 1) {
         if (this.isParentHierarchyTreeStructure(node)) {
-            recommendedSpacing += Math.max(maxNodeToWidth - 200, 0);
+            recommendedSpacing += Math.max(maxNodeToWidth - MAX_ALLOWED_NODE_WIDTH, 0);
         }
     }
-    return recommendedSpacing < 80 ? 80 : recommendedSpacing;
+    return recommendedSpacing < MIN_ALLOWED_NODE_WIDTH ? MIN_ALLOWED_NODE_WIDTH : recommendedSpacing;
 }
 
 azdataQueryPlan.prototype.getNodeHeight = function (node) {
-    const iconHeight = 30;
-    const costHeight = 15;
-    const lineCount = node.label.split(/\r\n|\r|\n/).length
-    const nodeHeight = iconHeight + costHeight + lineCount * 10;
+    const iconHeight = CELL_ICON_HEIGHT;
+    const costHeight = CELL_COST_HEIGHT;
+    const cellSubtextLineCount = node.label.split(/\r\n|\r|\n/).length
+    const nodeHeight = iconHeight + costHeight + cellSubtextLineCount * 10;
     return nodeHeight;
 }
 
