@@ -776,7 +776,7 @@ mxGraphHandler.prototype.getBoundingBox = function(cells)
  * Creates the shape used to draw the preview for the given bounds.
  */
 mxGraphHandler.prototype.createPreviewShape = function(bounds)
-{	
+{
 	var shape = new mxRectangleShape(bounds, null, this.previewColor);
 	shape.isDashed = true;
 	
