@@ -20,16 +20,17 @@
 			var imageBasePath = './icons/';
 			var iconPaths = getIconPaths(imageBasePath);
 			var badgePaths = getBadgePaths(imageBasePath);
+			var collapseExpandPaths = getCollapseExpandPaths(imageBasePath);
 
 			let queryPlanConfiguration = {
 				container: container,
 				queryPlanGraph: graph,
 				iconPaths: iconPaths,
 				badgeIconPaths: badgePaths,
-				expandCollapsePaths: undefined
+				expandCollapsePaths: collapseExpandPaths
 			};
 			var azdataGraph = new azdataQueryPlan(queryPlanConfiguration);
-			const cell = azdataGraph.graph.model.getCell('element-7')
+			const cell = azdataGraph.graph.model.getCell('element-36')
 			var samplePolygon = azdataGraph.drawPolygon(
 				cell,
 				"rgba(236, 0, 140,0.1)",
