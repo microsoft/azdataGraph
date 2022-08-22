@@ -1183,9 +1183,12 @@ azdataQueryPlan.prototype.isChildCellVisible = function (vertex) {
 };
 
 azdataQueryPlan.prototype.highlightExpensiveOperator = function (costPredicate) {
+    const HIGHLIGHTER_COLOR = '#ff0000';
+    const STROKE_WIDTH = 2;
+
     const expensiveNode = this.findExpensiveOperator(costPredicate);
     const expensiveCell = this.graph.model.getCell(expensiveNode.id);
-    const cellHighlighter = new mxCellHighlight(this.graph, '#ff0000', 2);
+    const cellHighlighter = new mxCellHighlight(this.graph, HIGHLIGHTER_COLOR, STROKE_WIDTH);
     cellHighlighter.highlight(this.graph.view.getState(expensiveCell));
 };
 
