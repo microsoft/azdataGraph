@@ -682,7 +682,7 @@ azdataQueryPlan.prototype.disableNodeCollapse = function (disableCollapse) {
     const allVertices = this.graph.model.getChildCells(this.graph.getDefaultParent()).filter(v => v?.vertex);
     allVertices.forEach(v => {
         let state = this.graph.view.getState(v);
-        if ((state.control === null || state.control.node === null)) {
+        if ((!state.control || !state.control.node)) {
             return;
         }
 
@@ -1181,6 +1181,37 @@ azdataQueryPlan.prototype.isChildCellVisible = function (vertex) {
     let childCell = this.graph.model.getCell(vertex.value.children[0].id);
     return childCell.isVisible();
 };
+
+azdataQueryPlan.prototype.highlightExpensiveOperator = function (costPredicate) {
+    const expensiveOperator = this.findExpensiveOperator(costPredicate);
+};
+
+azdataQueryPlan.prototype.findExpensiveOperator = function (getCostValue) {
+    let expensiveOperator = undefined;
+    let stack = [this.queryPlanGraph];
+
+    while (stack.length > 0) {
+        let node = stack.pop();
+
+        if (!expensiveOperator && getCostValue(node)) {
+            expensiveOperator = node;
+        }
+        else if (expensiveOperator) {
+            const expensiveOperatorValue = getCostValue(expensiveOperator);
+            const incomingCostValue = getCostValue(node);
+
+            if ((expensiveOperatorValue && incomingCostValue) && expensiveOperator < incomingCostValue) {
+                expensiveOperator = node;
+            }
+        }
+
+        for (let childIndex = 0; childIndex < node.children.length; ++childIndex) {
+            stack.push(node.children[childIndex]);
+        }
+    }
+
+    return expensiveOperator;
+}
 
 
 // Hides or shows execution plan subtree nodes and corresponding icons

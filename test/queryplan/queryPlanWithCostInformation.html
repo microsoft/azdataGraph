@@ -1,0 +1,62 @@
+<!--
+  Test page for manually testing query plan polygons.
+
+  This test page covers highlighting the most expensive operator found in a
+  query execution plan.
+-->
+<html>
+
+<head>
+	<title>Query Plan test</title>
+	<script type="text/javascript">
+		mxForceIncludes = true;
+		mxBasePath = '../../src';
+	</script>
+	<script type="text/javascript" src="./src/js/graph3.js"></script>
+	<script type="text/javascript" src="../../src/js/mxClient.js"></script>
+	<script type="text/javascript" src="./src/js/queryPlanSetup.js"></script>
+	<script type="text/javascript">
+
+		function main(container) {
+			var graph = getGraph();
+
+			var imageBasePath = './icons/';
+			var iconPaths = getIconPaths(imageBasePath);
+			var badgePaths = getBadgePaths(imageBasePath);
+			var collapseExpandPaths = getCollapseExpandPaths(imageBasePath);
+
+			let queryPlanConfiguration = {
+				container: container,
+				queryPlanGraph: graph,
+				iconPaths: iconPaths,
+				badgeIconPaths: badgePaths,
+				expandCollapsePaths: collapseExpandPaths
+			};
+			var azdataGraph = new azdataQueryPlan(queryPlanConfiguration);
+			azdataGraph.disableNodeCollapse(true);
+       
+			azdataGraph.highlightExpensiveOperator((node) => {
+                return node.subTreeCost;
+            });
+		};
+
+	</script>
+	<style>
+		#graphContainer {
+			position: relative;
+			overflow: scroll;
+			width: 1000px;
+			height: 1000px;
+			cursor: default;
+			border: 1px solid;
+			margin-top: 100px;
+			margin-left: 100px;
+		}
+	</style>
+</head>
+
+<body onload="main(document.getElementById('graphContainer'))">
+	<div id="graphContainer"></div>
+</body>
+
+</html>
