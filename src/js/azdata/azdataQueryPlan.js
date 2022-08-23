@@ -372,7 +372,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
 
             const costContainer = document.createElement('div');
             costContainer.setAttribute('class', 'graph-cell-cost');
-            costContainer.innerHTML = cell.value.costDisplayString;
+            costContainer.innerHTML = cell.value.costDisplayString ?? '';
             cellBodyContainer.appendChild(costContainer);
 
             const iconContainer = document.createElement('div');
@@ -420,7 +420,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
             // Adding output row count to the left of graph cell;
             const rows = document.createElement('div');
             rows.setAttribute('class', 'graph-cell-row-count');
-            rows.innerText = cell.value.rowCountDisplayString;
+            rows.innerText = cell.value.rowCountDisplayString ?? '';
             cellContainer.appendChild(rows);
 
             cellBodyContainer.ariaLabel = 'Level 1 Select Cost: 9% expanded'
