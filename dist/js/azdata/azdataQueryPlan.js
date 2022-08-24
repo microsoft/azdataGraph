@@ -188,14 +188,17 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     const selectNext = (evt) => {
         graph.tooltipHandler.hide();
         let currentCell = this.graph.getSelectionCell();
+        if(currentCell.collapsed) {
+            return;
+        }
         if (currentCell && currentCell.vertex) {
             if (currentCell.edges.length === 1) {
                 if (currentCell.edges[0].target !== currentCell) {
-                    this.graph.setSelectionCell(currentCell.edges[0]);
+                    this.graph.setSelectionCell(currentCell.edges[0].target);
                 }
             }
             else if (currentCell.edges.length > 1) {
-                this.graph.setSelectionCell(currentCell.edges[1]);
+                this.graph.setSelectionCell(currentCell.edges[1].target);
             }
         }
         else if (currentCell && currentCell.edge) {
@@ -211,11 +214,11 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
         if (currentCell && currentCell.vertex) {
             if (currentCell.edges.length === 1) {
                 if (currentCell.edges[0].source !== currentCell) {
-                    this.graph.setSelectionCell(currentCell.edges[0]);
+                    this.graph.setSelectionCell(currentCell.edges[0].source);
                 }
             }
             else if (currentCell.edges.length > 1) {
-                this.graph.setSelectionCell(currentCell.edges[0]);
+                this.graph.setSelectionCell(currentCell.edges[0].source);
             }
         }
         else if (currentCell && currentCell.edge) {
@@ -321,16 +324,29 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     graph.getSelectionModel().setSingleSelection(true); //Forcing only single cell selection in graph
     graph.cellsResizable = false;
     graph.cellsMovable = false;
+    graph.edgeMovable = false;
     graph.setHtmlLabels(true);
+    graph.container.setAttribute('role', 'tree');
+    graph.isCellSelectable = (cell) => {
+        if(cell?.isEdge()){
+            return false;
+        }
+        return true;
+    };
 
     graph.getSelectionModel().addListener(mxEvent.CHANGE, function (sender, evt) {
         if (graph.getSelectionCount() === 1) {
             const cell = graph.getSelectionCell();
-            
+
             if (evt?.properties?.added) {
                 evt.properties.added.forEach(cell => {
                     if (cell?.cellDivs?.body) {
-                        cell.cellDivs.body.tabIndex = -1;
+                        if (cell.edge) {
+                            const edgeElement = document.getElementById(cell.id);
+                            edgeElement.tabIndex = -1;
+                        } else {
+                            cell.cellDivs.body.tabIndex = -1;
+                        }
                     }
                 });
             }
@@ -338,12 +354,16 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
             if (evt?.properties?.removed) {
                 evt.properties.removed.forEach(cell => {
                     if (cell?.cellDivs?.body) {
-                        cell.cellDivs.body.tabIndex = 0;
+                        if (cell.edge) {
+                            const edgeElement = document.getElementById(cell.id);
+                            edgeElement.tabIndex = 0;
+                            edgeElement.focus();
+                        } else {
+                            cell.cellDivs.body.tabIndex = 0;
+                            cell.cellDivs.body.focus();
+                        }
                     }
                 });
-            }
-            if (cell?.cellDivs?.body) {
-                cell.cellDivs.body.focus();
             }
         }
     });
@@ -351,23 +371,49 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     graph.convertValueToString = function (cell) {
         if (cell.value != null && cell.value.label != null) {
             const cellDivs = new Object();
-            
+
             // Getting the state of the old tabIndex of the cell. This is needed to restore the old tabIndex after the cell is re-rendered.
             const oldTabIndex = cell?.cellDivs?.body?.tabIndex ?? -1;
-            
+
             cell.cellDivs = cellDivs;
 
             const cellContainer = document.createElement('div');
             cellDivs.container = cellContainer
             cellContainer.setAttribute('class', 'graph-cell');
-
             const cellBodyContainer = document.createElement('div');
             cellDivs.body = cellBodyContainer;
             cellBodyContainer.setAttribute('class', 'graph-cell-body');
+            cellBodyContainer.setAttribute('role', 'treeitem');
+            cellBodyContainer.setAttribute('aria-expanded', !cell.collapsed);
+            cellBodyContainer.setAttribute('aria-level', cell.value.depth);
+            cellBodyContainer.setAttribute('aria-posinset', cell.value.posInSet);
+            cellBodyContainer.setAttribute('aria-setsize', cell.value.setSize);
+            if(cell.value.ariaLabel){
+                cellBodyContainer.setAttribute('aria-label', cell.value.ariaLabel);
+            }
             cellContainer.appendChild(cellBodyContainer);
 
+            mxEvent.addListener(cellBodyContainer, 'focus', (evt) => {
+                this.setSelectionCell(cell);
+                if(cell.highlightShape){
+                    cell.highlightShape.isDashed = false;
+                    cell.highlightShape.redraw();
+                    cell.highlightShape.updateBoundingBox();
+                }
+            });
+
+            mxEvent.addListener(cellBodyContainer, 'blur', (evt) => {
+                if(cell.highlightShape){
+                    cell.highlightShape.isDashed = true;
+                    cell.highlightShape.redraw();
+                    cell.highlightShape.updateBoundingBox();
+                }
+            });
+
             if (cell.edge) {
-                return;
+                cellBodyContainer.id = cell.id;
+
+                return cellContainer;
             }
 
             const costContainer = document.createElement('div');
@@ -423,11 +469,9 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
             rows.innerText = cell.value.rowCountDisplayString;
             cellContainer.appendChild(rows);
 
-            cellBodyContainer.ariaLabel = 'Level 1 Select Cost: 9% expanded'
-
             mxEvent.addListener(cellBodyContainer, 'keydown', (evt) => {
                 if (evt.keyCode === 13 || evt.keyCode === 32) {
-                    if(!expandCollapse){
+                    if (!expandCollapse) {
                         return;
                     }
                     const currentCell = cell;
@@ -441,10 +485,6 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                     evt.stopPropagation();
                     evt.preventDefault();
                 }
-            });
-
-            mxEvent.addListener(cellBodyContainer, 'focus', (evt) => {
-                this.setSelectionCell(cell);
             });
 
             mxEvent.addListener(cellContainer, 'click', (evt) => {
@@ -530,6 +570,8 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     };
 
     graph.foldCells = function (collapse, recurse, cells) {
+        cells[0].cellDivs.body.setAttribute('aria-expanded', !collapse);
+
         this.model.beginUpdate();
         try {
             toggleSubtree(this, cells[0], !collapse);
@@ -560,9 +602,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     style[mxConstants.STYLE_IMAGE_HEIGHT] = '32';
     style[mxConstants.STYLE_SPACING_TOP] = '43';
     style[mxConstants.STYLE_SPACING] = '8';
-    style[mxConstants.STYLE_CELL_HIGHLIGHT_COLOR] = '#00BA34'
     style[mxConstants.STYLE_CELL_HIGHLIGHT_DASHED] = false;
-    style[mxConstants.STYLE_CELL_HIGHLIGHT_STROKE_WIDTH] = '2';
 
     var icons = new Array();
     for (const iconName in iconPaths) {
@@ -596,7 +636,8 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
         cellStyle[mxConstants.STYLE_FILLCOLOR] = 'transparent';
         cellStyle[mxConstants.STYLE_STROKECOLOR] = 'transparent';
         cellStyle[mxConstants.STYLE_CELL_HIGHLIGHT_DASHED] = false;
-        cellStyle[mxConstants.STYLE_CELL_HIGHLIGHT_COLOR] = '#59CE8F';
+        cellStyle[mxConstants.STYLE_CELL_HIGHLIGHT_STROKE_WIDTH] = '3';
+        cellStyle[mxConstants.STYLE_CELL_HIGHLIGHT_COLOR] = '#00ff00';
 
         graph.getStylesheet().putDefaultVertexStyle(cellStyle);
 
@@ -604,6 +645,10 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
         var maxY = this.queryPlanGraph.position.y;
 
         var vertex = graph.insertVertex(parent, this.queryPlanGraph.id, this.queryPlanGraph, this.queryPlanGraph.position.x, this.queryPlanGraph.position.y, CELL_WIDTH, CELL_HEIGHT);
+
+        this.queryPlanGraph.depth = 1;
+        this.queryPlanGraph.posInSet = 1;
+        this.queryPlanGraph.setSize = 1;
 
         var stack =
             [
@@ -638,6 +683,10 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
 
                     var edge = entry.node.edges[i];
                     graph.insertWeightedInvertedEdge(parent, edge.id, edge, entry.vertex, vertex);
+                    node.depth = entry.node.depth + 1;
+                    node.posInSet = i+1;
+                    node.setSize = entry.node.children.length;
+
                     stack.push(
                         {
                             vertex: vertex,
@@ -756,7 +805,7 @@ azdataQueryPlan.prototype.setNodeXPositionRecursive = function (node, x, level) 
     // Place the node at given position
     node.position = new Point(x, 0);
     node.level = level;
-    
+
     // Determining the right height for the node. Here, 50px is the appropriate space for node icons.
     this.updateSpacingY(node);
 
