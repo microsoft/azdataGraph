@@ -197,8 +197,12 @@ mxCellHighlight.prototype.repaint = function()
 		}
 		else
 		{
-			this.shape.bounds = new mxRectangle(this.state.x - this.spacing, this.state.y - this.spacing,
-					this.state.width + 2 * this.spacing, this.state.height + 2 * this.spacing);
+			const x = this.state.text ? Math.min(this.state.x, this.state.text.boundingBox.x) : this.state.x;
+			const y = this.state.text ? Math.min(this.state.y, this.state.text.boundingBox.y) : this.state.y;
+			const w = this.state.text ? Math.max(this.state.x + this.state.width, this.state.text.boundingBox.x + this.state.text.boundingBox.width) - x : this.state.width;
+			const h = this.state.text ? Math.max(this.state.y + this.state.height, this.state.text.boundingBox.y + this.state.text.boundingBox.height) - y : this.state.height;
+			this.shape.bounds = new mxRectangle(x - 2, y - 2, w + 5, h + 3);
+
 			this.shape.rotation = Number(this.state.style[mxConstants.STYLE_ROTATION] || '0');
 			this.shape.strokewidth = this.getStrokeWidth() / this.state.view.scale;
 			this.shape.outline = true;
