@@ -93093,6 +93093,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
 
     var graph = new azdataGraph(container);
     this.graph = graph;
+    this.graph.firstLoad = true;
     this.rubberband = new mxRubberband(graph);
     this.keyHandler = new mxKeyHandler(graph);
 
@@ -93404,7 +93405,11 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
             });
 
             cellDivs.body.tabIndex = oldTabIndex;
-
+            console.log(cell);
+            if(this.firstLoad && cell.value.isRoot){
+                this.firstLoad = false;
+                cellDivs.body.tabIndex = 0;
+            }
             return cellContainer;
         }
         if (cell.value != null && cell.value.label != null) {
@@ -93561,6 +93566,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
         this.queryPlanGraph.depth = 1;
         this.queryPlanGraph.posInSet = 1;
         this.queryPlanGraph.setSize = 1;
+        this.queryPlanGraph.isRoot = true;
 
         var stack =
             [
