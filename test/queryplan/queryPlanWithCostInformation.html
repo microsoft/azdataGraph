@@ -34,10 +34,10 @@
 			};
 			var azdataGraph = new azdataQueryPlan(queryPlanConfiguration);
 			azdataGraph.disableNodeCollapse(true);
-       
+
 			azdataGraph.highlightExpensiveOperator((node) => {
-                return node.elapsedTimeInMs;
-            });
+				return node.elapsedTimeInMs;
+			});
 		};
 
 	</script>
