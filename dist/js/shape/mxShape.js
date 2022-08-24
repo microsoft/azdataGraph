@@ -381,11 +381,14 @@ mxShape.prototype.redraw = function()
 	this.updateBoundsFromPoints();
 	
 	if (this.visible && this.checkBounds())
-	{
-		this.node.style.visibility = 'visible';
+	{	
+		if(this.node?.style){
+			this.node.style.visibility = 'visible';
+		}
+
 		this.clear();
 		
-		if (this.node.nodeName == 'DIV' && (this.isHtmlAllowed() || !mxClient.IS_VML))
+		if (this.node?.nodeName == 'DIV' && (this.isHtmlAllowed() || !mxClient.IS_VML))
 		{
 			this.redrawHtmlShape();
 		}
@@ -410,7 +413,7 @@ mxShape.prototype.redraw = function()
  */
 mxShape.prototype.clear = function()
 {
-	if (this.node.ownerSVGElement != null)
+	if (this.node?.ownerSVGElement != null)
 	{
 		while (this.node.lastChild != null)
 		{
@@ -419,9 +422,12 @@ mxShape.prototype.clear = function()
 	}
 	else
 	{
-		this.node.style.cssText = 'position:absolute;' + ((this.cursor != null) ?
+		if(this.node){
+			this.node.style.cssText = 'position:absolute;' + ((this.cursor != null) ?
 			('cursor:' + this.cursor + ';') : '');
 		this.node.innerHTML = '';
+		}
+
 	}
 };
 
@@ -588,7 +594,7 @@ mxShape.prototype.createCanvas = function()
 	var canvas = null;
 	
 	// LATER: Check if reusing existing DOM nodes improves performance
-	if (this.node.ownerSVGElement != null)
+	if (this.node?.ownerSVGElement != null)
 	{
 		canvas = this.createSvgCanvas();
 	}

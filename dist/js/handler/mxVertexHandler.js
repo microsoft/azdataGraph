@@ -198,6 +198,7 @@ mxVertexHandler.prototype.init = function()
 	this.selectionBounds = this.getSelectionBounds(this.state);
 	this.bounds = new mxRectangle(this.selectionBounds.x, this.selectionBounds.y, this.selectionBounds.width, this.selectionBounds.height);
 	this.selectionBorder = this.createSelectionShape(this.bounds);
+	this.state.cell.highlightShape = this.selectionBorder;
 	// VML dialect required here for event transparency in IE
 	this.selectionBorder.dialect = (this.graph.dialect != mxConstants.DIALECT_SVG) ? mxConstants.DIALECT_VML : mxConstants.DIALECT_SVG;
 	this.selectionBorder.pointerEvents = false;
@@ -377,8 +378,7 @@ mxVertexHandler.prototype.createSelectionShape = function(bounds)
 		mxRectangle.fromRectangle(bounds),
 		null, this.getSelectionColor());
 	shape.strokewidth = this.getSelectionStrokeWidth();
-	shape.isDashed = this.isSelectionDashed();
-	
+	shape.isDashed = this.graph.container.contains(document.activeElement) ? this.isSelectionDashed() : false;
 	return shape;
 };
 
