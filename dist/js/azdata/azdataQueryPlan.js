@@ -737,7 +737,7 @@ azdataQueryPlan.prototype.disableNodeCollapse = function (disableCollapse) {
     const allVertices = this.graph.model.getChildCells(this.graph.getDefaultParent()).filter(v => v?.vertex);
     allVertices.forEach(v => {
         let state = this.graph.view.getState(v);
-        if ((state.control === null || state.control.node === null)) {
+        if ((!state.control || !state.control.node)) {
             return;
         }
 
@@ -1237,6 +1237,49 @@ azdataQueryPlan.prototype.isChildCellVisible = function (vertex) {
     return childCell.isVisible();
 };
 
+azdataQueryPlan.prototype.highlightExpensiveOperator = function (costPredicate) {
+    const HIGHLIGHTER_COLOR = '#ff0000';
+    const STROKE_WIDTH = 1;
+
+    const expensiveNode = this.findExpensiveOperator(costPredicate);
+    if (!expensiveNode) {
+        return;
+    }
+
+    const expensiveCell = this.graph.model.getCell(expensiveNode.id);
+    const cellHighlighter = new mxCellHighlight(this.graph, HIGHLIGHTER_COLOR, STROKE_WIDTH);
+    cellHighlighter.highlight(this.graph.view.getState(expensiveCell));
+};
+
+azdataQueryPlan.prototype.findExpensiveOperator = function (getCostValue) {
+    const expensiveOperators = [];
+    const expensiveCostValues = [];
+
+    const stack = [this.queryPlanGraph];
+
+    while (stack.length > 0) {
+        const node = stack.pop();
+        const costValue = getCostValue(node);
+        
+        if (costValue) {
+            expensiveOperators.push(node);
+            expensiveCostValues.push(costValue);
+        }
+
+        for (let childIndex = 0; childIndex < node.children.length; ++childIndex) {
+            stack.push(node.children[childIndex]);
+        }
+    }
+
+    if (expensiveCostValues.length === 0) {
+        return undefined;
+    }
+
+    const maxCostValue = Math.max(...expensiveCostValues);
+    const maxCostValueIndex = expensiveCostValues.findIndex(c => c === maxCostValue);
+
+    return expensiveOperators[maxCostValueIndex];
+}
 
 // Hides or shows execution plan subtree nodes and corresponding icons
 function toggleSubtree(graph, cell, show) {
