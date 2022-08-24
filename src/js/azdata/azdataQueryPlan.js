@@ -493,7 +493,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
             });
 
             cellDivs.body.tabIndex = oldTabIndex;
-            console.log(cell);
+            
             if(this.firstLoad && cell.value.isRoot){
                 this.firstLoad = false;
                 cellDivs.body.tabIndex = 0;
