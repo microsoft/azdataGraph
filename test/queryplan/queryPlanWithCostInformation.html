@@ -36,7 +36,7 @@
 			azdataGraph.disableNodeCollapse(true);
        
 			azdataGraph.highlightExpensiveOperator((node) => {
-                return node.cost;
+                return node.elapsedTimeInMs;
             });
 		};
 
