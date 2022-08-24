@@ -1184,7 +1184,7 @@ azdataQueryPlan.prototype.isChildCellVisible = function (vertex) {
 
 azdataQueryPlan.prototype.highlightExpensiveOperator = function (costPredicate) {
     const HIGHLIGHTER_COLOR = '#ff0000';
-    const STROKE_WIDTH = 2;
+    const STROKE_WIDTH = 1;
 
     const expensiveNode = this.findExpensiveOperator(costPredicate);
     if (!expensiveNode) {
