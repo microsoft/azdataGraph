@@ -2,7 +2,7 @@
   Test page for manually testing query plan polygons.
 
   This test page covers highlighting the most expensive operator found in a
-  query execution plan.
+  query execution plan and then clearing it after 3 seconds.
 -->
 <html>
 
@@ -38,6 +38,11 @@
 			azdataGraph.highlightExpensiveOperator((node) => {
 				return node.elapsedTimeInMs;
 			});
+
+			// Tests clearing expensive operator highlighting after 3 seconds
+			setTimeout(function() {
+				azdataGraph.clearExpensiveOperatorHighlighting();
+			}, 3000);
 		};
 
 	</script>

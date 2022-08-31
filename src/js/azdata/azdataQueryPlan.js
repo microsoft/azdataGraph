@@ -1237,8 +1237,16 @@ azdataQueryPlan.prototype.isChildCellVisible = function (vertex) {
     return childCell.isVisible();
 };
 
+azdataQueryPlan.prototype.clearExpensiveOperatorHighlighting = function (node) {
+    if (this.expensiveCellHighlighter) {
+        this.expensiveCellHighlighter.destroy();
+    }
+
+    this.expensiveCellHighlighter = undefined;
+};
+
 azdataQueryPlan.prototype.highlightExpensiveOperator = function (costPredicate) {
-    const HIGHLIGHTER_COLOR = '#ff0000';
+    const HIGHLIGHTER_COLOR = '#FFA500'; // Orange
     const STROKE_WIDTH = 1;
 
     const expensiveNode = this.findExpensiveOperator(costPredicate);
@@ -1247,8 +1255,8 @@ azdataQueryPlan.prototype.highlightExpensiveOperator = function (costPredicate) 
     }
 
     const expensiveCell = this.graph.model.getCell(expensiveNode.id);
-    const cellHighlighter = new mxCellHighlight(this.graph, HIGHLIGHTER_COLOR, STROKE_WIDTH);
-    cellHighlighter.highlight(this.graph.view.getState(expensiveCell));
+    this.expensiveCellHighlighter = new mxCellHighlight(this.graph, HIGHLIGHTER_COLOR, STROKE_WIDTH);
+    this.expensiveCellHighlighter.highlight(this.graph.view.getState(expensiveCell));
 };
 
 azdataQueryPlan.prototype.findExpensiveOperator = function (getCostValue) {
