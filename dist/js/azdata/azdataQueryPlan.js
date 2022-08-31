@@ -369,6 +369,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
         }
     });
 
+    let self = this;
     graph.convertValueToString = function (cell) {
         if (cell.value != null && cell.value.label != null) {
             const cellDivs = new Object();
@@ -454,7 +455,9 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                     // undefined is for the middle parameter since the overwritten definition of foldCells doesn't reference it.
                     this.foldCells(collapse, undefined, [currentCell]);
                     currentCell.cellDivs.body.focus();
-
+                    if (!collapse) {
+                        self.redrawExpensiveOperatorHighlighting();
+                    }
                 });
             }
 
@@ -483,6 +486,11 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                     // undefined is for the middle parameter since the overwritten definition of foldCells doesn't reference it.
                     this.foldCells(collapse, undefined, [currentCell]);
                     cell.cellDivs.body.focus();
+                    
+                    if (!collapse) {
+                        self.redrawExpensiveOperatorHighlighting();
+                    }
+                    
                     evt.stopPropagation();
                     evt.preventDefault();
                 }
@@ -557,7 +565,6 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
         return false;
     };
 
-    let self = this;
     // Defines the position for the folding icon
     graph.cellRenderer.getControlBounds = function (state) {
         if (state.control != null) {
@@ -766,18 +773,18 @@ azdataQueryPlan.prototype.isParentHierarchyTreeStructure = function (node) {
         node = node.parent;
     }
     return false;
-}
+};
 
 azdataQueryPlan.prototype.getCleanedNodeLabel = function (node) {
     return node.label.replace(/\n|\r\n/g, "<br>");
-}
+};
 
 azdataQueryPlan.prototype.getNodeLabelLength = function (node) {
     this.canvas = this.canvas || document.createElement("canvas");
     const context = this.canvas.getContext("2d");
     const metrics = context.measureText(node.label);
     return metrics.width;
-}
+};
 
 azdataQueryPlan.prototype.getRecommendedNodeXSpacing = function (node) {
     const currentNodeSize = this.getNodeLabelLength(node);
@@ -792,7 +799,7 @@ azdataQueryPlan.prototype.getRecommendedNodeXSpacing = function (node) {
         }
     }
     return recommendedSpacing < MIN_ALLOWED_NODE_WIDTH ? MIN_ALLOWED_NODE_WIDTH : recommendedSpacing;
-}
+};
 
 azdataQueryPlan.prototype.getNodeHeight = function (node) {
     const iconHeight = CELL_ICON_HEIGHT;
@@ -800,12 +807,12 @@ azdataQueryPlan.prototype.getNodeHeight = function (node) {
     const cellSubtextLineCount = node.label.split(/\r\n|\r|\n/).length
     const nodeHeight = iconHeight + costHeight + cellSubtextLineCount * 10;
     return nodeHeight;
-}
+};
 
 
 azdataQueryPlan.prototype.updateSpacingY = function (node) {
     this.spacingY = Math.max(this.spacingY, this.getNodeHeight(node));
-}
+};
 
 azdataQueryPlan.prototype.setNodeXPositionRecursive = function (node, x, level) {
     // Place the node at given position
@@ -842,7 +849,7 @@ azdataQueryPlan.prototype.getYMidPoint = function (fromNode, toNode) {
         edgeMidpoint = Math.min(edgeMidpoint, fromNode.children[i].position.x - minMidPointSpaceFromNodeBoundingRect);
     }
     return edgeMidpoint;
-}
+};
 
 azdataQueryPlan.prototype.setNodeYPositionRecursive = function (node, layoutHelper, y) {
     var newY = Math.max(y, layoutHelper.getYPositionForXPosition(node.maxChildrenXPosition));
@@ -985,7 +992,7 @@ azdataQueryPlan.prototype.setEdgeColor = function (color) {
 
 azdataQueryPlan.prototype.setCellHighLightColor = function (color) {
     this.graph.setCellStyles(mxConstants.STYLE_CELL_HIGHLIGHT_COLOR, color, this.graph.model.getChildCells(this.graph.getDefaultParent()));
-}
+};
 
 azdataQueryPlan.prototype.destroy = function () {
     if (!this.destroyed) {
@@ -1237,8 +1244,23 @@ azdataQueryPlan.prototype.isChildCellVisible = function (vertex) {
     return childCell.isVisible();
 };
 
+azdataQueryPlan.prototype.clearExpensiveOperatorHighlighting = function () {
+    if (this.expensiveCellHighlighter) {
+        this.expensiveCellHighlighter.destroy();
+    }
+
+    this.expensiveCell = undefined;
+    this.expensiveCellHighlighter = undefined;
+};
+
+azdataQueryPlan.prototype.redrawExpensiveOperatorHighlighting = function () {
+    if (this.expensiveCell && this.expensiveCellHighlighter) {
+        this.expensiveCellHighlighter.highlight(this.graph.view.getState(this.expensiveCell));
+    }
+};
+
 azdataQueryPlan.prototype.highlightExpensiveOperator = function (costPredicate) {
-    const HIGHLIGHTER_COLOR = '#ff0000';
+    const HIGHLIGHTER_COLOR = '#FFA500'; // Orange
     const STROKE_WIDTH = 1;
 
     const expensiveNode = this.findExpensiveOperator(costPredicate);
@@ -1246,9 +1268,9 @@ azdataQueryPlan.prototype.highlightExpensiveOperator = function (costPredicate) 
         return;
     }
 
-    const expensiveCell = this.graph.model.getCell(expensiveNode.id);
-    const cellHighlighter = new mxCellHighlight(this.graph, HIGHLIGHTER_COLOR, STROKE_WIDTH);
-    cellHighlighter.highlight(this.graph.view.getState(expensiveCell));
+    this.expensiveCell = this.graph.model.getCell(expensiveNode.id);
+    this.expensiveCellHighlighter = new mxCellHighlight(this.graph, HIGHLIGHTER_COLOR, STROKE_WIDTH);
+    this.expensiveCellHighlighter.highlight(this.graph.view.getState(this.expensiveCell));
 };
 
 azdataQueryPlan.prototype.findExpensiveOperator = function (getCostValue) {
@@ -1279,7 +1301,7 @@ azdataQueryPlan.prototype.findExpensiveOperator = function (getCostValue) {
     const maxCostValueIndex = expensiveCostValues.findIndex(c => c === maxCostValue);
 
     return expensiveOperators[maxCostValueIndex];
-}
+};
 
 // Hides or shows execution plan subtree nodes and corresponding icons
 function toggleSubtree(graph, cell, show) {
