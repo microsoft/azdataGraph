@@ -2,7 +2,7 @@
   Test page for manually testing query plan polygons.
 
   This test page covers highlighting the most expensive operator found in a
-  query execution plan and then clearing it after 3 seconds.
+  query execution plan and then clearing it when the clear button is clicked.
 -->
 <html>
 
@@ -39,10 +39,11 @@
 				return node.elapsedTimeInMs;
 			});
 
-			// Tests clearing expensive operator highlighting after 3 seconds
-			setTimeout(function() {
+			// Tests clearing expensive operator highlighting
+			const clearButton = document.getElementById('clear-btn');
+			clearButton.addEventListener('click', () => {
 				azdataGraph.clearExpensiveOperatorHighlighting();
-			}, 3000);
+			});
 		};
 
 	</script>
@@ -62,6 +63,10 @@
 
 <body onload="main(document.getElementById('graphContainer'))">
 	<div id="graphContainer"></div>
+
+	<div id="buttonContainer" style="padding-top: 15px; padding-left: 100px">
+		<button type="button" id="clear-btn">Clear Operator Highlighting</button>
+	</div>
 </body>
 
 </html>
