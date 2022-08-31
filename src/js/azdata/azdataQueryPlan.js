@@ -486,6 +486,11 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                     // undefined is for the middle parameter since the overwritten definition of foldCells doesn't reference it.
                     this.foldCells(collapse, undefined, [currentCell]);
                     cell.cellDivs.body.focus();
+                    
+                    if (!collapse) {
+                        self.redrawExpensiveOperatorHighlighting();
+                    }
+                    
                     evt.stopPropagation();
                     evt.preventDefault();
                 }
