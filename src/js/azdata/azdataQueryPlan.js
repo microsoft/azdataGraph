@@ -369,6 +369,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
         }
     });
 
+    let self = this;
     graph.convertValueToString = function (cell) {
         if (cell.value != null && cell.value.label != null) {
             const cellDivs = new Object();
@@ -454,7 +455,9 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                     // undefined is for the middle parameter since the overwritten definition of foldCells doesn't reference it.
                     this.foldCells(collapse, undefined, [currentCell]);
                     currentCell.cellDivs.body.focus();
-
+                    if (!collapse) {
+                        self.redrawExpensiveOperatorHighlighting();
+                    }
                 });
             }
 
@@ -483,6 +486,11 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                     // undefined is for the middle parameter since the overwritten definition of foldCells doesn't reference it.
                     this.foldCells(collapse, undefined, [currentCell]);
                     cell.cellDivs.body.focus();
+                    
+                    if (!collapse) {
+                        self.redrawExpensiveOperatorHighlighting();
+                    }
+                    
                     evt.stopPropagation();
                     evt.preventDefault();
                 }
@@ -557,7 +565,6 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
         return false;
     };
 
-    let self = this;
     // Defines the position for the folding icon
     graph.cellRenderer.getControlBounds = function (state) {
         if (state.control != null) {
@@ -1237,8 +1244,23 @@ azdataQueryPlan.prototype.isChildCellVisible = function (vertex) {
     return childCell.isVisible();
 };
 
+azdataQueryPlan.prototype.clearExpensiveOperatorHighlighting = function () {
+    if (this.expensiveCellHighlighter) {
+        this.expensiveCellHighlighter.destroy();
+    }
+
+    this.expensiveCell = undefined;
+    this.expensiveCellHighlighter = undefined;
+};
+
+azdataQueryPlan.prototype.redrawExpensiveOperatorHighlighting = function () {
+    if (this.expensiveCell && this.expensiveCellHighlighter) {
+        this.expensiveCellHighlighter.highlight(this.graph.view.getState(this.expensiveCell));
+    }
+};
+
 azdataQueryPlan.prototype.highlightExpensiveOperator = function (costPredicate) {
-    const HIGHLIGHTER_COLOR = '#ff0000';
+    const HIGHLIGHTER_COLOR = '#FFA500'; // Orange
     const STROKE_WIDTH = 1;
 
     const expensiveNode = this.findExpensiveOperator(costPredicate);
@@ -1246,9 +1268,9 @@ azdataQueryPlan.prototype.highlightExpensiveOperator = function (costPredicate) 
         return;
     }
 
-    const expensiveCell = this.graph.model.getCell(expensiveNode.id);
-    const cellHighlighter = new mxCellHighlight(this.graph, HIGHLIGHTER_COLOR, STROKE_WIDTH);
-    cellHighlighter.highlight(this.graph.view.getState(expensiveCell));
+    this.expensiveCell = this.graph.model.getCell(expensiveNode.id);
+    this.expensiveCellHighlighter = new mxCellHighlight(this.graph, HIGHLIGHTER_COLOR, STROKE_WIDTH);
+    this.expensiveCellHighlighter.highlight(this.graph.view.getState(this.expensiveCell));
 };
 
 azdataQueryPlan.prototype.findExpensiveOperator = function (getCostValue) {
