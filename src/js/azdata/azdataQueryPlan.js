@@ -1279,7 +1279,7 @@ azdataQueryPlan.prototype.findExpensiveOperator = function (getCostValue) {
     const maxCostValueIndex = expensiveCostValues.findIndex(c => c === maxCostValue);
 
     return expensiveOperators[maxCostValueIndex];
-}
+};
 
 // Hides or shows execution plan subtree nodes and corresponding icons
 function toggleSubtree(graph, cell, show) {
