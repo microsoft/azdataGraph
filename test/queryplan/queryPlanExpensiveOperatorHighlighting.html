@@ -35,14 +35,30 @@
 			var azdataGraph = new azdataQueryPlan(queryPlanConfiguration);
 			azdataGraph.disableNodeCollapse(true);
 
-			azdataGraph.highlightExpensiveOperator((node) => {
+			let result = azdataGraph.highlightExpensiveOperator((node) => {
 				return node.elapsedTimeInMs;
 			});
+			
+			if (!result) {
+				window.alert('Unable to locate a node with the specified property.');
+			}
 
 			// Tests clearing expensive operator highlighting
 			const clearButton = document.getElementById('clear-btn');
 			clearButton.addEventListener('click', () => {
 				azdataGraph.clearExpensiveOperatorHighlighting();
+			});
+
+			const errorButton = document.getElementById('test-fail-case-btn');
+			errorButton.addEventListener('click', () => {
+				azdataGraph.clearExpensiveOperatorHighlighting();
+				let result = azdataGraph.highlightExpensiveOperator((node) => {
+					return node.InvalidProperty;
+				});
+
+				if (!result) {
+					window.alert('Unable to locate a node with the specified property.');
+				}
 			});
 		};
 
@@ -66,6 +82,7 @@
 
 	<div id="buttonContainer" style="padding-top: 15px; padding-left: 100px">
 		<button type="button" id="clear-btn">Clear Operator Highlighting</button>
+		<button type="button" id="test-fail-case-btn">Test Fail Case</button>
 	</div>
 </body>
 
