@@ -94181,12 +94181,14 @@ azdataQueryPlan.prototype.highlightExpensiveOperator = function (costPredicate) 
 
     const expensiveNode = this.findExpensiveOperator(costPredicate);
     if (!expensiveNode) {
-        return;
+        return false;
     }
 
     this.expensiveCell = this.graph.model.getCell(expensiveNode.id);
     this.expensiveCellHighlighter = new mxCellHighlight(this.graph, HIGHLIGHTER_COLOR, STROKE_WIDTH);
     this.expensiveCellHighlighter.highlight(this.graph.view.getState(this.expensiveCell));
+
+    return true;
 };
 
 azdataQueryPlan.prototype.findExpensiveOperator = function (getCostValue) {
