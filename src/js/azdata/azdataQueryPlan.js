@@ -386,7 +386,11 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
             cellDivs.body = cellBodyContainer;
             cellBodyContainer.setAttribute('class', 'graph-cell-body');
             cellBodyContainer.setAttribute('role', 'treeitem');
-            cellBodyContainer.setAttribute('aria-expanded', !cell.collapsed);
+
+            if (cell.isVertex() && cell?.value?.children?.length > 0) {
+                cellBodyContainer.setAttribute('aria-expanded', !cell.collapsed);
+            }
+
             cellBodyContainer.setAttribute('aria-level', cell.value.depth);
             cellBodyContainer.setAttribute('aria-posinset', cell.value.posInSet);
             cellBodyContainer.setAttribute('aria-setsize', cell.value.setSize);
@@ -582,7 +586,9 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     };
 
     graph.foldCells = function (collapse, recurse, cells) {
-        cells[0].cellDivs.body.setAttribute('aria-expanded', !collapse);
+        if (cells[0].isVertex() && cells[0]?.value?.children?.length > 0) {
+            cells[0].cellDivs.body.setAttribute('aria-expanded', !collapse);
+        }
 
         this.model.beginUpdate();
         try {
