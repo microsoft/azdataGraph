@@ -655,7 +655,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
         cellStyle[mxConstants.STYLE_STROKECOLOR] = 'transparent';
         cellStyle[mxConstants.STYLE_CELL_HIGHLIGHT_DASHED] = false;
         cellStyle[mxConstants.STYLE_CELL_HIGHLIGHT_STROKE_WIDTH] = '3';
-        cellStyle[mxConstants.STYLE_CELL_HIGHLIGHT_COLOR] = '#00ff00';
+        cellStyle[mxConstants.STYLE_CELL_HIGHLIGHT_COLOR] = '#4AA564';
 
         graph.getStylesheet().putDefaultVertexStyle(cellStyle);
 
