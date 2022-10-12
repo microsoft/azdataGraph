@@ -1266,7 +1266,7 @@ azdataQueryPlan.prototype.redrawExpensiveOperatorHighlighting = function () {
 };
 
 azdataQueryPlan.prototype.highlightExpensiveOperator = function (costPredicate) {
-    const HIGHLIGHTER_COLOR = '#cd2026'; // Accessiblity - color red
+    const HIGHLIGHTER_COLOR = '#CD2026'; // Accessiblity - color red
     const STROKE_WIDTH = 1;
 
     const expensiveNode = this.findExpensiveOperator(costPredicate);
