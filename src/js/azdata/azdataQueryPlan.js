@@ -655,7 +655,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
         cellStyle[mxConstants.STYLE_STROKECOLOR] = 'transparent';
         cellStyle[mxConstants.STYLE_CELL_HIGHLIGHT_DASHED] = false;
         cellStyle[mxConstants.STYLE_CELL_HIGHLIGHT_STROKE_WIDTH] = '3';
-        cellStyle[mxConstants.STYLE_CELL_HIGHLIGHT_COLOR] = '#00ff00';
+        cellStyle[mxConstants.STYLE_CELL_HIGHLIGHT_COLOR] = '#4AA564';
 
         graph.getStylesheet().putDefaultVertexStyle(cellStyle);
 
@@ -1266,7 +1266,7 @@ azdataQueryPlan.prototype.redrawExpensiveOperatorHighlighting = function () {
 };
 
 azdataQueryPlan.prototype.highlightExpensiveOperator = function (costPredicate) {
-    const HIGHLIGHTER_COLOR = '#FFA500'; // Orange
+    const HIGHLIGHTER_COLOR = '#CD2026'; // Accessible Red
     const STROKE_WIDTH = 1;
 
     const expensiveNode = this.findExpensiveOperator(costPredicate);
