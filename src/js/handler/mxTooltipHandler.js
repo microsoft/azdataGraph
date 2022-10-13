@@ -36,6 +36,8 @@ function mxTooltipHandler(graph, delay)
 	}
 };
 
+mxTooltipHandler.prototype.isVisible = false;
+
 /**
  * Variable: zIndex
  * 
@@ -318,6 +320,7 @@ mxTooltipHandler.prototype.hideTooltip = function()
 	{
 		this.div.style.visibility = 'hidden';
 		this.div.innerHTML = '';
+		this.isVisible = false;
 	}
 	// {{SQL CARBON EDIT}} setting sourceCell to undefined when we hide the tooltip
 	this.sourceCell = undefined;
@@ -329,8 +332,11 @@ mxTooltipHandler.prototype.hideTooltip = function()
  * Shows the tooltip for the specified cell and optional index at the
  * specified location (with a vertical offset of 10 pixels).
  */
-mxTooltipHandler.prototype.show = function(tip, x, y)
+mxTooltipHandler.prototype.show = function(tip, x, y, cell)
 {
+	if(cell){
+		this.sourceCell = cell;
+	}
 	if (!this.destroyed && tip != null && tip.length > 0)
 	{
 		// Initializes the DOM nodes if required
@@ -385,6 +391,7 @@ mxTooltipHandler.prototype.show = function(tip, x, y)
 		 * fits in the screen or not as we always want to show it.
 		 */
 		//mxUtils.fit(this.div); 
+		this.isVisible = true;
 
 	}
 };
@@ -408,5 +415,6 @@ mxTooltipHandler.prototype.destroy = function()
 		
 		this.destroyed = true;
 		this.div = null;
+		this.isVisible = false;
 	}
 };
