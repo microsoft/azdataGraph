@@ -692,7 +692,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
         cellStyle[mxConstants.STYLE_STROKECOLOR] = 'transparent';
         cellStyle[mxConstants.STYLE_CELL_HIGHLIGHT_DASHED] = false;
         cellStyle[mxConstants.STYLE_CELL_HIGHLIGHT_STROKE_WIDTH] = '3';
-        cellStyle[mxConstants.STYLE_CELL_HIGHLIGHT_COLOR] = '#00ff00';
+        cellStyle[mxConstants.STYLE_CELL_HIGHLIGHT_COLOR] = '#4AA564';
 
         graph.getStylesheet().putDefaultVertexStyle(cellStyle);
 
@@ -1306,11 +1306,11 @@ azdataQueryPlan.prototype.redrawExpensiveOperatorHighlighting = function () {
     }
 };
 
-azdataQueryPlan.prototype.highlightExpensiveOperator = function (costPredicate) {
-    const HIGHLIGHTER_COLOR = '#FFA500'; // Orange
+azdataQueryPlan.prototype.highlightExpensiveOperator = function (getExpenseMetricValue) {
+    const HIGHLIGHTER_COLOR = '#CD2026'; // Accessible Red
     const STROKE_WIDTH = 1;
 
-    const expensiveNode = this.findExpensiveOperator(costPredicate);
+    const expensiveNode = this.findExpensiveOperator(getExpenseMetricValue);
     if (!expensiveNode) {
         return false;
     }
@@ -1322,7 +1322,7 @@ azdataQueryPlan.prototype.highlightExpensiveOperator = function (costPredicate) 
     return true;
 };
 
-azdataQueryPlan.prototype.findExpensiveOperator = function (getCostValue) {
+azdataQueryPlan.prototype.findExpensiveOperator = function (getExpenseMetricValue) {
     const expensiveOperators = [];
     const expensiveCostValues = [];
 
@@ -1330,8 +1330,8 @@ azdataQueryPlan.prototype.findExpensiveOperator = function (getCostValue) {
 
     while (stack.length > 0) {
         const node = stack.pop();
-        const costValue = getCostValue(node);
-
+        const costValue = getExpenseMetricValue(node);
+        
         if (costValue) {
             expensiveOperators.push(node);
             expensiveCostValues.push(costValue);
