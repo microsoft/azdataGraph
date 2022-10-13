@@ -1265,6 +1265,11 @@ azdataQueryPlan.prototype.redrawExpensiveOperatorHighlighting = function () {
     }
 };
 
+/**
+ * Highlights the most expensive operator found in a query execution plan.
+ * @param getExpenseMetricValue user defined delegate that takes a node as an argument and returns a number.
+ * @returns Flag indicating if an expensive node was found and highlighted.
+ */
 azdataQueryPlan.prototype.highlightExpensiveOperator = function (getExpenseMetricValue) {
     const HIGHLIGHTER_COLOR = '#CD2026'; // Accessible Red
     const STROKE_WIDTH = 1;
@@ -1281,6 +1286,11 @@ azdataQueryPlan.prototype.highlightExpensiveOperator = function (getExpenseMetri
     return true;
 };
 
+/**
+ * Finds the most expensive operator in a query execution plan.
+ * @param getExpenseMetricValue user defined delegate that takes a node as an argument and returns a number.
+ * @returns The most expensive node found based on the expense metric value or undefined.
+ */
 azdataQueryPlan.prototype.findExpensiveOperator = function (getExpenseMetricValue) {
     const expensiveOperators = [];
     const expensiveCostValues = [];
