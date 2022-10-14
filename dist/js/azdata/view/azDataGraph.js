@@ -113,7 +113,7 @@ azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
     const footerTopMargin = 'margin-top: 1.5em;';
     const metricLabelMargin = 'margin-right: 4em;';
 
-    if (cell.value != null && cell.value.metrics != null) {
+    if (cell?.value != null && cell?.value?.metrics != null) {
         var tooltip = `<div style=\"${tooltipWidth}\">`;
 
         // tooltip heading for vertices only

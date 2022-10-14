@@ -68671,7 +68671,7 @@ azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
     const footerTopMargin = 'margin-top: 1.5em;';
     const metricLabelMargin = 'margin-right: 4em;';
 
-    if (cell.value != null && cell.value.metrics != null) {
+    if (cell?.value != null && cell?.value?.metrics != null) {
         var tooltip = `<div style=\"${tooltipWidth}\">`;
 
         // tooltip heading for vertices only
@@ -84271,6 +84271,8 @@ function mxTooltipHandler(graph, delay)
 	}
 };
 
+mxTooltipHandler.prototype.isVisible = false;
+
 /**
  * Variable: zIndex
  * 
@@ -84375,6 +84377,8 @@ mxTooltipHandler.prototype.init = function()
 		this.div = document.createElement('div');
 		this.div.className = 'mxTooltip';
 		this.div.style.visibility = 'hidden';
+		this.div.setAttribute('role', 'tooltip');
+		this.div.setAttribute('aria-live','polite');
 
 		document.body.appendChild(this.div);
 
@@ -84396,11 +84400,12 @@ mxTooltipHandler.prototype.init = function()
 		mxEvent.addListener(this.div, 'mousemove', mxUtils.bind(this, function(evt)
 		{
 			var pt = mxUtils.convertPoint(this.graph.container, evt.clientX, evt.clientY);
-			if( this.sourceCell &&
-				pt.x < this.sourceCell.geometry.x ||
-				pt.x > (this.sourceCell.geometry.x + this.sourceCell.geometry.width) ||
-				pt.y < (this.sourceCell.geometry.y) ||
-				pt.y > (this.sourceCell.geometry.y + this.sourceCell.geometry.height)
+			
+			if( this.sourceCell !== undefined &&
+				pt.x < this.sourceCell?.geometry?.x ||
+				pt.x > (this.sourceCell?.geometry?.x + this.sourceCell?.geometry?.width) ||
+				pt.y < (this.sourceCell?.geometry?.y) ||
+				pt.y > (this.sourceCell?.geometry?.y + this.sourceCell?.geometry?.height)
 			){
 				this.hideTooltip();
 			}
@@ -84451,10 +84456,9 @@ mxTooltipHandler.prototype.mouseMove = function(sender, me)
 	{
 		this.reset(me, true);
 		var state = this.getStateForEvent(me);
-		
-		if (this.isHideOnHover() || state != this.state || (me.getSource() != this.node &&
+		if (this.isEnabled() && (this.isHideOnHover() || state != this.state || (me.getSource() != this.node &&
 			(!this.stateSource || (state != null && this.stateSource ==
-			(me.isSource(state.shape) || !me.isSource(state.text))))))
+			(me.isSource(state.shape) || !me.isSource(state.text)))))))
 		{
 			this.hideTooltip();
 		}
@@ -84553,6 +84557,7 @@ mxTooltipHandler.prototype.hideTooltip = function()
 	{
 		this.div.style.visibility = 'hidden';
 		this.div.innerHTML = '';
+		this.isVisible = false;
 	}
 	// {{SQL CARBON EDIT}} setting sourceCell to undefined when we hide the tooltip
 	this.sourceCell = undefined;
@@ -84564,8 +84569,11 @@ mxTooltipHandler.prototype.hideTooltip = function()
  * Shows the tooltip for the specified cell and optional index at the
  * specified location (with a vertical offset of 10 pixels).
  */
-mxTooltipHandler.prototype.show = function(tip, x, y)
+mxTooltipHandler.prototype.show = function(tip, x, y, cell)
 {
+	if(cell){
+		this.sourceCell = cell;
+	}
 	if (!this.destroyed && tip != null && tip.length > 0)
 	{
 		// Initializes the DOM nodes if required
@@ -84620,6 +84628,7 @@ mxTooltipHandler.prototype.show = function(tip, x, y)
 		 * fits in the screen or not as we always want to show it.
 		 */
 		//mxUtils.fit(this.div); 
+		this.isVisible = true;
 
 	}
 };
@@ -84643,6 +84652,7 @@ mxTooltipHandler.prototype.destroy = function()
 		
 		this.destroyed = true;
 		this.div = null;
+		this.isVisible = false;
 	}
 };
 
@@ -93083,8 +93093,7 @@ function azdataQueryPlan(queryPlanConfiguration) {
 }
 
 azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
-    const { container, iconPaths, badgeIconPaths, expandCollapsePaths } = queryPlanConfiguration;
-
+    const { container, iconPaths, badgeIconPaths, expandCollapsePaths, showTooltipOnClick } = queryPlanConfiguration;
     this.container = container;
     this.polygonRoots = [];
     this.drawnPolygons = [];
@@ -93105,7 +93114,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     const selectNext = (evt) => {
         graph.tooltipHandler.hide();
         let currentCell = this.graph.getSelectionCell();
-        if(currentCell.collapsed) {
+        if (currentCell.collapsed) {
             return;
         }
         if (currentCell && currentCell.vertex) {
@@ -93243,9 +93252,16 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     graph.cellsMovable = false;
     graph.edgeMovable = false;
     graph.setHtmlLabels(true);
-    graph.container.setAttribute('role', 'tree');
+    graph.container.firstChild.setAttribute('role', 'tree');
+
+    if (showTooltipOnClick) {
+        this.graph.showTooltipOnClick = showTooltipOnClick;
+        graph.tooltipHandler.setEnabled(false);
+    }
+    graph.showTooltip = true;
+
     graph.isCellSelectable = (cell) => {
-        if(cell?.isEdge()){
+        if (cell?.isEdge()) {
             return false;
         }
         return true;
@@ -93310,14 +93326,14 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
             cellBodyContainer.setAttribute('aria-level', cell.value.depth);
             cellBodyContainer.setAttribute('aria-posinset', cell.value.posInSet);
             cellBodyContainer.setAttribute('aria-setsize', cell.value.setSize);
-            if(cell.value.ariaLabel){
+            if (cell.value.ariaLabel) {
                 cellBodyContainer.setAttribute('aria-label', cell.value.ariaLabel);
             }
             cellContainer.appendChild(cellBodyContainer);
 
             mxEvent.addListener(cellBodyContainer, 'focus', (evt) => {
                 this.setSelectionCell(cell);
-                if(cell.highlightShape){
+                if (cell.highlightShape) {
                     cell.highlightShape.isDashed = false;
                     cell.highlightShape.redraw();
                     cell.highlightShape.updateBoundingBox();
@@ -93325,10 +93341,56 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
             });
 
             mxEvent.addListener(cellBodyContainer, 'blur', (evt) => {
-                if(cell.highlightShape){
+                if (cell.highlightShape) {
                     cell.highlightShape.isDashed = true;
                     cell.highlightShape.redraw();
                     cell.highlightShape.updateBoundingBox();
+                }
+            });
+
+            mxEvent.addListener(cellContainer, 'mousemove', (evt) => {
+                if (this.showTooltipOnClick && this.showTooltip) {
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                }
+            })
+
+            mxEvent.addListener(cellContainer, 'mouseleave', (evt) => {
+                if (this.showTooltipOnClick && this.showTooltip) {
+                    this.tooltipHandler.hide();
+                }
+            })
+
+            mxEvent.addListener(cellContainer, 'click', (evt) => {
+                if (this.showTooltipOnClick && this.showTooltip) {
+                    const cell = this.getSelectionCell();
+                    const tooltip = this.getTooltipForCell(cell);
+                    if (cell?.geometry) {
+                        const cellContainerRect = cellBodyContainer.getBoundingClientRect();
+                        this.tooltipHandler.show(tooltip, cellContainerRect.x + cellContainerRect.width, cellContainerRect.y + cellContainerRect.height, cell);
+                    }
+                }
+            });
+
+            mxEvent.addListener(cellBodyContainer, 'keydown', (evt) => {
+                if (this.showTooltipOnClick && this.showTooltip) {
+                    if (evt.key === 'F3') {
+                        if (this.tooltipHandler.isVisible) {
+                            this.tooltipHandler.hide();
+                        } else {
+                            const cell = this.getSelectionCell();
+                            if (cell?.geometry) {
+                                const cellContainerRect = cellBodyContainer.getBoundingClientRect();
+                                this.tooltipHandler.show(this.getTooltipForCell(cell), cellContainerRect.x + cellContainerRect.width, cellContainerRect.y + cellContainerRect.height, cell);
+                            }
+                        }
+                        evt.preventDefault();
+                        evt.stopPropagation();
+                    } else if (evt.key === 'Escape') {
+                        this.tooltipHandler.hide();
+                        evt.preventDefault();
+                        evt.stopPropagation();
+                    }
                 }
             });
 
@@ -93406,11 +93468,11 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                     // undefined is for the middle parameter since the overwritten definition of foldCells doesn't reference it.
                     this.foldCells(collapse, undefined, [currentCell]);
                     cell.cellDivs.body.focus();
-                    
+
                     if (!collapse) {
                         self.redrawExpensiveOperatorHighlighting();
                     }
-                    
+
                     evt.stopPropagation();
                     evt.preventDefault();
                 }
@@ -93421,8 +93483,8 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
             });
 
             cellDivs.body.tabIndex = oldTabIndex;
-            
-            if(this.firstLoad && cell.value.isRoot){
+
+            if (this.firstLoad && cell.value.isRoot) {
                 this.firstLoad = false;
                 cellDivs.body.tabIndex = 0;
             }
@@ -93619,7 +93681,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                     var edge = entry.node.edges[i];
                     graph.insertWeightedInvertedEdge(parent, edge.id, edge, entry.vertex, vertex);
                     node.depth = entry.node.depth + 1;
-                    node.posInSet = i+1;
+                    node.posInSet = i + 1;
                     node.setSize = entry.node.children.length;
 
                     stack.push(
@@ -93923,6 +93985,19 @@ azdataQueryPlan.prototype.destroy = function () {
     }
 };
 
+azdataQueryPlan.prototype.setShowTooltipOnClick = function (showTooltipOnClick) {
+    this.graph.showTooltipOnClick = showTooltipOnClick;
+}
+
+azdataQueryPlan.prototype.showTooltip = function (showTooltip) {
+    this.graph.showTooltip = showTooltip;
+    if(showTooltip && !this.graph.showTooltipOnClick){
+        this.graph.tooltipHandler.setEnabled(true);
+    } else {
+        this.graph.tooltipHandler.setEnabled(false);
+    }
+}
+
 /**
  * Draws a polygon using the points given
  * @param {*} cell starting cell where the polygon will start to be drawn. 
@@ -94181,11 +94256,16 @@ azdataQueryPlan.prototype.redrawExpensiveOperatorHighlighting = function () {
     }
 };
 
-azdataQueryPlan.prototype.highlightExpensiveOperator = function (costPredicate) {
+/**
+ * Highlights the most expensive operator found in a query execution plan.
+ * @param getExpenseMetricValue user defined delegate that takes a node as an argument and returns a number.
+ * @returns Flag indicating if an expensive node was found and highlighted.
+ */
+azdataQueryPlan.prototype.highlightExpensiveOperator = function (getExpenseMetricValue) {
     const HIGHLIGHTER_COLOR = '#CD2026'; // Accessible Red
     const STROKE_WIDTH = 1;
 
-    const expensiveNode = this.findExpensiveOperator(costPredicate);
+    const expensiveNode = this.findExpensiveOperator(getExpenseMetricValue);
     if (!expensiveNode) {
         return false;
     }
@@ -94197,7 +94277,12 @@ azdataQueryPlan.prototype.highlightExpensiveOperator = function (costPredicate) 
     return true;
 };
 
-azdataQueryPlan.prototype.findExpensiveOperator = function (getCostValue) {
+/**
+ * Finds the most expensive operator in a query execution plan.
+ * @param getExpenseMetricValue user defined delegate that takes a node as an argument and returns a number.
+ * @returns The most expensive node found based on the expense metric value or undefined.
+ */
+azdataQueryPlan.prototype.findExpensiveOperator = function (getExpenseMetricValue) {
     const expensiveOperators = [];
     const expensiveCostValues = [];
 
@@ -94205,8 +94290,8 @@ azdataQueryPlan.prototype.findExpensiveOperator = function (getCostValue) {
 
     while (stack.length > 0) {
         const node = stack.pop();
-        const costValue = getCostValue(node);
-        
+        const costValue = getExpenseMetricValue(node);
+
         if (costValue) {
             expensiveOperators.push(node);
             expensiveCostValues.push(costValue);
