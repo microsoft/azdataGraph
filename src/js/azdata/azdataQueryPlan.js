@@ -326,12 +326,13 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     graph.cellsMovable = false;
     graph.edgeMovable = false;
     graph.setHtmlLabels(true);
-    graph.container.setAttribute('role', 'tree');
+    graph.container.firstChild.setAttribute('role', 'tree');
 
     if (showTooltipOnClick) {
         this.graph.showTooltipOnClick = showTooltipOnClick;
         graph.tooltipHandler.setEnabled(false);
     }
+    graph.showTooltip = true;
 
     graph.isCellSelectable = (cell) => {
         if (cell?.isEdge()) {
@@ -421,18 +422,32 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                 }
             });
 
+            mxEvent.addListener(cellContainer, 'mousemove', (evt) => {
+                if (this.showTooltipOnClick && this.showTooltip) {
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                }
+            })
+
+            mxEvent.addListener(cellContainer, 'mouseleave', (evt) => {
+                if (this.showTooltipOnClick && this.showTooltip) {
+                    this.tooltipHandler.hide();
+                }
+            })
+
             mxEvent.addListener(cellContainer, 'click', (evt) => {
-                if (this.showTooltipOnClick) {
+                if (this.showTooltipOnClick && this.showTooltip) {
                     const cell = this.getSelectionCell();
                     const tooltip = this.getTooltipForCell(cell);
                     if (cell?.geometry) {
-                        this.tooltipHandler.show(tooltip, evt.clientX, evt.clientY, cell);
+                        const cellContainerRect = cellBodyContainer.getBoundingClientRect();
+                        this.tooltipHandler.show(tooltip, cellContainerRect.x + cellContainerRect.width, cellContainerRect.y + cellContainerRect.height, cell);
                     }
                 }
             });
 
             mxEvent.addListener(cellBodyContainer, 'keydown', (evt) => {
-                if (this.showTooltipOnClick) {
+                if (this.showTooltipOnClick && this.showTooltip) {
                     if (evt.key === 'F3') {
                         if (this.tooltipHandler.isVisible) {
                             this.tooltipHandler.hide();
@@ -1044,8 +1059,17 @@ azdataQueryPlan.prototype.destroy = function () {
     }
 };
 
-azdataQueryPlan.prototype.setShowTooltipOnClick = function(showTooltipOnClick) {
+azdataQueryPlan.prototype.setShowTooltipOnClick = function (showTooltipOnClick) {
     this.graph.showTooltipOnClick = showTooltipOnClick;
+}
+
+azdataQueryPlan.prototype.showTooltip = function (showTooltip) {
+    this.graph.showTooltip = showTooltip;
+    if(showTooltip && !this.graph.showTooltipOnClick){
+        this.graph.tooltipHandler.setEnabled(true);
+    } else {
+        this.graph.tooltipHandler.setEnabled(false);
+    }
 }
 
 /**
@@ -1331,7 +1355,7 @@ azdataQueryPlan.prototype.findExpensiveOperator = function (getExpenseMetricValu
     while (stack.length > 0) {
         const node = stack.pop();
         const costValue = getExpenseMetricValue(node);
-        
+
         if (costValue) {
             expensiveOperators.push(node);
             expensiveCostValues.push(costValue);
