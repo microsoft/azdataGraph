@@ -36,6 +36,8 @@ function mxTooltipHandler(graph, delay)
 	}
 };
 
+mxTooltipHandler.prototype.isVisible = false;
+
 /**
  * Variable: zIndex
  * 
@@ -140,6 +142,8 @@ mxTooltipHandler.prototype.init = function()
 		this.div = document.createElement('div');
 		this.div.className = 'mxTooltip';
 		this.div.style.visibility = 'hidden';
+		this.div.setAttribute('role', 'tooltip');
+		this.div.setAttribute('aria-live','polite');
 
 		document.body.appendChild(this.div);
 
@@ -161,11 +165,12 @@ mxTooltipHandler.prototype.init = function()
 		mxEvent.addListener(this.div, 'mousemove', mxUtils.bind(this, function(evt)
 		{
 			var pt = mxUtils.convertPoint(this.graph.container, evt.clientX, evt.clientY);
-			if( this.sourceCell &&
-				pt.x < this.sourceCell.geometry.x ||
-				pt.x > (this.sourceCell.geometry.x + this.sourceCell.geometry.width) ||
-				pt.y < (this.sourceCell.geometry.y) ||
-				pt.y > (this.sourceCell.geometry.y + this.sourceCell.geometry.height)
+			
+			if( this.sourceCell !== undefined &&
+				pt.x < this.sourceCell?.geometry?.x ||
+				pt.x > (this.sourceCell?.geometry?.x + this.sourceCell?.geometry?.width) ||
+				pt.y < (this.sourceCell?.geometry?.y) ||
+				pt.y > (this.sourceCell?.geometry?.y + this.sourceCell?.geometry?.height)
 			){
 				this.hideTooltip();
 			}
@@ -216,10 +221,9 @@ mxTooltipHandler.prototype.mouseMove = function(sender, me)
 	{
 		this.reset(me, true);
 		var state = this.getStateForEvent(me);
-		
-		if (this.isHideOnHover() || state != this.state || (me.getSource() != this.node &&
+		if (this.isEnabled() && (this.isHideOnHover() || state != this.state || (me.getSource() != this.node &&
 			(!this.stateSource || (state != null && this.stateSource ==
-			(me.isSource(state.shape) || !me.isSource(state.text))))))
+			(me.isSource(state.shape) || !me.isSource(state.text)))))))
 		{
 			this.hideTooltip();
 		}
@@ -318,6 +322,7 @@ mxTooltipHandler.prototype.hideTooltip = function()
 	{
 		this.div.style.visibility = 'hidden';
 		this.div.innerHTML = '';
+		this.isVisible = false;
 	}
 	// {{SQL CARBON EDIT}} setting sourceCell to undefined when we hide the tooltip
 	this.sourceCell = undefined;
@@ -329,8 +334,11 @@ mxTooltipHandler.prototype.hideTooltip = function()
  * Shows the tooltip for the specified cell and optional index at the
  * specified location (with a vertical offset of 10 pixels).
  */
-mxTooltipHandler.prototype.show = function(tip, x, y)
+mxTooltipHandler.prototype.show = function(tip, x, y, cell)
 {
+	if(cell){
+		this.sourceCell = cell;
+	}
 	if (!this.destroyed && tip != null && tip.length > 0)
 	{
 		// Initializes the DOM nodes if required
@@ -385,6 +393,7 @@ mxTooltipHandler.prototype.show = function(tip, x, y)
 		 * fits in the screen or not as we always want to show it.
 		 */
 		//mxUtils.fit(this.div); 
+		this.isVisible = true;
 
 	}
 };
@@ -408,5 +417,6 @@ mxTooltipHandler.prototype.destroy = function()
 		
 		this.destroyed = true;
 		this.div = null;
+		this.isVisible = false;
 	}
 };
