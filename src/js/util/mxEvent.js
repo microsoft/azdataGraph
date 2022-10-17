@@ -1476,6 +1476,13 @@ var mxEvent =
 	RESET: 'reset',
 
 	/**
+	 * Variable: TOOLTIP_SHOWN
+	 * 
+	 * Specified the event name for tooltip shown
+	 */
+	TOOLTIP_SHOWN: 'tooltipShown',
+
+	/**
 	 * Variable: PINCH_THRESHOLD
 	 *
 	 * Threshold for pinch gestures to fire a mouse wheel event.
