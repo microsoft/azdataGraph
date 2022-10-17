@@ -328,6 +328,20 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     graph.setHtmlLabels(true);
     graph.container.firstChild.setAttribute('role', 'tree');
 
+    graph.addListener(mxEvent.CLICK, function (sender, evt) {
+
+        var cell = evt.getProperty("cell"); // cell may be null
+        if (cell != null && cell.edge && this.showTooltipOnClick && this.showTooltip) {
+            const tooltip = this.getTooltipForCell(cell);
+            if (tooltip) {
+                this.tooltipHandler.show(tooltip, evt.properties.event.clientX, evt.properties.event.clientY, cell);
+
+            }
+            evt.consume();
+        }
+    });
+
+
     if (showTooltipOnClick) {
         this.graph.showTooltipOnClick = showTooltipOnClick;
         graph.tooltipHandler.setEnabled(false);
@@ -422,18 +436,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                 }
             });
 
-            mxEvent.addListener(cellContainer, 'mousemove', (evt) => {
-                if (this.showTooltipOnClick && this.showTooltip) {
-                    evt.preventDefault();
-                    evt.stopPropagation();
-                }
-            })
 
-            mxEvent.addListener(cellContainer, 'mouseleave', (evt) => {
-                if (this.showTooltipOnClick && this.showTooltip) {
-                    this.tooltipHandler.hide();
-                }
-            })
 
             mxEvent.addListener(cellContainer, 'click', (evt) => {
                 if (this.showTooltipOnClick && this.showTooltip) {
