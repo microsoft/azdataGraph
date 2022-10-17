@@ -221,11 +221,21 @@ mxTooltipHandler.prototype.mouseMove = function(sender, me)
 	{
 		this.reset(me, true);
 		var state = this.getStateForEvent(me);
-		if (this.isEnabled() && (this.isHideOnHover() || state != this.state || (me.getSource() != this.node &&
+
+	
+		if (this.isHideOnHover() || state != this.state || (me.getSource() != this.node &&
 			(!this.stateSource || (state != null && this.stateSource ==
-			(me.isSource(state.shape) || !me.isSource(state.text)))))))
-		{
-			this.hideTooltip();
+			(me.isSource(state.shape) || !me.isSource(state.text))))))
+		{	
+			if(this.sourceCell?.cellDivs?.container){
+				const container = this.sourceCell.cellDivs.container;
+				const containerRect = container.getBoundingClientRect();
+				if(me.evt.x < containerRect.x || me.evt.x > containerRect.x + containerRect.width || me.evt.y < containerRect.y || me.evt.y > containerRect.y + containerRect.height){
+					this.hideTooltip();
+				}
+			} else {
+				this.hideTooltip();
+			}
 		}
 	}
 	
@@ -377,11 +387,11 @@ mxTooltipHandler.prototype.show = function(tip, x, y, cell)
 		const windowHeight = window.innerHeight;
 
 		if ((windowWidth - x) < tooltipWidth) {
-			this.div.style.left = windowWidth - tooltipWidth + "px";
+			this.div.style.left = Math.max(window.scrollX, windowWidth - tooltipWidth) + "px";
 		}
 
 		if ((windowHeight - y) < tooltipHeight) {
-			this.div.style.top = windowHeight - tooltipHeight + "px";
+			this.div.style.top =  Math.max(window.scrollY,  windowHeight - tooltipHeight) + "px";
 		}
 
 		/**
@@ -395,6 +405,7 @@ mxTooltipHandler.prototype.show = function(tip, x, y, cell)
 		//mxUtils.fit(this.div); 
 		this.isVisible = true;
 
+		this.graph.fireEvent(new mxEventObject(mxEvent.TOOLTIP_SHOWN, 'tooltip', this.div, 'x', x, 'y', y));
 	}
 };
 

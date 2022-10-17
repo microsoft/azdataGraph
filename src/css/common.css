@@ -124,6 +124,9 @@ div.mxTooltip {
 	cursor: default;
 	padding: 4px;
 	color: black;
+	max-width: 100vw;
+	max-height: 100vh;
+	overflow: hidden;
 }
 div.mxPopupMenu {
 	-webkit-box-shadow: 3px 3px 12px #C0C0C0;
