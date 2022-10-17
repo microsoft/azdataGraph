@@ -391,7 +391,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
 
     let self = this;
     graph.convertValueToString = function (cell) {
-        if (cell.value != null && cell.value.label != null) {
+        if (cell?.value != null && cell?.value?.label != null) {
             const cellDivs = new Object();
 
             // Getting the state of the old tabIndex of the cell. This is needed to restore the old tabIndex after the cell is re-rendered.
@@ -567,7 +567,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
             }
             return cellContainer;
         }
-        if (cell.value != null && cell.value.label != null) {
+        if (cell?.value != null && cell?.value?.label != null) {
             let hasWindowsEOL = cell.value.label.includes('\r\n');
             const joinStrings = (strArray) => {
                 if (hasWindowsEOL) {
