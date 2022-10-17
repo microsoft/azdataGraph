@@ -11257,6 +11257,13 @@ var mxEvent =
 	RESET: 'reset',
 
 	/**
+	 * Variable: TOOLTIP_SHOWN
+	 * 
+	 * Specified the event name for tooltip shown
+	 */
+	TOOLTIP_SHOWN: 'tooltipShown',
+
+	/**
 	 * Variable: PINCH_THRESHOLD
 	 *
 	 * Threshold for pinch gestures to fire a mouse wheel event.
@@ -84456,11 +84463,21 @@ mxTooltipHandler.prototype.mouseMove = function(sender, me)
 	{
 		this.reset(me, true);
 		var state = this.getStateForEvent(me);
-		if (this.isEnabled() && (this.isHideOnHover() || state != this.state || (me.getSource() != this.node &&
+
+	
+		if (this.isHideOnHover() || state != this.state || (me.getSource() != this.node &&
 			(!this.stateSource || (state != null && this.stateSource ==
-			(me.isSource(state.shape) || !me.isSource(state.text)))))))
-		{
-			this.hideTooltip();
+			(me.isSource(state.shape) || !me.isSource(state.text))))))
+		{	
+			if(this.sourceCell?.cellDivs?.container){
+				const container = this.sourceCell.cellDivs.container;
+				const containerRect = container.getBoundingClientRect();
+				if(me.evt.x < containerRect.x || me.evt.x > containerRect.x + containerRect.width || me.evt.y < containerRect.y || me.evt.y > containerRect.y + containerRect.height){
+					this.hideTooltip();
+				}
+			} else {
+				this.hideTooltip();
+			}
 		}
 	}
 	
@@ -84612,11 +84629,11 @@ mxTooltipHandler.prototype.show = function(tip, x, y, cell)
 		const windowHeight = window.innerHeight;
 
 		if ((windowWidth - x) < tooltipWidth) {
-			this.div.style.left = windowWidth - tooltipWidth + "px";
+			this.div.style.left = Math.max(window.scrollX, windowWidth - tooltipWidth) + "px";
 		}
 
 		if ((windowHeight - y) < tooltipHeight) {
-			this.div.style.top = windowHeight - tooltipHeight + "px";
+			this.div.style.top =  Math.max(window.scrollY,  windowHeight - tooltipHeight) + "px";
 		}
 
 		/**
@@ -84630,6 +84647,7 @@ mxTooltipHandler.prototype.show = function(tip, x, y, cell)
 		//mxUtils.fit(this.div); 
 		this.isVisible = true;
 
+		this.graph.fireEvent(new mxEventObject(mxEvent.TOOLTIP_SHOWN, 'tooltip', this.div, 'x', x, 'y', y));
 	}
 };
 
@@ -93254,6 +93272,20 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     graph.setHtmlLabels(true);
     graph.container.firstChild.setAttribute('role', 'tree');
 
+    graph.addListener(mxEvent.CLICK, function (sender, evt) {
+
+        var cell = evt.getProperty("cell"); // cell may be null
+        if (cell != null && cell.edge && this.showTooltipOnClick && this.showTooltip) {
+            const tooltip = this.getTooltipForCell(cell);
+            if (tooltip) {
+                this.tooltipHandler.show(tooltip, evt.properties.event.clientX, evt.properties.event.clientY, cell);
+
+            }
+            evt.consume();
+        }
+    });
+
+
     if (showTooltipOnClick) {
         this.graph.showTooltipOnClick = showTooltipOnClick;
         graph.tooltipHandler.setEnabled(false);
@@ -93303,7 +93335,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
 
     let self = this;
     graph.convertValueToString = function (cell) {
-        if (cell.value != null && cell.value.label != null) {
+        if (cell?.value != null && cell?.value?.label != null) {
             const cellDivs = new Object();
 
             // Getting the state of the old tabIndex of the cell. This is needed to restore the old tabIndex after the cell is re-rendered.
@@ -93348,18 +93380,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                 }
             });
 
-            mxEvent.addListener(cellContainer, 'mousemove', (evt) => {
-                if (this.showTooltipOnClick && this.showTooltip) {
-                    evt.preventDefault();
-                    evt.stopPropagation();
-                }
-            })
 
-            mxEvent.addListener(cellContainer, 'mouseleave', (evt) => {
-                if (this.showTooltipOnClick && this.showTooltip) {
-                    this.tooltipHandler.hide();
-                }
-            })
 
             mxEvent.addListener(cellContainer, 'click', (evt) => {
                 if (this.showTooltipOnClick && this.showTooltip) {
@@ -93490,7 +93511,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
             }
             return cellContainer;
         }
-        if (cell.value != null && cell.value.label != null) {
+        if (cell?.value != null && cell?.value?.label != null) {
             let hasWindowsEOL = cell.value.label.includes('\r\n');
             const joinStrings = (strArray) => {
                 if (hasWindowsEOL) {
