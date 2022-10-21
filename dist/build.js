@@ -94012,10 +94012,9 @@ azdataQueryPlan.prototype.setShowTooltipOnClick = function (showTooltipOnClick) 
 
 azdataQueryPlan.prototype.showTooltip = function (showTooltip) {
     this.graph.showTooltip = showTooltip;
-    if(showTooltip && !this.graph.showTooltipOnClick){
-        this.graph.tooltipHandler.setEnabled(true);
-    } else {
-        this.graph.tooltipHandler.setEnabled(false);
+
+    if (!this.graph.showTooltipOnClick) {
+        this.graph.tooltipHandler.setEnabled(showTooltip);
     }
 }
 
