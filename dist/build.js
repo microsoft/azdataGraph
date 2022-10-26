@@ -93457,7 +93457,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                 expandCollapse.ariaLabel = (cell.collapsed? 'Expand node' : 'Collapse node ') + cell.value.label;
                 const icon = cell.collapsed ? expandCollapsePaths.expand : expandCollapsePaths.collapse;
                 expandCollapse.style.backgroundImage = 'url(' + icon + ')';
-                cellBodyContainer.appendChild(expandCollapse);
+                cellContainer.appendChild(expandCollapse);
                 mxEvent.addListener(expandCollapse, 'click', (evt) => {
 
                     const currentCell = cell;
