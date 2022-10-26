@@ -441,6 +441,9 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                     cell.highlightShape.redraw();
                     cell.highlightShape.updateBoundingBox();
                 }
+                if (this.tooltipHandler.isVisible) {
+                    this.tooltipHandler.hide();
+                }
             });
 
             mxEvent.addListener(cellContainer, 'click', (evt) => {
