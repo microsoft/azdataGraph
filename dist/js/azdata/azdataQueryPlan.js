@@ -367,6 +367,9 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                             edgeElement.tabIndex = -1;
                         } else {
                             cell.cellDivs.body.tabIndex = -1;
+                            if(cell.cellDivs.expandCollapse) {
+                                cell.cellDivs.expandCollapse.tabIndex = -1;
+                            }
                         }
                     }
                 });
@@ -381,6 +384,9 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                             edgeElement.focus();
                         } else {
                             cell.cellDivs.body.tabIndex = 0;
+                            if(cell.cellDivs.expandCollapse) {
+                                cell.cellDivs.expandCollapse.tabIndex = 0;
+                            }
                             cell.cellDivs.body.focus();
                         }
                     }
@@ -420,6 +426,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
             cellContainer.appendChild(cellBodyContainer);
 
             mxEvent.addListener(cellBodyContainer, 'focus', (evt) => {
+
                 this.setSelectionCell(cell);
                 if (cell.highlightShape) {
                     cell.highlightShape.isDashed = false;
@@ -436,8 +443,6 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                 }
             });
 
-
-
             mxEvent.addListener(cellContainer, 'click', (evt) => {
                 if (this.showTooltipOnClick && this.showTooltip) {
                     const cell = this.getSelectionCell();
@@ -451,7 +456,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
 
             mxEvent.addListener(cellBodyContainer, 'keydown', (evt) => {
                 if (this.showTooltipOnClick && this.showTooltip) {
-                    if (evt.key === 'F3') {
+                    if (evt.keyCode === 13 || evt.keyCode === 32) {
                         if (this.tooltipHandler.isVisible) {
                             this.tooltipHandler.hide();
                         } else {
@@ -501,6 +506,8 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
             if (cell.value.children && cell.value.children.length > 0) {
                 expandCollapse = document.createElement('a');
                 expandCollapse.setAttribute('class', 'graph-icon-badge-expand');
+                expandCollapse.setAttribute('role', 'button');
+                expandCollapse.ariaLabel = (cell.collapsed? 'Expand node' : 'Collapse node ') + cell.value.label;
                 const icon = cell.collapsed ? expandCollapsePaths.expand : expandCollapsePaths.collapse;
                 expandCollapse.style.backgroundImage = 'url(' + icon + ')';
                 cellBodyContainer.appendChild(expandCollapse);
@@ -509,15 +516,45 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                     const currentCell = cell;
                     const collapse = !currentCell.collapsed;
                     const icon = collapse ? expandCollapsePaths.expand : expandCollapsePaths.collapse;
+                    expandCollapse.ariaLabel = (cell.collapsed? 'Expand node' : 'Collapse node ') + cell.value.label;
                     expandCollapse.style.backgroundImage = 'url(' + icon + ')';
 
                     // undefined is for the middle parameter since the overwritten definition of foldCells doesn't reference it.
                     this.foldCells(collapse, undefined, [currentCell]);
-                    currentCell.cellDivs.body.focus();
+                    currentCell.cellDivs.expandCollapse.focus();
                     if (!collapse) {
                         self.redrawExpensiveOperatorHighlighting();
                     }
+                    expandCollapse.focus();
+                    cell.highlightShape.isDashed = true;
+                    cell.highlightShape.redraw();
+                    cell.highlightShape.updateBoundingBox();
                 });
+                mxEvent.addListener(expandCollapse, 'keydown', (evt) => {
+                    if(evt.keyCode === 13 || evt.keyCode === 32){
+                        const currentCell = cell;
+                        const collapse = !currentCell.collapsed;
+                        const icon = collapse ? expandCollapsePaths.expand : expandCollapsePaths.collapse;
+                        expandCollapse.ariaLabel = (cell.collapsed? 'Expand node' : 'Collapse node ') + cell.value.label;
+                        expandCollapse.style.backgroundImage = 'url(' + icon + ')';
+    
+                        // undefined is for the middle parameter since the overwritten definition of foldCells doesn't reference it.
+                        this.foldCells(collapse, undefined, [currentCell]);
+                        currentCell.cellDivs.expandCollapse.focus();
+                        if (!collapse) {
+                            self.redrawExpensiveOperatorHighlighting();
+                        }
+                        evt.stopPropagation();
+                        evt.preventDefault();
+                        expandCollapse.focus();
+                        cell.highlightShape.isDashed = true;
+                        cell.highlightShape.redraw();
+                        cell.highlightShape.updateBoundingBox();
+                    }
+                });
+
+                cellDivs.expandCollapse = expandCollapse;
+                cellDivs.expandCollapse.tabIndex = oldTabIndex;
             }
 
 
@@ -532,29 +569,6 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
             rows.innerText = cell.value.rowCountDisplayString;
             cellContainer.appendChild(rows);
 
-            mxEvent.addListener(cellBodyContainer, 'keydown', (evt) => {
-                if (evt.keyCode === 13 || evt.keyCode === 32) {
-                    if (!expandCollapse) {
-                        return;
-                    }
-                    const currentCell = cell;
-                    const collapse = !currentCell.collapsed;
-                    const icon = collapse ? expandCollapsePaths.expand : expandCollapsePaths.collapse;
-                    expandCollapse.style.backgroundImage = 'url(' + icon + ')';
-
-                    // undefined is for the middle parameter since the overwritten definition of foldCells doesn't reference it.
-                    this.foldCells(collapse, undefined, [currentCell]);
-                    cell.cellDivs.body.focus();
-
-                    if (!collapse) {
-                        self.redrawExpensiveOperatorHighlighting();
-                    }
-
-                    evt.stopPropagation();
-                    evt.preventDefault();
-                }
-            });
-
             mxEvent.addListener(cellContainer, 'click', (evt) => {
                 cellBodyContainer.focus();
             });
@@ -564,6 +578,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
             if (this.firstLoad && cell.value.isRoot) {
                 this.firstLoad = false;
                 cellDivs.body.tabIndex = 0;
+                cellDivs.expandCollapse.tabIndex = 0;
             }
             return cellContainer;
         }
