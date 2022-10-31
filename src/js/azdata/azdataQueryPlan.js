@@ -580,8 +580,12 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
 
             if (this.firstLoad && cell.value.isRoot) {
                 this.firstLoad = false;
-                cellDivs.body.tabIndex = 0;
-                cellDivs.expandCollapse.tabIndex = 0;
+                if(cellDivs.body){
+                    cellDivs.body.tabIndex = 0;
+                }
+                if(cellDivs.expandCollapse){
+                    cellDivs.expandCollapse.tabIndex = 0;
+                }
             }
             return cellContainer;
         }
