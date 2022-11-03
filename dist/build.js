@@ -94334,7 +94334,7 @@ azdataQueryPlan.prototype.findExpensiveOperator = function (getExpenseMetricValu
         const node = stack.pop();
         const costValue = getExpenseMetricValue(node);
 
-        if (costValue) {
+        if (costValue !== undefined && costValue >= 0) {
             expensiveOperators.push(node);
             expensiveCostValues.push(costValue);
         }
