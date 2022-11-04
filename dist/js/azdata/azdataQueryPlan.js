@@ -1365,14 +1365,14 @@ azdataQueryPlan.prototype.highlightExpensiveOperator = function (getExpenseMetri
 
     const expensiveNode = this.findExpensiveOperator(getExpenseMetricValue);
     if (!expensiveNode) {
-        return false;
+        return undefined;
     }
 
     this.expensiveCell = this.graph.model.getCell(expensiveNode.id);
     this.expensiveCellHighlighter = new mxCellHighlight(this.graph, HIGHLIGHTER_COLOR, STROKE_WIDTH);
     this.expensiveCellHighlighter.highlight(this.graph.view.getState(this.expensiveCell));
 
-    return true;
+    return expensiveNode.id;
 };
 
 /**
