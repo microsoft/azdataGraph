@@ -459,7 +459,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
 
             mxEvent.addListener(cellBodyContainer, 'keydown', (evt) => {
                 if (this.showTooltipOnClick && this.showTooltip) {
-                    if (evt.keyCode === 13 || evt.keyCode === 32) {
+                    if (evt.keyCode === 13) {
                         if (this.tooltipHandler.isVisible) {
                             this.tooltipHandler.hide();
                         } else {
