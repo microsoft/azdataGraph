@@ -22860,7 +22860,7 @@ mxShape.prototype.redraw = function()
 	if (this.visible && this.checkBounds())
 	{	
 		if(this.node?.style){
-			this.node.style.visibility = 'visible';
+			this.node.style.display = '';
 		}
 
 		this.clear();
@@ -22878,7 +22878,7 @@ mxShape.prototype.redraw = function()
 	}
 	else
 	{
-		this.node.style.visibility = 'hidden';
+		this.node.style.display = 'none';
 		this.boundingBox = null;
 	}
 };
