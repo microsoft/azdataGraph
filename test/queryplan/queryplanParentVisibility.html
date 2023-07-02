@@ -1,0 +1,60 @@
+<!--
+ Tests the visibility of graph contents when the parent container is hidden. In default case, the graph contents are visible even when the parent container is hidden. However, I have made changes to mxShape class to use display: none instead of visibility: hidden. This change makes the graph contents invisible when the parent container is hidden.
+-->
+<html>
+
+<head>
+	<title>Query Plan test</title>
+	<script type="text/javascript">
+		mxForceIncludes = true;
+		mxBasePath = '../../src';
+	</script>
+	<script type="text/javascript" src="./src/js/graph.js"></script>
+	<script type="text/javascript" src="../../src/js/mxClient.js"></script>
+	<script type="text/javascript" src="./src/js/queryPlanSetup.js"></script>
+	<script type="text/javascript">
+
+		function main(container) {
+			var graph = getGraph();
+
+			var imageBasePath = './icons/';
+			var iconPaths = getIconPaths(imageBasePath);
+			var badgePaths = getBadgePaths(imageBasePath);
+			var collapseExpandPaths = getCollapseExpandPaths(imageBasePath);
+
+			let queryPlanConfiguration = {
+				container: container,
+				queryPlanGraph: graph,
+				iconPaths: iconPaths,
+				badgeIconPaths: badgePaths,
+				expandCollapsePaths: collapseExpandPaths,
+				showTooltipOnClick: true
+			};
+			new azdataQueryPlan(queryPlanConfiguration);
+		};
+
+		setInterval(function () {
+			const container = document.getElementById('graphContainer');
+			container.style.visibility = container.style.visibility === 'hidden' ? '' : 'hidden';
+		}, 5000);
+
+	</script>
+	<style>
+		#graphContainer {
+			position: relative;
+			overflow: scroll;
+			width: 1500px;
+			height: 800px;
+			cursor: default;
+			border: 1px solid;
+			margin-top: 100px;
+			margin-left: 100px;
+		}
+	</style>
+</head>
+
+<body onload="main(document.getElementById('graphContainer'))">
+	<div id="graphContainer"></div>
+</body>
+
+</html>
