@@ -3,3 +3,4 @@ dist
 .jshintrc
 examples/**/dist
 .idea/
+*.tgz

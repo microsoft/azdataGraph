@@ -20,3 +20,4 @@ mxgraph-dotnet.*suo
 php/
 pom.xml
 target
+*.tgz
