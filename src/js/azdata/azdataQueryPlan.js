@@ -326,7 +326,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
     graph.cellsMovable = false;
     graph.edgeMovable = false;
     graph.setHtmlLabels(true);
-    graph.container.firstChild.setAttribute('role', 'tree');
+    graph.container.firstChild.setAttribute('role', 'generic');
 
     graph.addListener(mxEvent.CLICK, function (sender, evt) {
 
