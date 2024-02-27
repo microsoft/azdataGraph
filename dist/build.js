@@ -93311,6 +93311,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                             edgeElement.tabIndex = -1;
                         } else {
                             cell.cellDivs.body.tabIndex = -1;
+                            cell.cellDivs.body.ariaSelected = false;
                             if(cell.cellDivs.expandCollapse) {
                                 cell.cellDivs.expandCollapse.tabIndex = -1;
                             }
@@ -93328,6 +93329,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                             edgeElement.focus();
                         } else {
                             cell.cellDivs.body.tabIndex = 0;
+                            cell.cellDivs.body.ariaSelected = true;
                             if(cell.cellDivs.expandCollapse) {
                                 cell.cellDivs.expandCollapse.tabIndex = 0;
                             }
@@ -93526,6 +93528,7 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                 this.firstLoad = false;
                 if(cellDivs.body){
                     cellDivs.body.tabIndex = 0;
+                    cellDivs.body.ariaSelected = true;
                 }
                 if(cellDivs.expandCollapse){
                     cellDivs.expandCollapse.tabIndex = 0;
