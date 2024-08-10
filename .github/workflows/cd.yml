@@ -29,9 +29,10 @@ jobs:
       - name: Install Dependencies
         run: npm install
       
-      - name: Check if package.json has changed
-        id: check
-        uses: EndBug/version-check@v2
+      - uses: MontyD/package-json-updated-action
+        id: version-updated
+        with:
+          path: package.json
 
       - name: Create npm package
         run: npm pack
@@ -59,7 +60,7 @@ jobs:
         run: |
           cd ./release
           git add .
-          git commit -m "Release v${{ steps.check.outputs.version }}"
+          git commit -m "Release v${{ steps.version-updated.outputs.has-updated }}"
           git push origin release
       
       - name: Generate release notes
@@ -75,7 +76,7 @@ jobs:
           echo ${{ env.RELEASE_NOTES }}
           echo ${{ env.GIT_LOG }}
           echo ${{ env.RELEASE_NOTES }}
-          echo v${{ steps.check.outputs.version }}
+          echo v${{  steps.version-updated.outputs.has-updated }}
 
 
       
