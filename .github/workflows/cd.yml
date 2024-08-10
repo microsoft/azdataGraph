@@ -55,6 +55,7 @@ jobs:
         with:
           ref: release
           path: ./release
+          fetch-depth: 0
 
       - name: Extract package contents
         run: |
