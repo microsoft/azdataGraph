@@ -81,7 +81,7 @@ jobs:
           
       
       - name: Generate release notes
-        if: skip_release == 'false'
+        if: env.skip_release == 'false'
         run: |
           cd ./release
           PREV_TAG=$(git describe --tags --abbrev=0)
@@ -92,14 +92,14 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
       - name: Printing release notes
-        if: skip_release == 'false'
+        if: env.skip_release == 'false'
         run: |
           echo " ${{ env.RELEASE_NOTES }} "
           echo v${{ env.version }}
           echo ${{ env.exists }}
 
       - name: Create Release
-        if: env.exists == 'false' && skip_release == 'false'
+        if: env.exists == 'false' && env.skip_release == 'false'
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
