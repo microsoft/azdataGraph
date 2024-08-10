@@ -227,6 +227,14 @@ td.mxPopupMenuIcon {
 	background-color: #FFFFFF;
 }
 
+.graph-cell .graph-icon-badge-expand.expanded {
+	background-image: url('../images/expanded.gif');
+}
+
+.graph-cell .graph-icon-badge-expand.collapsed {
+	background-image: url('../images/collapsed.gif');
+}
+
 .graph-cell-cost{
 	border-radius: 15px;
 	width: fit-content;
