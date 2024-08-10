@@ -84,8 +84,6 @@ jobs:
         if: always()
         run: |
           echo ${{ env.RELEASE_NOTES }}
-          echo ${{ env.GIT_LOG }}
-          echo ${{ env.RELEASE_NOTES }}
           echo v${{ env.version }}
           echo ${{ env.exists }}
 
