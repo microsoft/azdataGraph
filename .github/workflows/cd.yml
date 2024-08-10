@@ -69,6 +69,7 @@ jobs:
 
       - name: Generate release notes
         run: |
+          cd ./release
           PREV_TAG=$(git describe --tags --abbrev=0)
           echo "${PREV_TAG}"
           GIT_LOG=$(git log --pretty=format:"%h - %s (%an)" "${PREV_TAG}..HEAD")
