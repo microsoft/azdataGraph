@@ -32,6 +32,9 @@ jobs:
       - name: Check if package.json has changed
         id: check
         uses: EndBug/version-check@v2
+        with:
+          static-checking: localIsNew
+
 
       - name: Create npm package
         run: npm pack
