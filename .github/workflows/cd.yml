@@ -75,6 +75,7 @@ jobs:
           cd ./release
           PREV_TAG=$(git describe --tags --abbrev=0)
           echo "${PREV_TAG}"
+          git log --pretty=format:"%h - %s (%an)" "${PREV_TAG}..HEAD"
           GIT_LOG=$(git log --pretty=format:"%h - %s (%an)" "${PREV_TAG}..HEAD")
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
           echo "${GIT_LOG}" >> $GITHUB_ENV
