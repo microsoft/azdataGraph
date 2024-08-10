@@ -12,6 +12,7 @@ permissions:
   actions: read
   checks: write
   deployments: write
+  packages: write
 
 jobs:
   build-and-test:
@@ -69,13 +70,13 @@ jobs:
           git add .
           git commit -m "Release v${{ env.version }}"
           echo "Pushing with message: Release v${{ env.version }}"
+          git push origin release
       
       - name: Generate release notes
         run: |
           cd ./release
           PREV_TAG=$(git describe --tags --abbrev=0)
           echo "${PREV_TAG}"
-          git log --pretty=format:"%h - %s (%an)" "${PREV_TAG}..HEAD"
           GIT_LOG=$(git log --pretty=format:"%h - %s (%an)" "${PREV_TAG}..HEAD")
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
           echo "${GIT_LOG}" >> $GITHUB_ENV
@@ -87,6 +88,19 @@ jobs:
           echo " ${{ env.RELEASE_NOTES }} "
           echo v${{ env.version }}
           echo ${{ env.exists }}
+
+      - name: Create Release
+        if: env.exists == 'false'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.version }}
+          release_name: Release v${{ env.version }}
+          body: ${{ env.RELEASE_NOTES }}
+          draft: false
+          prerelease: false
+          commitish: release
 
 
       
