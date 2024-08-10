@@ -40,6 +40,7 @@ jobs:
             echo "Tag v${VERSION} does not exist."
             echo "exists=false" >> $GITHUB_ENV
           fi
+          echo "version=${VERSION}" >> $GITHUB_ENV
 
       - name: Create npm package
         run: npm pack
@@ -64,9 +65,9 @@ jobs:
           git config --global user.name "github-actions[bot]"
           cd ./release
           git add .
-          git commit -m "Release v${{ steps.check.outputs.version }}"
-          echo "Pushing with message: Release v${{ steps.check.outputs.version }}"
-
+          git commit -m "Release v${{ env.VERSION }}"
+          echo "Pushing with message: Release v${{ env.VERSION }}"
+      
       - name: Generate release notes
         run: |
           cd ./release
@@ -76,7 +77,7 @@ jobs:
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
           echo "${GIT_LOG}" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
-      
+
       - name: Printing release notes
         run: |
           echo ${{ env.RELEASE_NOTES }}
