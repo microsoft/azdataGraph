@@ -83,7 +83,7 @@ jobs:
       - name: Printing release notes
         if: always()
         run: |
-          echo ${{ env.RELEASE_NOTES }}
+          echo " ${{ env.RELEASE_NOTES }} "
           echo v${{ env.version }}
           echo ${{ env.exists }}
 
