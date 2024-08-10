@@ -42,7 +42,6 @@ jobs:
             echo "Tag v${VERSION} does not exist."
             echo "exists=false" >> $GITHUB_ENV
           fi
-          
 
       - name: Create npm package
         run: npm pack
