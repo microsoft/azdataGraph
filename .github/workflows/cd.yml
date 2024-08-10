@@ -66,8 +66,8 @@ jobs:
           git config --global user.name "github-actions[bot]"
           cd ./release
           git add .
-          git commit -m "Release v${{ env.VERSION }}"
-          echo "Pushing with message: Release v${{ env.VERSION }}"
+          git commit -m "Release v${{ env.version }}"
+          echo "Pushing with message: Release v${{ env.version }}"
       
       - name: Generate release notes
         run: |
@@ -85,7 +85,7 @@ jobs:
           echo ${{ env.RELEASE_NOTES }}
           echo ${{ env.GIT_LOG }}
           echo ${{ env.RELEASE_NOTES }}
-          echo v${{ env.VERSION }}
+          echo v${{ env.version }}
           echo ${{ env.exists }}
 
 
