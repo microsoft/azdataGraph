@@ -33,6 +33,7 @@ jobs:
         id: tag_check
         run: |
           VERSION=$(jq -r '.version' package.json)
+          echo "version=${VERSION}" >> $GITHUB_ENV
           if git rev-parse "${VERSION}" >/dev/null 2>&1; then
             echo "Tag v${VERSION} already exists."
             echo "exists=true" >> $GITHUB_ENV
@@ -40,7 +41,7 @@ jobs:
             echo "Tag v${VERSION} does not exist."
             echo "exists=false" >> $GITHUB_ENV
           fi
-          echo "version=${VERSION}" >> $GITHUB_ENV
+          
 
       - name: Create npm package
         run: npm pack
@@ -79,11 +80,12 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
       - name: Printing release notes
+        if: always()
         run: |
           echo ${{ env.RELEASE_NOTES }}
           echo ${{ env.GIT_LOG }}
           echo ${{ env.RELEASE_NOTES }}
-          echo v${{ steps.check.outputs.version }}
+          echo v${{ env.VERSION }}
           echo ${{ env.exists }}
 
 
