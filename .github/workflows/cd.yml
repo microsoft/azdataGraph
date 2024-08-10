@@ -1,4 +1,4 @@
-name: CI
+name: CS
 on:
     schedule:
       - cron: '0 0 * * *'
@@ -15,7 +15,7 @@ permissions:
   packages: write
 
 jobs:
-  build-and-test:
+  create_release:
     runs-on: ubuntu-latest
 
     steps:
@@ -67,11 +67,21 @@ jobs:
           git config --global user.name "github-actions[bot]"
           cd ./release
           git add .
-          git commit -m "Release v${{ env.version }}"
-          echo "Pushing with message: Release v${{ env.version }}"
-          git push origin release
+          CHANGED_FILES=$(git diff-index --quiet HEAD)
+          if [ -n "$CHANGED_FILES" ]; then
+            echo "Pushing with message: Release v${{ env.version }}"
+            git commit -m "Release v${{ env.version }}"
+            echo "Pushing with message: Release v${{ env.version }}"
+            git push origin release
+            echo "skip_release=false" >> $GITHUB_ENV
+          else
+            echo "No changes to push"
+            echo "skip_release=true" >> $GITHUB_ENV
+          fi
+          
       
       - name: Generate release notes
+        if: skip_release == 'false'
         run: |
           cd ./release
           PREV_TAG=$(git describe --tags --abbrev=0)
@@ -82,14 +92,14 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
       - name: Printing release notes
-        if: always()
+        if: skip_release == 'false'
         run: |
           echo " ${{ env.RELEASE_NOTES }} "
           echo v${{ env.version }}
           echo ${{ env.exists }}
 
       - name: Create Release
-        if: env.exists == 'false'
+        if: env.exists == 'false' && skip_release == 'false'
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
