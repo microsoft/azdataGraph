@@ -51,18 +51,15 @@ jobs:
         run: |
           tar -xzf *.tgz --strip-components=1 -C ./release
 
-      - name: Set up Git use
-        run: |
-          git config --global user.email "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-      
       - name: Push package contents to a new branch
         run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
           cd ./release
           git add .
           git commit -m "Release v${{ steps.check.outputs.version }}"
-          git push origin release
-      
+          echo "Pushing with message: Release v${{ steps.check.outputs.version }}"
+
       - name: Generate release notes
         run: |
           PREV_TAG=$(git describe --tags --abbrev=0 HEAD^1)
