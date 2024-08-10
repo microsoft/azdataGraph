@@ -29,7 +29,8 @@ jobs:
       - name: Install Dependencies
         run: npm install
       
-      - uses: MontyD/package-json-updated-action
+      - name: Check for updated version
+        uses: MontyD/package-json-updated-action
         id: version-updated
         with:
           path: package.json
