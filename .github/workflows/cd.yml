@@ -28,16 +28,11 @@ jobs:
       
       - name: Install Dependencies
         run: npm install
-
+      
       - name: Check if package.json has changed
         id: check
-        run: |
-          if [ $(git diff --name-only HEAD^1 HEAD | grep 'package.json' | wc -l) -eq 0 ]; then
-            echo "No version change detected in package.json."
-          else
-            echo "Version change detected."
-          fi
-      
+        uses: EndBug/version-check@v2
+
       - name: Create npm package
         run: npm pack
       
@@ -62,10 +57,10 @@ jobs:
       
       - name: Push package contents to a new branch
         run: |
-          VERSION=$(jq -r '.version' ../package.json)
           cd ./release
           git add .
-          git commit -m "Release ${VERSION}"
+          git commit -m "Release v${{ steps.check.outputs.version }}"
+          git push origin release
       
       - name: Generate release notes
         run: |
