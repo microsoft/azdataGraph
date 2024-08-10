@@ -62,7 +62,7 @@ jobs:
       
       - name: Push package contents to a new branch
         run: |
-          VERSION=$(jq -r '.version' package.json)
+          VERSION=$(jq -r '.version' ../package.json)
           cd ./release
           git add .
           git commit -m "Release ${VERSION}"
