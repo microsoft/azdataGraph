@@ -29,12 +29,17 @@ jobs:
       - name: Install Dependencies
         run: npm install
       
-      - uses: MontyD/package-json-updated-action
-        id: version-updated
-        with:
-          path: package.json
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check if tag is present
+        id: tag_check
+        run: |
+          VERSION=$(jq -r '.version' package.json)
+          if git rev-parse "${VERSION}" >/dev/null 2>&1; then
+            echo "Tag v${VERSION} already exists."
+            echo "exists=true" >> $GITHUB_ENV
+          else
+            echo "Tag v${VERSION} does not exist."
+            echo "exists=false" >> $GITHUB_ENV
+          fi
 
       - name: Create npm package
         run: npm pack
@@ -76,6 +81,7 @@ jobs:
           echo ${{ env.GIT_LOG }}
           echo ${{ env.RELEASE_NOTES }}
           echo v${{ steps.check.outputs.version }}
+          echo ${{ env.exists }}
 
 
       
