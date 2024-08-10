@@ -47,8 +47,12 @@ jobs:
 
       - name: Checkout release branch
         uses: actions/checkout@v4
-        ref: release
         path: './release'
+      
+      - name: Checkout release branch
+        run: |
+          cd ./release
+          git checkout release
 
       - name: Extract package contents
         run: |
