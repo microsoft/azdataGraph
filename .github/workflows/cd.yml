@@ -29,12 +29,10 @@ jobs:
       - name: Install Dependencies
         run: npm install
       
-      - name: Check if package.json has changed
+      - uses: johnnybenson/package-json-versioned-action@v1.0.5
         id: check
-        uses: EndBug/version-check@v2
         with:
-          static-checking: localIsNew
-
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create npm package
         run: npm pack
