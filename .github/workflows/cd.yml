@@ -10,9 +10,6 @@ on:
 permissions:
   contents: write
   actions: read
-  checks: write
-  deployments: write
-  packages: write
 
 jobs:
   create_release:
@@ -67,7 +64,7 @@ jobs:
           git config --global user.name "github-actions[bot]"
           cd ./release
           git add .
-          CHANGED_FILES=$(git diff-index --quiet HEAD)
+          CHANGED_FILES=$(git diff-index HEAD)
           if [ -n "$CHANGED_FILES" ]; then
             echo "Pushing with message: Release v${{ env.version }}"
             git commit -m "Release v${{ env.version }}"
