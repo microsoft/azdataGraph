@@ -75,7 +75,7 @@ jobs:
       - name: Generate release notes
         if: env.skip_release == 'false'
         run: |
-          GIT_LOG=$(git log --pretty=format:"%h - %s (%an)" "HEAD^1..HEAD")
+          GIT_LOG=$(git log --pretty=format:"%h - %s (%an)" "HEAD^..HEAD")
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
           echo "${GIT_LOG}" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
