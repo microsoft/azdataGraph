@@ -82,7 +82,6 @@ jobs:
           fi
 
       - name: Printing release notes
-        if: env.skip_release == 'false'
         run: |
           echo " ${{ env.RELEASE_NOTES }} "
           echo v${{ env.version }}
