@@ -42,10 +42,6 @@ jobs:
 
       - name: Create npm package
         run: npm pack
-      
-      - name: Extract package contents
-        run: npm pack
-        id: npm_pack
 
       - name: Checkout release branch
         uses: actions/checkout@v4
@@ -54,10 +50,12 @@ jobs:
           path: ./release
           fetch-depth: 0
 
+      # Extract the package contents to the release branch
       - name: Extract package contents
         run: |
           tar -xzf *.tgz --strip-components=1 -C ./release
 
+      # Push the package contents to the release branch
       - name: Push package contents to a new branch
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -76,18 +74,16 @@ jobs:
             echo "skip_release=true" >> $GITHUB_ENV
           fi
           
-      
+      # Generate release notes
       - name: Generate release notes
         if: env.skip_release == 'false'
         run: |
-          cd ./release
-          PREV_TAG=$(git describe --tags --abbrev=0)
-          echo "${PREV_TAG}"
           GIT_LOG=$(git log --pretty=format:"%h - %s (%an)" "${PREV_TAG}..HEAD")
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
           echo "${GIT_LOG}" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
+      # Print release notes
       - name: Printing release notes
         if: env.skip_release == 'false'
         run: |
