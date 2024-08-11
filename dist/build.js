@@ -93458,15 +93458,15 @@ azdataQueryPlan.prototype.init = function (queryPlanConfiguration) {
                 expandCollapse.setAttribute('role', 'button');
                 expandCollapse.ariaLabel = (cell.collapsed? 'Expand node' : 'Collapse node ') + cell.value.label;
                 const icon = cell.collapsed ? expandCollapsePaths.expand : expandCollapsePaths.collapse;
-                expandCollapse.style.backgroundImage = 'url(' + icon + ')';
+                expandCollapse.setAttribute ('class', cell.collapsed? 'graph-icon-badge-expand expanded' : 'graph-icon-badge-expand collapsed');
                 cellContainer.appendChild(expandCollapse);
                 mxEvent.addListener(expandCollapse, 'click', (evt) => {
 
                     const currentCell = cell;
                     const collapse = !currentCell.collapsed;
                     const icon = collapse ? expandCollapsePaths.expand : expandCollapsePaths.collapse;
+                    expandCollapse.setAttribute ('class', cell.collapsed? 'graph-icon-badge-expand expanded' : 'graph-icon-badge-expand collapsed');
                     expandCollapse.ariaLabel = (cell.collapsed? 'Expand node' : 'Collapse node ') + cell.value.label;
-                    expandCollapse.style.backgroundImage = 'url(' + icon + ')';
 
                     // undefined is for the middle parameter since the overwritten definition of foldCells doesn't reference it.
                     this.foldCells(collapse, undefined, [currentCell]);
