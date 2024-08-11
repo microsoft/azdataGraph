@@ -30,7 +30,6 @@ jobs:
         run: npm install
 
       - name: Generate release notes
-        if: env.skip_release == 'false'
         run: |
           GIT_LOG=$(git log --pretty=format:"%h - %s (%an)" "HEAD^..HEAD")
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
