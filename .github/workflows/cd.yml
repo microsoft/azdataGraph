@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -26,6 +28,14 @@ jobs:
       
       - name: Install Dependencies
         run: npm install
+
+      - name: Generate release notes
+        if: env.skip_release == 'false'
+        run: |
+          GIT_LOG=$(git log --pretty=format:"%h - %s (%an)" "HEAD^..HEAD")
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          echo "${GIT_LOG}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
       
       - name: Check if tag is present
         id: tag_check
@@ -71,14 +81,6 @@ jobs:
             echo "No changes to push"
             echo "skip_release=true" >> $GITHUB_ENV
           fi
-          
-      - name: Generate release notes
-        if: env.skip_release == 'false'
-        run: |
-          GIT_LOG=$(git log --pretty=format:"%h - %s (%an)" "HEAD^..HEAD")
-          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
-          echo "${GIT_LOG}" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
 
       - name: Printing release notes
         if: env.skip_release == 'false'
