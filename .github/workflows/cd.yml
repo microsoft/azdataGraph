@@ -31,7 +31,8 @@ jobs:
 
       - name: Generate release notes
         run: |
-          GIT_LOG=$(git log --pretty=format:"%h - %s (%an)" "HEAD^..HEAD")
+          git log --pretty=format:"%h - %s (%an)" $(git log -G '"version":' -n 2 --pretty=format:%H -- package.json | sed -n 2p)..HEAD
+          GIT_LOG=$(git log --pretty=format:"%h - %s (%an)" $(git log -G '"version":' -n 2 --pretty=format:%H -- package.json | sed -n 2p)..HEAD)
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
           echo "${GIT_LOG}" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
@@ -64,6 +65,7 @@ jobs:
           tar -xzf *.tgz --strip-components=1 -C ./release
 
       - name: Push package contents to a new branch
+        if: env.exists == 'false'
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
