@@ -228,11 +228,11 @@ td.mxPopupMenuIcon {
 }
 
 .graph-cell .graph-icon-badge-expand.expanded {
-	background-image: url('../images/expanded.gif');
+	background-image: url('../images/collapsed.gif');
 }
 
 .graph-cell .graph-icon-badge-expand.collapsed {
-	background-image: url('../images/collapsed.gif');
+	background-image: url('../images/expanded.gif');
 }
 
 .graph-cell-cost{
