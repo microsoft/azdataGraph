@@ -16,6 +16,8 @@ module.exports = function (grunt) {
     });
     deps = ["./js/mxClient.js"].concat(deps.slice(0));
 
+    grunt.loadNpmTasks('grunt-contrib-uglify');
+
   grunt.initConfig({
     copy: {
       main: {
@@ -86,14 +88,23 @@ module.exports = function (grunt) {
         }
       }
     },
+    // Uglify task configuration.
+    uglify: {
+      build: {
+        files: {
+          'dist/build.js': ['dist/build.js'] // Specify the source and destination files
+        }
+      }
+    },
   });
 
   require("load-grunt-tasks")(grunt);
   grunt.registerTask("default", [
     "copy",
-    "concat"
+    "concat",
     // ,
     // "webpack"
+    "uglify"
   ]);
   grunt.registerTask("build", [
     "default"
