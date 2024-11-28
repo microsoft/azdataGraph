@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Schema Designer test</title>
+        <script type="text/javascript">
+            mxForceIncludes = true;
+            mxBasePath = '../../src';
+        </script>
+        <script type="text/javascript" src="../../src/js/mxClient.js"></script>
+        <link rel="stylesheet" type="text/css" href="../../src/js/schemaDesigner/schemaDesigner.css">
+        <style>
+            :root {
+                --color-toolbar-bg: #2c2c2c;
+                --color-toolbar-text: #fff;
+                --color-toolbar-button-hover: #383838;
+                --color-toolbar-divider: #444444;
+                --color-border: #c3c3c3;
+                --color-outline-color: #0c8ce9;
+                --color-graph-gridLines: #c3c3c3;
+                --color-graph-outline-background: #fff;
+            }
+            .body{
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                padding: 10px;
+            }
+            #graphContainer {
+                position: relative;
+                overflow: hidden;
+                width: 100%;
+                height: calc(100vh - 20px);
+            }
+        </style>
+    </head>
+    <body>
+        <div id="graphContainer"></div>
+    </body>
+    <script type="text/javascript">
+        const container = document.getElementById('graphContainer');
+        const sd = new SchemaDesigner(container, {
+            toolbar: {
+                addTable: {
+                    icon: './icons/table.svg',
+                    title: 'Add Table',
+                },
+                undo: {
+                    icon: './icons/undo.svg',
+                    title: 'Undo',
+                },
+                redo: {
+                    icon: './icons/redo.svg',
+                    title: 'Redo',
+                },
+                delete: {
+                    icon: './icons/delete.svg',
+                    title: 'Delete',
+                },
+                zoomIn: {
+                    icon: './icons/zoomIn.svg',
+                    title: 'Zoom In',
+                },
+                zoomOut: {
+                    icon: './icons/zoomOut.svg',
+                    title: 'Zoom Out',
+                },
+            }
+        });
+    </script>
+</html>

@@ -795,6 +795,7 @@ if (mxForceIncludes)
 	mxClient.include(mxClient.basePath+'/js/io/mxDefaultPopupMenuCodec.js');
 	mxClient.include(mxClient.basePath+'/js/io/mxEditorCodec.js');
 	mxClient.include(mxClient.basePath+'/js/azdata/azdataQueryPlan.js');
+	mxClient.include(mxClient.basePath+'/js/schemaDesigner/schemaDesigner.js');
 // PREPROCESSOR-REMOVE-START
 }
 // PREPROCESSOR-REMOVE-END
