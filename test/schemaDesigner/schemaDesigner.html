@@ -10,6 +10,7 @@
         <link rel="stylesheet" type="text/css" href="../../src/js/schemaDesigner/schemaDesigner.css">
         <style>
             :root {
+                --graph-font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                 --color-toolbar-bg: #2c2c2c;
                 --color-toolbar-text: #fff;
                 --color-toolbar-button-hover: #383838;
@@ -48,7 +49,7 @@
         const sd = new SchemaDesigner(container, {
             toolbar: {
                 addTable: {
-                    icon: './icons/table.svg',
+                    icon: './icons/addTable.svg',
                     title: 'Add Table',
                 },
                 undo: {

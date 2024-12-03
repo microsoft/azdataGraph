@@ -84,6 +84,7 @@ class SchemaDesigner {
         };
 
         var cellStyle = new Object();
+        cellStyle[mxConstants.STYLE_FONTFAMILY] = 'var(--graph-font-family)';
         cellStyle[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
         cellStyle[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
         cellStyle[mxConstants.STYLE_FILLCOLOR] = "#bdc3c7";
@@ -95,7 +96,7 @@ class SchemaDesigner {
         var tableStyle = new Object();
         tableStyle[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_SWIMLANE;
         tableStyle[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
-        tableStyle[mxConstants.STYLE_FILLCOLOR] = "var(--color-graph-table-indicator)";
+        tableStyle[mxConstants.STYLE_FILLCOLOR] = "var(--color-graph-column-indicator)";
         graph.getStylesheet().putCellStyle("table", tableStyle);
 
         var columnStyle = new Object();
@@ -119,6 +120,24 @@ class SchemaDesigner {
                 var tableObject = new Table('newTable', 'dbo', [], pt.x, pt.y, config);
                 tableObject.addColumn(new Column('id', 'int', true, false, false, true, true, null, config));
                 tableObject.addColumn(new Column('name', 'text', true, true, false, false, false, null, config));
+                tableObject.addColumn(new Column('name', 'text', true, true, false, false, false, null, config));
+                tableObject.addColumn(new Column('name', 'text', true, true, false, false, false, null, config));
+                tableObject.addColumn(new Column('name', 'text', true, true, false, false, false, null, config));
+                tableObject.addColumn(new Column('name', 'text', true, true, false, false, false, null, config));
+                tableObject.addColumn(new Column('name', 'text', true, true, false, false, false, null, config));
+                tableObject.addColumn(new Column('name', 'text', true, true, false, false, false, null, config));
+                tableObject.addColumn(new Column('name', 'text', true, true, false, false, false, null, config));
+                tableObject.addColumn(new Column('name', 'text', true, true, false, false, false, null, config));
+                tableObject.addColumn(new Column('name', 'text', true, true, false, false, false, null, config));
+                tableObject.addColumn(new Column('name', 'text', true, true, false, false, false, null, config));
+                tableObject.addColumn(new Column('name', 'text', true, true, false, false, false, null, config));
+                tableObject.addColumn(new Column('name', 'text', true, true, false, false, false, null, config));
+                tableObject.addColumn(new Column('name', 'text', true, true, false, false, false, null, config));
+                tableObject.addColumn(new Column('name', 'text', true, true, false, false, false, null, config));
+                tableObject.addColumn(new Column('name', 'text', true, true, false, false, false, null, config));
+                tableObject.addColumn(new Column('name', 'text', true, true, false, false, false, null, config));
+                tableObject.addColumn(new Column('name', 'text', true, true, false, false, false, null, config));
+
                 this.renderTable(tableObject);
             }
         );
@@ -201,16 +220,8 @@ class SchemaDesigner {
             table.value = tableObject;
             table.geometry.x = tableObject.x;
             table.geometry.y = tableObject.y;
+            // table.geometry.alternateBounds = new mxRectangle(0, 0, table.geometry.width, table.geometry.height);
             this.graph.addCell(table, parent);
-            table.geometry.alternateBounds = new mxRectangle(0, 0, table.geometry.width, table.geometry.height);
-
-            for (let i = 0; i < tableObject.columns.length; i++) {
-                var column = new mxCell(tableObject.columns[i], new mxGeometry(0, 0, 260, 28), 'column');
-                column.value = tableObject.columns[i];
-                column.setVertex(true);
-                column.setConnectable(false);
-                table.insert(column);
-            }
         }
         finally {
             this.model.endUpdate();
@@ -244,21 +255,42 @@ class Table {
 
     render() {
         const parent = document.createElement('div');
-        parent.classList.add('sd-table-parent');
-        const indicator = document.createElement('div');
-        indicator.classList.add('sd-table-indicator');
-        parent.appendChild(indicator);
-        const div = document.createElement('div');
-        div.classList.add('sd-table');
-        const icon = document.createElement('div');
-        icon.classList.add('sd-table-icon');
-        div.appendChild(icon);
-        icon.style.backgroundImage = `url(${this.config.icons.table})`;
-        const name = document.createElement('div');
-        name.classList.add('sd-table-name');
-        name.innerText = `${this.schema}.${this.name}`;
-        div.appendChild(name);
-        parent.appendChild(div);
+        parent.classList.add('sd-table');
+        const colorIndicator = document.createElement('div');
+        colorIndicator.classList.add('sd-table-color-indicator');
+        parent.appendChild(colorIndicator);
+        const header = document.createElement('div');
+        header.classList.add('sd-table-header');
+        const headerIcon = document.createElement('div');
+        headerIcon.classList.add('sd-table-header-icon');
+        headerIcon.style.backgroundImage = `url(${this.config.icons.table})`;
+        header.appendChild(headerIcon);
+        const headerText = document.createElement('div');
+        headerText.classList.add('sd-table-header-text');
+        headerText.innerText = `${this.schema}.${this.name}`;
+        header.appendChild(headerText);
+        parent.appendChild(header);
+
+        const columns = document.createElement('div');
+        columns.classList.add('sd-table-columns');
+        this.columns.forEach(column => {
+            const columnDiv = document.createElement('div');
+            columnDiv.classList.add('sd-table-column');
+            const columnIcon = document.createElement('div');
+            columnIcon.classList.add('sd-table-column-icon');
+            columnIcon.style.backgroundImage = `url(${this.config.dataTypeIcon[column.datatype]})`;
+            columnDiv.appendChild(columnIcon);
+            const columnText = document.createElement('div');
+            columnText.classList.add('sd-table-column-text');
+            columnText.innerText = column.name;
+            columnDiv.appendChild(columnText);
+            const columnConstraints = document.createElement('div');
+            columnConstraints.classList.add('sd-table-column-constraints');
+            columnConstraints.innerText = column.getConstraintText();
+            columnDiv.appendChild(columnConstraints);
+            columns.appendChild(columnDiv);
+        });
+        parent.appendChild(columns);
         return parent;
     }
 }
@@ -284,34 +316,7 @@ class Column {
         if (this.isForeignKey) {
             constraints.push('FK');
         }
-        // if (!this.isNullable) {
-        //     constraints.push('NOT NULL');
-        // }
-        // if (this.isIdentity) {
-        //     constraints.push('IDENTITY');
-        // }
-        // if (this.isUnique) {
-        //     constraints.push('UNIQUE');
-        // }
         return constraints.join(', ');
-    }
-
-    render() {
-        const div = document.createElement('div');
-        div.classList.add('sd-column');
-        const icon = document.createElement('div');
-        icon.classList.add('sd-column-icon');
-        icon.style.backgroundImage = `url(${this.config.dataTypeIcon[this.datatype]})`;
-        div.appendChild(icon);
-        const name = document.createElement('div');
-        name.classList.add('sd-column-name');
-        name.innerText = this.name;
-        div.appendChild(name);
-        const constraints = document.createElement('div');
-        constraints.classList.add('sd-column-constraints');
-        constraints.innerText = this.getConstraintText();
-        div.appendChild(constraints);
-        return div;
     }
 }
 
