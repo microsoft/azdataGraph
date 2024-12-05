@@ -135,6 +135,10 @@
   height: 28px;
 }
 
+.sd-table-column:hover{
+  background-color: var(--color-graph-node-hover);
+}
+
 .sd-table-column-icon {
   width: 26px;
   height: 100%;
@@ -150,8 +154,8 @@
   font-weight: 400;
   align-self: center;
   text-align: left;
-  flex: 1;
   user-select: none;
+  flex: 1;
 }
 
 .sd-table-column-constraints {

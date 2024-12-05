@@ -1,86 +1,181 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Schema Designer test</title>
-        <script type="text/javascript">
-            mxForceIncludes = true;
-            mxBasePath = '../../src';
-        </script>
-        <script type="text/javascript" src="../../src/js/mxClient.js"></script>
-        <link rel="stylesheet" type="text/css" href="../../src/js/schemaDesigner/schemaDesigner.css">
-        <style>
-            :root {
-                --graph-font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                --color-toolbar-bg: #2c2c2c;
-                --color-toolbar-text: #fff;
-                --color-toolbar-button-hover: #383838;
-                --color-toolbar-divider: #444444;
-                --color-border: #c3c3c3;
-                --color-outline-color: #0c8ce9;
-                --color-graph-gridLines: #c3c3c3;
-                --color-graph-outline-background: #fff;
-                --color-graph-cell-highlight: #0c8ce9;
-                --color-graph-outline-tableCell: #1e272e;
-                --color-graph-outline-columnCell: #bdc3c7;
-                --color-graph-background: #ffffff;
-                --color-graph-table-indicator: #00A2AD;
-                --color-graph-column-indicator: #f0f0f0;
-            }
-            .body{
-                margin: 0;
-                padding: 0;
-                width: 100%;
-                height: 100%;
-                padding: 10px;
-            }
-            #graphContainer {
-                position: relative;
-                overflow: hidden;
-                width: 100%;
-                height: calc(100vh - 20px);
-            }
-        </style>
-    </head>
-    <body>
-        <div id="graphContainer"></div>
-    </body>
+  <head>
+    <title>Schema Designer test</title>
     <script type="text/javascript">
-        const container = document.getElementById('graphContainer');
-        const sd = new SchemaDesigner(container, {
-            toolbar: {
-                addTable: {
-                    icon: './icons/addTable.svg',
-                    title: 'Add Table',
-                },
-                undo: {
-                    icon: './icons/undo.svg',
-                    title: 'Undo',
-                },
-                redo: {
-                    icon: './icons/redo.svg',
-                    title: 'Redo',
-                },
-                delete: {
-                    icon: './icons/delete.svg',
-                    title: 'Delete',
-                },
-                zoomIn: {
-                    icon: './icons/zoomIn.svg',
-                    title: 'Zoom In',
-                },
-                zoomOut: {
-                    icon: './icons/zoomOut.svg',
-                    title: 'Zoom Out',
-                },
-            },
-            icons: {
-                table: './icons/tableNode.svg',
-            },
-            dataTypeIcon: {
-                int: './icons/text.svg',
-                varchar: './icons/text.svg',
-                text: './icons/text.svg',
-            }
-        });
+      mxForceIncludes = true;
+      mxBasePath = "../../src";
     </script>
+    <script type="text/javascript" src="../../src/js/mxClient.js"></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="../../src/js/schemaDesigner/schemaDesigner.css"
+    />
+    <style>
+      :root {
+        --graph-font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        --color-toolbar-bg: #2c2c2c;
+        --color-toolbar-text: #fff;
+        --color-toolbar-button-hover: #383838;
+        --color-toolbar-divider: #444444;
+        --color-border: #c3c3c3;
+        --color-outline-color: #0c8ce9;
+        --color-graph-gridLines: #c3c3c3;
+        --color-graph-outline-background: #fff;
+        --color-graph-cell-highlight: #0c8ce9;
+        --color-graph-outline-tableCell: #1e272e;
+        --color-graph-outline-columnCell: #bdc3c7;
+        --color-graph-background: #ffffff;
+        --color-graph-table-indicator: #00a2ad;
+        --color-graph-column-indicator: #f0f0f0;
+        --color-graph-node-hover: #f0f0f0;
+      }
+      .body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        padding: 10px;
+      }
+      #graphContainer {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        height: calc(100vh - 20px);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="graphContainer"></div>
+  </body>
+  <script type="text/javascript">
+    const container = document.getElementById("graphContainer");
+    const config = {
+      toolbar: {
+        addTable: {
+          icon: "./icons/addTable.svg",
+          title: "Add Table",
+        },
+        undo: {
+          icon: "./icons/undo.svg",
+          title: "Undo",
+        },
+        redo: {
+          icon: "./icons/redo.svg",
+          title: "Redo",
+        },
+        delete: {
+          icon: "./icons/delete.svg",
+          title: "Delete",
+        },
+        zoomIn: {
+          icon: "./icons/zoomIn.svg",
+          title: "Zoom In",
+        },
+        zoomOut: {
+          icon: "./icons/zoomOut.svg",
+          title: "Zoom Out",
+        },
+      },
+      icons: {
+        table: "./icons/tableNode.svg",
+        connector: "./icons/connector.svg",
+      },
+      dataTypeIcon: {
+        int: "./icons/numberDataType.svg",
+        varchar: "./icons/text.svg",
+        text: "./icons/text.svg",
+        decimal: "./icons/numberDataType.svg",
+        datetime: "./icons/dateTimeDataType.svg",
+      },
+      schema: {
+        tables: [],
+        relationships: [],
+      },
+    };
+
+    /**
+     * Column Name	Data Type	Constraints
+item_id	INT	PRIMARY KEY, AUTO_INCREMENT
+name	VARCHAR(100)	NOT NULL
+description	TEXT	NULLABLE
+price	DECIMAL(10,2)	NOT NULL
+stock_quantity	INT	NOT NULL, DEFAULT 0
+*/
+
+    const table1 = new Table("Items", "dbo", [], 400, 600, config);
+    table1.addColumn(
+      new Column("item_id", "int", true, false, false, true, true, null, config)
+    );
+    table1.addColumn(
+      new Column("name", "varchar", false, false, false, false, false, 100, config)
+    );
+    table1.addColumn(
+      new Column("description", "text", false, false, false, false, false, null, config)
+    );
+    table1.addColumn(
+      new Column("price", "decimal", false, false, false, false, false, 2, config)
+    );
+    table1.addColumn(
+      new Column("stock_quantity", "int", false, false, false, false, false, null, config)
+    );
+
+    const table2 = new Table("Customers", "dbo", [], 600, 200, config);
+    table2.addColumn(
+      new Column("customer_id", "int", true, false, false, true, true, null, config)
+    );
+    table2.addColumn(
+      new Column("name", "varchar", false, false, false, false, false, 50, config)
+    );
+    table2.addColumn(
+      new Column("email", "varchar", false, false, false, false, false, 50, config)
+    );
+    table2.addColumn(
+      new Column("phone", "varchar", false, false, false, false, false, 50, config)
+    );
+    table2.addColumn(
+      new Column("created_at", "datetime", false, false, false, false, false, null, config)
+    )
+
+    const table3 = new Table("Orders", "dbo", [], 600, 400, config);
+    table3.addColumn(
+      new Column("order_id", "int", true, false, false, true, true, null, config)
+    );
+    table3.addColumn(
+      new Column("customer_id", "int", false, true, false, false, false, null, config)
+    );
+    table3.addColumn(
+      new Column("item_id", "int", false, true, false, false, false, null, config)
+    )
+    table3.addColumn(
+      new Column("quantity", "int", false, false, false, false, false, null, config)
+    )
+    table3.addColumn(
+      new Column("price", "decimal", false, false, false, false, false, 2, config)
+    )
+
+    config.schema.tables.push(table1);
+    config.schema.tables.push(table2);
+    config.schema.tables.push(table3);
+
+    var relationShip1 = new Relationship(
+      "Items",
+      "Orders",
+      "item_id",
+      "item_id",
+    )
+
+    var relationShip2 = new Relationship(
+      "Customers",
+      "Orders",
+      "customer_id",
+      "customer_id",
+    )
+  
+    config.schema.relationships.push(relationShip1);
+    config.schema.relationships.push(relationShip2);
+
+    const sd = new SchemaDesigner(container, config);
+  </script>
 </html>
