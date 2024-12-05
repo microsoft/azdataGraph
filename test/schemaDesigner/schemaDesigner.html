@@ -104,7 +104,7 @@ price	DECIMAL(10,2)	NOT NULL
 stock_quantity	INT	NOT NULL, DEFAULT 0
 */
 
-    const table1 = new Table("Items", "dbo", [], 400, 600, config);
+    const table1 = new Table("Items", "dbo", [], 50, 300, config);
     table1.addColumn(
       new Column("item_id", "int", true, false, false, true, true, null, config)
     );
@@ -121,7 +121,7 @@ stock_quantity	INT	NOT NULL, DEFAULT 0
       new Column("stock_quantity", "int", false, false, false, false, false, null, config)
     );
 
-    const table2 = new Table("Customers", "dbo", [], 600, 200, config);
+    const table2 = new Table("Customers", "dbo", [], 750, 300, config);
     table2.addColumn(
       new Column("customer_id", "int", true, false, false, true, true, null, config)
     );
@@ -138,7 +138,7 @@ stock_quantity	INT	NOT NULL, DEFAULT 0
       new Column("created_at", "datetime", false, false, false, false, false, null, config)
     )
 
-    const table3 = new Table("Orders", "dbo", [], 600, 400, config);
+    const table3 = new Table("Orders", "dbo", [], 400, 600, config);
     table3.addColumn(
       new Column("order_id", "int", true, false, false, true, true, null, config)
     );
@@ -160,15 +160,15 @@ stock_quantity	INT	NOT NULL, DEFAULT 0
     config.schema.tables.push(table3);
 
     var relationShip1 = new Relationship(
-      "Items",
       "Orders",
+      "Items",
       "item_id",
       "item_id",
     )
 
     var relationShip2 = new Relationship(
-      "Customers",
       "Orders",
+      "Customers",
       "customer_id",
       "customer_id",
     )

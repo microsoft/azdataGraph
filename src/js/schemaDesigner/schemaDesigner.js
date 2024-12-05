@@ -355,7 +355,6 @@ class SchemaDesigner {
 
             if (target != null && this.currentRow != null) {
                 var div = target.parentNode;
-                console.log('div', div);
                 var s = state.view.scale;
 
                 icons[0].node.style.visibility = 'visible';
@@ -396,14 +395,16 @@ class SchemaDesigner {
         // Creates the edge state that may be used for preview
         graph.connectionHandler.createEdgeState = function (me) {
             var relation = {};
-            relation.sourceRow = this.currentRow || '0';
-            relation.targetRow = '0';
+            relation.sourceRow = this.currentRow || 0;
+            relation.targetRow = 0;
+
 
             var edge = this.createEdge(relation);
             var style = this.graph.getCellStyle(edge);
             var state = new mxCellState(this.graph.view, edge, style);
             // Stores the source row in the handler
             this.sourceRowNode = this.currentRowNode;
+            console.log('Creating edge state', relation);
 
             return state;
         };
@@ -451,10 +452,12 @@ class SchemaDesigner {
             return;
         }
         const parent = this.graph.getDefaultParent();
+        console.log(sourceTable.value.columns, targetTable.value.columns);
         const sourceRowNumber = sourceTable.value.columns.findIndex(c => c.name === relationship.sourceRowName);
         const targetRowNumber = targetTable.value.columns.findIndex(c => c.name === relationship.targetRowName);
-        relationship.sourceRow = sourceRowNumber;
-        relationship.targetRow = targetRowNumber;
+        relationship.sourceRow = sourceRowNumber + 1;
+        relationship.targetRow = targetRowNumber + 1;
+        console.log('Adding edge',  sourceRowNumber, targetRowNumber);
        this.graph.insertEdge(parent, null, relationship, sourceTable, targetTable);
 
     }
@@ -602,7 +605,6 @@ class Toolbar {
 
 
 mxGraphView.prototype.updateFloatingTerminalPoint = function (edge, start, end, source) {
-    console.log('this csllred');
     var next = this.getNextPoint(edge, end, source);
 
     if(start?.text?.node == undefined) {
