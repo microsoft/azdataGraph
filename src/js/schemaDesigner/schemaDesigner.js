@@ -543,7 +543,10 @@ class SchemaDesigner {
               }
             });
 
-            mxEvent.addListener(div, "scroll", updateEdges);
+            mxEvent.addListener(div, "scroll", () => {
+              state.cell.value.scrollTop = div.scrollTop;
+              updateEdges();
+            });
             mxEvent.addListener(div, "mouseup", updateEdges);
           }
         }
@@ -591,7 +594,7 @@ class SchemaDesigner {
       if (target != null && this.currentRow != null) {
         var div = target.parentNode;
         var s = state.view.scale;
-
+        icons[0].node.style.userSelect = "none";
         icons[0].node.style.visibility = "visible";
         icons[0].bounds.width = s * 24;
         icons[0].bounds.height = s * 24;
@@ -599,6 +602,7 @@ class SchemaDesigner {
         icons[0].bounds.y =
           state.y +
           target.offsetTop * s +
+          - div.scrollTop +
           (target.offsetHeight * s) / 2 -
           icons[0].bounds.height / 1.2; // 1.2 makes the icon completely centered to the target row. Ideally it should be 2 but it is not working as expected.
         icons[0].redraw();
@@ -970,6 +974,10 @@ mxGraphView.prototype.updateFloatingTerminalPoint = function (
         }
       }
     }
+  }
+
+  if(start.cell.value.scrollTop){
+    div.scrollTop = start.cell.value.scrollTop;
   }
 };
 
