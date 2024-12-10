@@ -1,0 +1,28 @@
+{
+  "name": "azdatagraph-ts",
+  "description": "ts version of azdataGraph",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "Apache-2.0",
+  "author": "Microsoft",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/microsoft/azdataGraph.git"
+  },
+  "devDependencies": {
+    "@jgoz/esbuild-plugin-typecheck": "^4.0.2",
+    "@typed-mxgraph/typed-mxgraph": "^1.0.8",
+    "esbuild": "^0.24.0",
+    "httpserver": "^0.3.0",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "node build.js && npx tsc",
+    "watch": "node build.js --watch",
+    "examples": "httpserver -p 4000"
+  },
+  "dependencies": {
+    "mxgraph": "^4.2.2"
+  }
+}

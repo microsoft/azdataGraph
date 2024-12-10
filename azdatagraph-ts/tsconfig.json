@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+      "target": "es6",
+      "module": "esnext",
+      "declaration": true,
+      "emitDeclarationOnly": true,
+      "outDir": "./dist",
+      "strict": true,
+      "moduleResolution":"node",
+      "typeRoots": [
+        "node_modules/@types",
+        "node_modules/@typed-mxgraph"
+      ]
+    },
+    "include": ["src"],
+  }

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hello World Library</title>
+  <script type="module">
+    import { SchemaDesigner } from '../dist/index.js';
+
+    window.onload = () => {
+      const targetDiv1 = document.getElementById('target1');      
+      if (targetDiv1) {
+        const schemaDesigner = new SchemaDesigner(targetDiv1);
+      }
+    };
+  </script>
+</head>
+<body>
+  <div id="target1" style="border: 1px solid black; padding: 10px; margin-bottom: 10px;"></div>
+</body>
+</html>
