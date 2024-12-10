@@ -1,21 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hello World Library</title>
-  <script type="module">
-    import { SchemaDesigner } from '../dist/index.js';
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hello World Library</title>
+    <link rel="stylesheet" href="../dist/index.css" />
+    <script type="module">
+      import { SchemaDesigner } from "../dist/index.js";
 
-    window.onload = () => {
-      const targetDiv1 = document.getElementById('target1');      
-      if (targetDiv1) {
-        const schemaDesigner = new SchemaDesigner(targetDiv1);
+      window.onload = () => {
+        const targetDiv1 = document.getElementById("graphContainer");
+        if (targetDiv1) {
+          const schemaDesigner = new SchemaDesigner(targetDiv1, {
+            graphFontFamily: "Segoe UI",
+            toolbarBackgroundColor: "var(--color-toolbar-bg)",
+            addTableIcon: "./icons/addTable.svg",
+            undoIcon: "./icons/undo.svg",
+            redoIcon: "./icons/redo.svg",
+            zoomInIcon: "./icons/zoomIn.svg",
+            zoomOutIcon: "./icons/zoomOut.svg",
+            deleteIcon: "./icons/delete.svg",
+            entityIcon: "./icons/tableNode.svg",
+            dataTypeIcons: {
+              int: "./icons/numberDataType.svg",
+            },
+            connectorIcon: "./icons/connector.svg",
+          });
+        }
+      };
+    </script>
+    <style>
+      :root {
+        --graph-font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        --color-toolbar-bg: #2c2c2c;
+        --color-toolbar-text: #fff;
+        --color-toolbar-button-hover: #383838;
+        --color-toolbar-divider: #444444;
+        --color-border: #c3c3c3;
+        --color-outline-color: #0c8ce9;
+        --color-graph-gridLines: #c3c3c3;
+        --color-graph-outline-background: #fff;
+        --color-graph-cell-highlight: #0c8ce9;
+        --color-graph-outline-tableCell: #1e272e;
+        --color-graph-outline-columnCell: #bdc3c7;
+        --color-graph-background: #ffffff;
+        --color-graph-table-indicator: #00a2ad;
+        --color-graph-column-indicator: #f0f0f0;
+        --color-graph-node-hover: #f0f0f0;
       }
-    };
-  </script>
-</head>
-<body>
-  <div id="target1" style="border: 1px solid black; padding: 10px; margin-bottom: 10px;"></div>
-</body>
+      .body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        padding: 10px;
+      }
+      #graphContainer {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        height: calc(100vh - 20px);
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="graphContainer"
+      style="border: 1px solid black; padding: 10px; margin-bottom: 10px"
+    ></div>
+  </body>
 </html>

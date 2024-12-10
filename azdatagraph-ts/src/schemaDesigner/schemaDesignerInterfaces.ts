@@ -1,8 +1,9 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the Source EULA.See License.txt in the project root for license information.
+ * --------------------------------------------------------------------------------------------*/
 
-/**
- * Interface for the entity
- */
-interface Entity {
+export interface Entity {
     /**
      * Name of the entity
      */
@@ -17,7 +18,7 @@ interface Entity {
     columns: Column[];
 }
 
-interface Column {
+export interface Column {
     /**
      * Name of the column
      */
@@ -36,7 +37,7 @@ interface Column {
     isIdentity: boolean;
 }
 
-interface Relationship {
+export interface Relationship {
     /**
      * Name of the relationship
      */
