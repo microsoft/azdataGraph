@@ -48,6 +48,9 @@ export class SchemaDesigner {
     private overwriteMxGraphDefaults() {
         mx.mxClient.NO_FO = true;
         mx.mxEvent.disableContextMenu(this._container);
+        mx.mxConstants.DEFAULT_VALID_COLOR = this._config.validColor;
+        mx.mxConstants.VALID_COLOR = this._config.validColor;
+        mx.mxConstants.INVALID_COLOR = this._config.invalidColor;
     }
 
     private setupEditorOptions() {
@@ -88,13 +91,12 @@ export class SchemaDesigner {
 
             let x = start.x;
             let y = start.getCenterY();
-
             // Checks on which side of the terminal to leave
             if (next.x > x + start.width / 2) {
                 x += start.width;
             }
 
-            if (div !== null || div !== undefined) {
+            if (div !== null && div !== undefined) {
                 y = start.getCenterY() - div.scrollTop;
                 if (
                     edge.cell.value !== undefined &&
@@ -107,12 +109,16 @@ export class SchemaDesigner {
                     // Gets vertical center of source or target row
                     if (column !== undefined || column !== null) {
                         y = getRowY(start, column);
+                    } else {
+                        return;
                     }
                 }
 
                 if (edge !== null && edge.absolutePoints !== null) {
                     next.y = y;
                 }
+            } else {
+                return;
             }
 
             edge.setAbsoluteTerminalPoint(new mx.mxPoint(x, y), source);
@@ -241,7 +247,7 @@ export class SchemaDesigner {
         (this._graph.connectionHandler as extendedConnectionHandler).updateRow = function (target) {
             while (
                 target !== null &&
-                target.className.includes !== null && 
+                target.className.includes !== null &&
                 typeof target.className === 'string' &&
                 target?.className?.includes("sd-table-column-")
             ) {
@@ -274,7 +280,7 @@ export class SchemaDesigner {
                     target.offsetTop * s +
                     - div.scrollTop +
                     (target.offsetHeight * s) / 2 -
-                    icons[0].bounds.height / 1.2; // 1.2 makes the icon completely centered to the target row. Ideally it should be 2 but it is not working as expected.
+                    icons[0].bounds.height / 2; // 1.2 makes the icon completely centered to the target row. Ideally it should be 2 but it is not working as expected.
                 icons[0].redraw();
                 this.currentRowNode = target;
             } else {
@@ -292,9 +298,6 @@ export class SchemaDesigner {
                 } else {
                     this.edgeState.cell.value.targetRow = 0;
                 }
-
-                // Destroys icon to prevent event redirection via image in IE
-                this.destroyIcons();
             }
             oldMouseMove.apply(this, arguments as any);
         };
@@ -308,15 +311,60 @@ export class SchemaDesigner {
             const style = this.graph.getCellStyle(edge);
             const state = new mx.mxCellState(this.graph.view, edge, style);
             this.sourceRowNode = this.currentRowNode;
-            console.log('edge state', state);
             return state;
         };
 
         (this._graph.connectionHandler as extendedConnectionHandler).isValidTarget = function (cell) {
-            return this.currentRowNode !== undefined;
+            return this.currentRowNode !== null;
+        };
+
+        (this._graph.connectionHandler as extendedConnectionHandler).validateConnection = function (source, target) {
+            if(this.edgeState === null) {
+                return null!;
+            }
+            if(this.currentRowNode === null) {
+                return "";
+            }
+            // No connection to edge cells
+            if(this.graph.model.isEdge(target)) {
+                return "";
+            }
+
+            if(source === target) {
+                return "";
+            }
+            
+            const edgeState = this.edgeState;
+            const edgeStateValue = edgeState.cell.value as EdgeCellValue;
+            const edgeBetweenSourceAndTarget = this.graph.model.getEdgesBetween(source, target);
+            for (let i = 0; i < edgeBetweenSourceAndTarget.length; i++) {
+                const edge = edgeBetweenSourceAndTarget[i];
+                const edgeValue = edge.value as EdgeCellValue;
+                // No repeated edges
+                if (
+                    edgeValue.sourceRow === edgeStateValue.sourceRow &&
+                    edgeValue.targetRow === edgeStateValue.targetRow &&
+                    edge.source === source &&
+                    edge.target === target
+                ) {
+                    return "";
+                }
+
+                // No cyclic connections
+                if (
+                    // edgeValue.sourceRow === edgeStateValue.targetRow &&
+                    // edgeValue.targetRow === edgeStateValue.sourceRow &&
+                    edge.source === target &&
+                    edge.target === source
+                ) {
+                    return "";
+                }
+            }
+            return null!;
         };
 
         (this._graph.connectionHandler as extendedConnectionHandler).getTargetPerimeterPoint = function (state, me) {
+            console.log('getTargetPerimeterPoint');
             let y = me.getY();
             if (this.currentRowNode !== null) {
                 y = getRowY(state, this.currentRowNode);
@@ -324,11 +372,12 @@ export class SchemaDesigner {
             let x = state.x;
             if (this.getEventSource().getCenterX() > state.getCenterX()) {
                 x += state.width;
-              }
+            }
             return new mx.mxPoint(x, y);
         };
 
         (this._graph.connectionHandler as extendedConnectionHandler).getSourcePerimeterPoint = function (state, next, me) {
+            console.log('getSourcePerimeterPoint');
             let y = me.getY();
             if (this.sourceRowNode !== null) {
                 y = getRowY(state, this.sourceRowNode);
@@ -344,21 +393,8 @@ export class SchemaDesigner {
             return new mx.mxPoint(x, y);
         };
 
-        const cellStyle: StyleMap = {};
-        cellStyle[mx.mxConstants.STYLE_FONTFAMILY] = this._config.graphFontFamily;
-        cellStyle[mx.mxConstants.STYLE_SHAPE] = mx.mxConstants.SHAPE_RECTANGLE;
-        cellStyle[mx.mxConstants.STYLE_PERIMETER] = mx.mxPerimeter.RectanglePerimeter;
-        cellStyle[mx.mxConstants.STYLE_FILLCOLOR] = this._config.cellFillColor;
-        cellStyle[mx.mxConstants.HIGHLIGHT_STROKEWIDTH] = 2;
-        cellStyle['cellHighlightDashed'] = false;
-        cellStyle['cellHightlightStrokeWidth'] = 2;
-        cellStyle['cellHighlightColor'] = this._config.cellHighlightColor;
-        this._graph.getStylesheet().putDefaultVertexStyle(cellStyle);
-
+        this._graph.getStylesheet().getDefaultVertexStyle()['cellHighlightColor'] = "red";
         this._graph.stylesheet.getDefaultEdgeStyle()[mx.mxConstants.STYLE_EDGE] = mx.mxConstants.EDGESTYLE_ENTITY_RELATION;
-        this._graph.stylesheet.getDefaultEdgeStyle()[mx.mxConstants.STYLE_STROKECOLOR] = this._config.edgeStrokeColor;
-        this._graph.stylesheet.getDefaultEdgeStyle()[mx.mxConstants.HIGHLIGHT_COLOR] = this._config.cellHighlightColor;
-
     }
 
     private setupGraphOutlineOptions() {
@@ -473,8 +509,8 @@ export class SchemaDesigner {
             new mx.mxGeometry(
                 0,
                 0,
-                260,
-                Math.min(330, 70 + entity.entity.columns.length * 30),
+                260+4,
+                Math.min(330, 52 + entity.entity.columns.length * 28)+4,
             )
         );
         entityCell.setVertex(true);
@@ -609,6 +645,8 @@ export interface SchemaDesignerConfig {
     entityIcon: string;
     dataTypeIcons: { [key: string]: string };
     connectorIcon: string;
+    validColor: string;
+    invalidColor: string;
 }
 
 /**
@@ -623,7 +661,7 @@ function getRowY(state: mxCellState, column: HTMLElement): number {
         return state.y;
     }
     const div = column.parentNode as HTMLElement;
-    let y = state.y + (column.offsetTop - div.scrollTop + 5) * s; // 5 is the magic number to make the line completely centered to the row.
+    let y = state.y + (column.offsetTop - div.scrollTop + column.offsetHeight / 2) * s; // 5 is the magic number to make the line completely centered to the row.
     if (div.scrollTop > column.offsetTop) { // If the column is above the visible area of the entity container div then we should use the top of the column container.
         y = state.y + (div.offsetTop - 15) * s;
     }

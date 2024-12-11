@@ -125,14 +125,16 @@
   flex-direction: column;
   max-height: 280px;
   overflow-y: auto;
-  margin-top: 10px;
-  gap: 5px;
+  margin-top: 5px;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .sd-table-column {
   display: flex;
   gap: 10px;
   height: 28px;
+  box-sizing: border-box;
 }
 
 .sd-table-column:hover{
