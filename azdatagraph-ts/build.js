@@ -11,6 +11,7 @@ const config = {
     loader: { 
         ".ts": "ts",
         ".css": "css",
+        ".gif": "dataurl",
     },
     plugins: [{
         name: 'rebuild-notify',
