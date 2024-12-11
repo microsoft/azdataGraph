@@ -241,7 +241,7 @@ export class SchemaDesigner {
         (this._graph.connectionHandler as extendedConnectionHandler).updateRow = function (target) {
             while (
                 target !== null && target !== undefined &&
-                target.className.includes !== null &&
+                target.className.includes !== undefined &&
                 target?.className?.includes("sd-table-column-")
             ) {
                 target = target.parentNode as HTMLElement;
