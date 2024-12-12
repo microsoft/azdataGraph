@@ -7,19 +7,18 @@ import './schemaDesigner.css';
 import '../../css/common.css';
 
 import { Column, Entity } from './schemaDesignerInterfaces';
-import { StyleMap, mxCellState, mxConnectionHandler, mxConstants, mxEditor, mxGraph, mxGraphModel, mxImage, mxOutline } from 'mxgraph';
+import { mxCellState, mxEditor, mxGraph, mxGraphModel } from 'mxgraph';
 
-import mx from '../mx';
+import {mxGraphFactory as mx} from '../mx';
 
-const ENTITY_CELL_ID = 'table';
 const ENTITY_COLUMNS_CONTAINER_CLASS = 'sd-table-columns';
 const ENTITY_COLUMN_DIV_CLASS = 'sd-table-column';
 
 export class SchemaDesigner {
     private _editor!: mxEditor;
-    private _graph!: mxGraph;
+    public _graph!: mxGraph;
     private _model!: mxGraphModel;
-    private _graphContainer!: HTMLElement;
+    public _graphContainer!: HTMLElement;
     private _toolbar!: Toolbar;
 
     constructor(
@@ -195,10 +194,10 @@ export class SchemaDesigner {
         this._graph.isCellMovable = (cell) => {
             return !this._model.isEdge(cell);
         }
-        this._graph.isCellResizable = (cell) => {
+        this._graph.isCellResizable = (_cell) => {
             return false;
         }
-        this._graph.isCellFoldable = (cell) => {
+        this._graph.isCellFoldable = (_cell) => {
             return false;
         }
         this._graph.convertValueToString = function (cell) {
@@ -290,7 +289,7 @@ export class SchemaDesigner {
 
 
         const oldMouseMove = this._graph.connectionHandler.mouseMove;
-        (this._graph.connectionHandler as extendedConnectionHandler).mouseMove = function (sender, me) {
+        (this._graph.connectionHandler as extendedConnectionHandler).mouseMove = function (_sender, me) {
             if (this.edgeState !== null) {
                 this.currentRowNode = this.updateRow(me.getSource() as HTMLElement) as HTMLElement;
                 if (this.currentRow !== null) {
@@ -302,7 +301,7 @@ export class SchemaDesigner {
             oldMouseMove.apply(this, arguments as any);
         };
 
-        (this._graph.connectionHandler as extendedConnectionHandler).createEdgeState = function (me) {
+        (this._graph.connectionHandler as extendedConnectionHandler).createEdgeState = function (_me) {
             const relation: EdgeCellValue = {
                 sourceRow: this.currentRow || 0,
                 targetRow: 0,
@@ -314,7 +313,7 @@ export class SchemaDesigner {
             return state;
         };
 
-        (this._graph.connectionHandler as extendedConnectionHandler).isValidTarget = function (cell) {
+        (this._graph.connectionHandler as extendedConnectionHandler).isValidTarget = function (_cell) {
             return this.currentRowNode !== null;
         };
 
@@ -417,7 +416,7 @@ export class SchemaDesigner {
             "Add Table",
             () => {
             },
-            (graph, evt, cell) => {
+            (_graph, evt, _cell) => {
                 this._graph.stopEditing(false);
                 const pt = this._graph.getPointForEvent(evt, true);
                 const entity = new EntityObject({
@@ -567,7 +566,7 @@ class Toolbar {
 }
 
 class EntityObject {
-    private div!: HTMLElement;
+    public div!: HTMLElement;
     constructor(public entity: Entity, private _config: SchemaDesignerConfig) {
     }
 

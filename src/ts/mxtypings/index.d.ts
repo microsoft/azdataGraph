@@ -160,6 +160,7 @@ declare module 'mxgraph' {
     mxValueChange: typeof mxValueChange;
     mxTerminalChange: typeof mxTerminalChange;
     mxCurrentRootChange: typeof mxCurrentRootChange;
+    azdataQueryPlan: any;
   }
 
   export type mxGraphOptions = {

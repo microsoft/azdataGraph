@@ -3,7 +3,7 @@
  *  Licensed under the Source EULA.See License.txt in the project root for license information.
  * --------------------------------------------------------------------------------------------*/
 
-import factory from 'mxgraph';
+import factory, { mxGraphExportObject } from 'mxgraph';
 
 declare global {
   interface Window {
@@ -21,5 +21,5 @@ window.mxForceIncludes = false;
 window.mxLoadStylesheets = false;
 window.mxResourceExtension = '.txt';
 
-export default factory({
-});
+export const mxGraphFactory: mxGraphExportObject = factory({
+})
