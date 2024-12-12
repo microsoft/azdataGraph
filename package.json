@@ -12,12 +12,12 @@
   "bugs": {
     "url": "https://github.com/microsoft/azdataGraph/issues"
   },
-  "main": "./dist/build.js",
-  "types": "index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/ts/src/ts/index.d.ts",
   "scripts": {
     "compile-mxgraph": "grunt build --base ./ --gruntfile etc/build/Gruntfile.js",
     "watch-ts": "npm run compile-mxgraph && npx tsc -w",
-    "build": "npm run compile-mxgraph && node build.js && npx tsc",
+    "build": "npm run compile-mxgraph && npx tsc && node build.js",
     "watch": "npm run compile-mxgraph && node build.js --watch",
     "examples": "httpserver -p 4000",
     "lint": "eslint"
