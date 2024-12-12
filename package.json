@@ -15,7 +15,9 @@
   "main": "./dist/build.js",
   "types": "index.d.ts",
   "scripts": {
-    "prepare": "grunt build --base ./ --gruntfile etc/build/Gruntfile.js"
+    "prepare": "grunt build --base ./ --gruntfile etc/build/Gruntfile.js",
+    "compile-ts": "npx tsc",
+    "watch-ts": "npx tsc -w"
   },
   "devDependencies": {
     "grunt": "^1.5.3",
