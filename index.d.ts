@@ -4,15 +4,15 @@
 // }
 
 
-/// <reference path="./src/typings/editor/index.d.ts" />
-/// <reference path="./src/typings/handler/index.d.ts" />
-/// <reference path="./src/typings/io/index.d.ts" />
-/// <reference path="./src/typings/layout/index.d.ts" />
-/// <reference path="./src/typings/model/index.d.ts" />
-/// <reference path="./src/typings/util/index.d.ts" />
-/// <reference path="./src/typings/shape/index.d.ts" />
-/// <reference path="./src/typings/view/index.d.ts" />
-/// <reference path="./src/typings/mxClient.d.ts" />
+/// <reference path="./typings/editor/index.d.ts" />
+/// <reference path="./typings/handler/index.d.ts" />
+/// <reference path="./typings/io/index.d.ts" />
+/// <reference path="./typings/layout/index.d.ts" />
+/// <reference path="./typings/model/index.d.ts" />
+/// <reference path="./typings/util/index.d.ts" />
+/// <reference path="./typings/shape/index.d.ts" />
+/// <reference path="./typings/view/index.d.ts" />
+/// <reference path="./typings/mxClient.d.ts" />
 
 declare module 'azdataGraph' {
   export interface mxGraphExportObject {
