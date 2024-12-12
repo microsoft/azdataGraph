@@ -1,5 +1,5 @@
-/// <reference path="../index.d.ts" />
-import { mxgraphFactory } from '../dist/build';
+/// <reference path="../typings/index.d.ts" />
+import factory from '../dist/build';
 
 declare global {
     interface Window {
@@ -17,6 +17,6 @@ window.mxForceIncludes = false;
 window.mxLoadStylesheets = true;
 window.mxResourceExtension = '.txt';
 
-export const mx = mxgraphFactory;
+export default factory({});
 
 

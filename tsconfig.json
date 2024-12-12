@@ -12,5 +12,5 @@
     "skipLibCheck": true,
     "allowJs": true
   },
-  "include": ["index.d.ts", "src/typings/**/*.d.ts", "src-ts/**/*.ts"],
+  "include": ["typings/index.d.ts", "src/typings/**/*.d.ts", "src-ts/**/*.ts"],
 }
