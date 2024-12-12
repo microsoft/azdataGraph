@@ -3,13 +3,16 @@
     "target": "es2016",
     "module": "commonjs",
     "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "./dist",
-    "declarationDir": "./dist",
+    //"emitDeclarationOnly": true,
+    "outDir": "./dist/ts",
+    "declarationDir": "./dist/ts",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "mxgraph": ["./dist/build.js"]
+    }
   },
-  "include": ["index.d.ts"],
+  "include": ["index.d.ts", "src/ts/**/*.ts"],
 }

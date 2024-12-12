@@ -1,7 +1,7 @@
 {
   "name": "azdataGraph",
   "description": "azdataGraph is a derivative of mxGraph, which is a fully client side JavaScript diagramming library that uses SVG and HTML for rendering.",
-  "version": "0.0.69",
+  "version": "0.0.70",
   "homepage": "https://github.com/microsoft/azdataGraph",
   "author": "Microsoft",
   "license": "Apache-2.0",
@@ -15,15 +15,26 @@
   "main": "./dist/build.js",
   "types": "index.d.ts",
   "scripts": {
-    "prepare": "grunt build --base ./ --gruntfile etc/build/Gruntfile.js"
+    "compile-mxgraph": "grunt build --base ./ --gruntfile etc/build/Gruntfile.js",
+    "watch-ts": "npm run compile-mxgraph && npx tsc -w",
+    "build": "npm run compile-mxgraph && node build.js && npx tsc",
+    "watch": "npm run compile-mxgraph && node build.js --watch",
+    "examples": "httpserver -p 4000",
+    "lint": "eslint"
   },
   "devDependencies": {
+    "@jgoz/esbuild-plugin-typecheck": "^4.0.2",
+    "esbuild": "^0.24.0",
+    "eslint": "^9.16.0",
+    "eslint-plugin-license-header": "^0.6.1",
     "grunt": "^1.5.3",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-webpack": "^2.0.1",
+    "httpserver": "^0.3.0",
     "load-grunt-tasks": "^3.5.2",
-    "webpack": "^2.2.1",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.0",
+    "webpack": "^2.2.1"
   }
 }
