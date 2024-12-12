@@ -29,8 +29,8 @@ jobs:
       - name: Install Dependencies
         run: npm install
       
-      - name: Run tsc
-        run: npx tsc
+      - name: Run build
+        run: npm run build
 
       - name: Generate release notes
         run: |
