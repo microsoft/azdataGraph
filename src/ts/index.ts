@@ -4,6 +4,5 @@
  * --------------------------------------------------------------------------------------------*/
 /// <reference path="./mxtypings/index.d.ts" />
 import mx from 'mxgraph';
-export * from './schemaDesigner/schemaDesigner';
 export * from 'mxgraph';
 export { mx };
