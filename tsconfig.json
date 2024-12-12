@@ -3,8 +3,7 @@
     "target": "es2016",
     "module": "commonjs",
     "declaration": true,
-    "outDir": "./dist/ts",
-    "declarationDir": "./dist/ts",
+    "outDir": "./dist",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
@@ -16,7 +15,8 @@
     "allowSyntheticDefaultImports": true,
     "paths": {
       "mxgraph": ["./dist/build.js"]
-    }
+    },
+    "moduleResolution": "node",
   },
   "include": ["index.d.ts", "src/ts/**/*.ts", "src/ts/**/*.d.ts"]
 }

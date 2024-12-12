@@ -76,7 +76,7 @@ function copyFilesRecursively(sourceDir, destDir) {
 
 // Example usage
 const sourceFolder = path.resolve("src/ts/mxtypings");
-const destinationFolder = path.resolve("dist/ts/mxtypings");
+const destinationFolder = path.resolve("dist/src/ts/mxtypings");
 
 copyFilesRecursively(sourceFolder, destinationFolder);
 console.log("Copying complete!");
@@ -99,4 +99,4 @@ const prependText = (filePath, text) => {
     });
 }
 
-prependText('./dist/ts/src/ts/index.d.ts', `/// <reference path="./mxtypings/index.d.ts" />\n`);
+prependText('./dist/src/ts/index.d.ts', `/// <reference path="./mxtypings/index.d.ts" />\n`);

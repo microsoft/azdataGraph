@@ -13,7 +13,7 @@
     "url": "https://github.com/microsoft/azdataGraph/issues"
   },
   "main": "./dist/index.js",
-  "types": "./dist/ts/src/ts/index.d.ts",
+  "types": "./dist/src/ts/index.d.ts",
   "scripts": {
     "compile-mxgraph": "grunt build --base ./ --gruntfile etc/build/Gruntfile.js",
     "watch-ts": "npm run compile-mxgraph && npx tsc -w",
