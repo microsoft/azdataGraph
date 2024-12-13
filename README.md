@@ -21,9 +21,9 @@ Typings for the mxGraph library are included in this package. The typings are fo
 1. Clone the azdataGraph repository
 1. Make your changes
 1. Update the version number in the `package.json` file
-1. Run `npm install` to install the dependencies
-1. Run `npm run build` to build the package
-1. Run `npm pack` to create a tarball of the package
+1. Run `yarn` to install the dependencies
+1. Run `yarn build` to build the package
+1. Run `yarn pack` to create a tarball of the package
 1. Push the contents of the tarball to the release branch
 1. Create a new release in the Github UI
 1. Create a new tag with the version number and set the release branch as the target
