@@ -13,6 +13,7 @@
     "noFallthroughCasesInSwitch": true,
     "composite": true,
     "allowSyntheticDefaultImports": true,
+    "noImplicitOverride": true,
     "paths": {
       "mxgraph": ["./dist/build.js"]
     },
