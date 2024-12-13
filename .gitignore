@@ -4,3 +4,4 @@ dist
 examples/**/dist
 .idea/
 *.tgz
+.DS_Store

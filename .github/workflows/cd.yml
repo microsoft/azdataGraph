@@ -25,12 +25,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+
+      - name: Install yarn
+        run: npm install -g yarn
       
       - name: Install Dependencies
-        run: npm install
+        run: yarn
       
-      - name: Run tsc
-        run: npx tsc
+      - name: Run build
+        run: yarn build
 
       - name: Generate release notes
         run: |
@@ -54,7 +57,7 @@ jobs:
           fi
 
       - name: Create npm package
-        run: npm pack
+        run: yarn pack
       
       - name: Checkout release branch
         uses: actions/checkout@v4
