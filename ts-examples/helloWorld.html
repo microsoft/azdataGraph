@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello World</title>
+    <style>
+      #graphContainer {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        height: calc(100vh - 10);
+        user-select: none;
+      }
+    </style>
+    <script type="module">
+      import { mx } from "../dist/index.js";
+      window.onload = () => {
+        window.mxLoadResources = false;
+        window.mxForceIncludes = false;
+        window.mxLoadStylesheets = false;
+        window.mxResourceExtension = ".txt";
+        const mxClient = mx();
+        const mxGraph = new mxClient.mxGraph(
+          document.getElementById("graphContainer")
+        );
+        const parent = mxGraph.getDefaultParent();
+        mxGraph.getModel().beginUpdate();
+        try {
+          const v1 = mxGraph.insertVertex(
+            parent,
+            null,
+            "Hello",
+            20,
+            20,
+            80,
+            30
+          );
+          const v2 = mxGraph.insertVertex(
+            parent,
+            null,
+            "World",
+            200,
+            150,
+            80,
+            30
+          );
+          const e1 = mxGraph.insertEdge(parent, null, "", v1, v2);
+        } finally {
+          mxGraph.getModel().endUpdate();
+        }
+      };
+    </script>
+  </head>
+  <body>
+    <div id="graphContainer"></div>
+  </body>
+</html>
