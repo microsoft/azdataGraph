@@ -3,7 +3,13 @@
  *  Licensed under the Source EULA.See License.txt in the project root for license information.
  * --------------------------------------------------------------------------------------------*/
 
-export interface Entity {
+export interface ISchema {
+    entities: IEntity[];
+    relationships: IRelationship[];
+}
+
+
+export interface IEntity {
     /**
      * Name of the entity
      */
@@ -15,10 +21,10 @@ export interface Entity {
     /**
      * Columns of the entity
      */
-    columns: Column[];
+    columns: IColumn[];
 }
 
-export interface Column {
+export interface IColumn {
     /**
      * Name of the column
      */
@@ -37,7 +43,7 @@ export interface Column {
     isIdentity: boolean;
 }
 
-export interface Relationship {
+export interface IRelationship {
     /**
      * Name of the relationship
      */
@@ -45,11 +51,11 @@ export interface Relationship {
     /**
      * Parent entity of the relationship
      */
-    parentEntity: string;
+    entity: string;
     /**
      * Parent column of the relationship
      */
-    parentColumn: string;
+    column: string;
     /**
      * Referenced entity of the relationship
      */
@@ -68,7 +74,7 @@ export interface Relationship {
     onUpdateAction: OnAction;
 }
 
-enum OnAction {
+export enum OnAction {
     CASCADE = "0",
     NO_ACTION = "1",
     SET_NULL = "2",
@@ -94,4 +100,6 @@ export interface SchemaDesignerConfig {
     connectorIcon: string;
     validColor: string;
     invalidColor: string;
+    exportIcon: string;
+    autoarrangeIcon: string;
 }

@@ -6,12 +6,13 @@
 import './schemaDesigner.css';
 import '../../css/common.css';
 
-import { Column, Entity, SchemaDesignerConfig } from './schemaDesignerInterfaces';
-import { mxEditor, mxGraph, mxGraphModel } from 'mxgraph';
+import { IColumn, IEntity, IRelationship, ISchema, OnAction, SchemaDesignerConfig } from './schemaDesignerInterfaces';
+import { mxEditor, mxGraph, mxGraphModel, mxHierarchicalLayout } from 'mxgraph';
 
-import {mxGraphFactory as mx} from '../mx';
+import { mxGraphFactory as mx } from '../mx';
 import { SchemaDesignerToolbar } from './schemaDesignerToolbar';
 import { getRowY } from './utils';
+import { SchemaDesignerEntity } from './schemaDesignerEntity';
 
 const ENTITY_COLUMNS_CONTAINER_CLASS = 'sd-table-columns';
 const ENTITY_COLUMN_DIV_CLASS = 'sd-table-column';
@@ -22,6 +23,7 @@ export class SchemaDesigner {
     private _model!: mxGraphModel;
     public _graphContainer!: HTMLElement;
     private _toolbar!: SchemaDesignerToolbar;
+    private _layout!: mxHierarchicalLayout;
 
     constructor(
         private _container: HTMLElement,
@@ -80,6 +82,9 @@ export class SchemaDesigner {
         );
         this._graph.graphHandler.htmlPreview = true;
         this._graph.connectionHandler.factoryMethod = null!;
+        this._layout = new mx.mxHierarchicalLayout(this._graph, mx.mxConstants.DIRECTION_WEST);
+        this._graph.setCellsDisconnectable(false);
+        this._graph.autoExtend = true;
 
         this._graph.view.updateFloatingTerminalPoint = function (edge, start, end, source) {
             const next = this.getNextPoint(edge, end, source);
@@ -320,21 +325,21 @@ export class SchemaDesigner {
         };
 
         (this._graph.connectionHandler as extendedConnectionHandler).validateConnection = function (source, target) {
-            if(this.edgeState === null) {
+            if (this.edgeState === null) {
                 return null!;
             }
-            if(this.currentRowNode === null) {
+            if (this.currentRowNode === null) {
                 return "";
             }
             // No connection to edge cells
-            if(this.graph.model.isEdge(target)) {
+            if (this.graph.model.isEdge(target)) {
                 return "";
             }
 
-            if(source === target) {
+            if (source === target) {
                 return "";
             }
-            
+
             const edgeState = this.edgeState;
             const edgeStateValue = edgeState.cell.value as EdgeCellValue;
             const edgeBetweenSourceAndTarget = this.graph.model.getEdgesBetween(source, target);
@@ -365,7 +370,6 @@ export class SchemaDesigner {
         };
 
         (this._graph.connectionHandler as extendedConnectionHandler).getTargetPerimeterPoint = function (state, me) {
-            console.log('getTargetPerimeterPoint');
             let y = me.getY();
             if (this.currentRowNode !== null) {
                 y = getRowY(state, this.currentRowNode);
@@ -378,7 +382,6 @@ export class SchemaDesigner {
         };
 
         (this._graph.connectionHandler as extendedConnectionHandler).getSourcePerimeterPoint = function (state, next, me) {
-            console.log('getSourcePerimeterPoint');
             let y = me.getY();
             if (this.sourceRowNode !== null) {
                 y = getRowY(state, this.sourceRowNode);
@@ -393,6 +396,13 @@ export class SchemaDesigner {
 
             return new mx.mxPoint(x, y);
         };
+
+        this._graph.connectionHandler.addListener(mx.mxEvent.CONNECT, (_sender, evt) => {
+            const edge = evt.getProperty('cell');
+            const source = this._graph.getModel().getTerminal(edge, true);
+            this._graph.view.invalidate(source, false, false);
+            this._graph.view.validate(source);
+        });
 
         this._graph.getStylesheet().getDefaultVertexStyle()['cellHighlightColor'] = "red";
         this._graph.stylesheet.getDefaultEdgeStyle()[mx.mxConstants.STYLE_EDGE] = mx.mxConstants.EDGESTYLE_ENTITY_RELATION;
@@ -421,7 +431,7 @@ export class SchemaDesigner {
             (_graph, evt, _cell) => {
                 this._graph.stopEditing(false);
                 const pt = this._graph.getPointForEvent(evt, true);
-                const entity = new EntityObject({
+                const entity = {
                     name: "New Table",
                     schema: "dbo",
                     columns: [{
@@ -440,9 +450,9 @@ export class SchemaDesigner {
                         isPrimaryKey: false,
                         isIdentity: false
                     }]
-                }, this._config);
+                };
 
-                this.insertEntity(entity, pt.x, pt.y);
+                this.renderEntity(entity, pt.x, pt.y);
             }
         );
         this._toolbar.addDivider();
@@ -480,6 +490,23 @@ export class SchemaDesigner {
         );
 
         this._toolbar.addDivider();
+
+        this._toolbar.addButton(
+            this._config.autoarrangeIcon,
+            "Auto Arrange",
+            () => {
+                this._layout.execute(this._graph.getDefaultParent());
+            }
+        );
+        this._toolbar.addButton(
+            this._config.exportIcon,
+            "Export",
+            () => {
+                const schema = this.schema;
+                console.log(schema);
+            }
+        );
+        this._toolbar.addDivider();
         this._toolbar.addButton(
             this._config.deleteIcon,
             "Delete",
@@ -504,14 +531,49 @@ export class SchemaDesigner {
         }
     }
 
-    private insertEntity(entity: EntityObject, x: number, y: number) {
+    public renderModel(schema: ISchema, cleanUndoManager: boolean = false) {
+        const parent = this._graph.getDefaultParent();
+        this._model.beginUpdate();
+        try {
+            this._graph.removeCells(this._model.getChildCells(parent));
+            const entities = schema.entities;
+            for (let i = 0; i < entities.length; i++) {
+                const entity = entities[i];
+                this.renderEntity(entity, 100 + i * 50, 100 + i * 50);
+            }
+            for (let i = 0; i < schema.relationships.length; i++) {
+                const relationship = schema.relationships[i];
+                this.renderRelationship(relationship);
+            }
+        } finally {
+            this._model.endUpdate();
+            this._graph.view.refresh();
+            const parentCells = [];
+            for (let i = 0; i < this._model.cells.length; i++) {
+                if (this._model.cells[i].vertex) {
+                    if (this._model.getIncomingEdges(this._model.cells[i]).length === 0) {
+                        parentCells.push(this._model.cells[i]);
+                    }
+
+                }
+            }
+            console.log(parentCells);
+            this._layout.execute(this._graph.getDefaultParent());
+            if (cleanUndoManager) {
+                this._editor.undoManager.clear();
+            }
+        }
+    }
+
+    private renderEntity(entity: IEntity, x: number, y: number) {
+        const entityValue = new SchemaDesignerEntity(entity, this._config, this._graph);
         const entityCell = new mx.mxCell(
-            entity,
+            entityValue,
             new mx.mxGeometry(
                 0,
                 0,
-                260+4,
-                Math.min(330, 52 + entity.entity.columns.length * 28)+4,
+                260 + 4,
+                Math.min(330, 52 + entityValue.columns.length * 28) + 4,
             )
         );
         entityCell.setVertex(true);
@@ -526,72 +588,57 @@ export class SchemaDesigner {
         }
         this._graph.setSelectionCell(entityCell);
     }
-}
 
-class EntityObject implements Entity {
-    public div!: HTMLElement;
-    public name: string;
-    public schema: string;
-    public columns: Column[];
-
-    constructor(public entity: Entity, private _config: SchemaDesignerConfig) {
-        this.name = entity.name;
-        this.schema = entity.schema;
-        this.columns = entity.columns;
-    }
-
-    render(): HTMLElement {
-        const parent = document.createElement("div");
-        parent.classList.add("sd-table");
-        const colorIndicator = document.createElement("div");
-        colorIndicator.classList.add("sd-table-color-indicator");
-        parent.appendChild(colorIndicator);
-        const header = document.createElement("div");
-        header.classList.add("sd-table-header");
-        const headerIcon = document.createElement("div");
-        headerIcon.classList.add("sd-table-header-icon");
-        headerIcon.style.backgroundImage = `url(${this._config.entityIcon})`;
-        header.appendChild(headerIcon);
-        const headerText = document.createElement("div");
-        headerText.classList.add("sd-table-header-text");
-        headerText.innerText = `${this.entity.schema}.${this.entity.name}`;
-        header.appendChild(headerText);
-        parent.appendChild(header);
-
-        const columns = document.createElement("div");
-        columns.classList.add("sd-table-columns");
-        this.entity.columns.forEach((column, index) => {
-            const columnDiv = document.createElement("div");
-            columnDiv.classList.add("sd-table-column");
-            const columnIcon = document.createElement("div");
-            columnIcon.classList.add("sd-table-column-icon");
-            columnIcon.style.backgroundImage = `url(${this._config.dataTypeIcons[column.type]
-                })`;
-            columnDiv.appendChild(columnIcon);
-            const columnText = document.createElement("div");
-            columnText.classList.add("sd-table-column-text");
-            columnText.innerText = column.name;
-            columnDiv.appendChild(columnText);
-            const columnConstraints = document.createElement("div");
-            columnConstraints.classList.add("sd-table-column-constraints");
-            columnConstraints.innerText = this.getConstraintText(column);
-            columnDiv.appendChild(columnConstraints);
-            columnDiv.setAttribute("column-id", index.toString());
-            columns.appendChild(columnDiv);
-        });
-        parent.appendChild(columns);
-        this.div = parent;
-        return parent;
-    }
-
-    private getConstraintText(col: Column): string {
-        const constraints = [];
-        if (col.isPrimaryKey) {
-            constraints.push("PK");
+    private renderRelationship(relationship: IRelationship) {
+        const cells = this._model.getChildCells(this._graph.getDefaultParent());
+        const source = cells.find((cell) => cell.value.name === relationship.entity);
+        const target = cells.find((cell) => cell.value.name === relationship.referencedEntity);
+        if (source === undefined || target === undefined) {
+            return;
         }
-        return constraints.join(", ");
+        const edgeValue: EdgeCellValue = {
+            sourceRow: source.value.columns.findIndex((column: IColumn) => column.name === relationship.column) + 1,
+            targetRow: target.value.columns.findIndex((column: IColumn) => column.name === relationship.referencedColumn) + 1
+        };
+        this._graph.insertEdge(this._graph.getDefaultParent(), null!, edgeValue, source, target);
+        this._graph.view.invalidate(source, false, false);
+        this._graph.view.validate(source);
+        this._graph.view.invalidate(target, false, false);
+        this._graph.view.validate(target);
+    }
+
+    public get schema(): ISchema {
+        const schema: ISchema = {
+            entities: [],
+            relationships: []
+        };
+        const cells = this._model.getChildCells(this._graph.getDefaultParent());
+        for (let i = 0; i < cells.length; i++) {
+            const cell = cells[i];
+            if (cell.vertex) {
+                const entity: IEntity = {
+                    columns: cell.value.columns,
+                    name: cell.value.name,
+                    schema: cell.value.schema
+                };
+                schema.entities.push(entity);
+            } else if (cell.edge) {
+                const relationship: IRelationship = {
+                    foreignKeyName: "",
+                    onDeleteAction: OnAction.CASCADE,
+                    onUpdateAction: OnAction.CASCADE,
+                    column: cell.target.value.columns[cell.value.sourceRow - 1].name,
+                    entity: cell.target.value.name,
+                    referencedEntity: cell.source.value.name,
+                    referencedColumn: cell.source.value.columns[cell.value.targetRow - 1].name
+                };
+                schema.relationships.push(relationship);
+            }
+        }
+        return schema;
     }
 }
+
 
 export interface EdgeCellValue {
     sourceRow: number;
