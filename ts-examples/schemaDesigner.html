@@ -7,8 +7,9 @@
     <link rel="stylesheet" href="../dist/index.css" />
     <script type="module">
       import { SchemaDesigner } from "../dist/index.js";
-
+      import { test } from "./schemaDesigner.js";
       window.onload = () => {
+        console.log(test);
         const targetDiv1 = document.getElementById("graphContainer");
         if (targetDiv1) {
           const schemaDesigner = new SchemaDesigner(targetDiv1, {
@@ -33,103 +34,103 @@
             exportIcon: "./resources/export.svg",
             autoarrangeIcon: "./resources/arrange.svg",
           });
-
-          schemaDesigner.renderModel({
-            entities: [
-              {
-                name: "New Table",
-                schema: "dbo",
-                columns: [
-                  {
-                    name: "Column1",
-                    type: "int",
-                    isPrimaryKey: true,
-                    isIdentity: true,
-                  },
-                  {
-                    name: "Column2",
-                    type: "int",
-                    isPrimaryKey: false,
-                    isIdentity: false,
-                  },
-                  {
-                    name: "Column2",
-                    type: "int",
-                    isPrimaryKey: false,
-                    isIdentity: false,
-                  },
-                ],
-              },
-              {
-                name: "New Table 2",
-                schema: "dbo",
-                columns: [
-                  {
-                    name: "Column1",
-                    type: "int",
-                    isPrimaryKey: true,
-                    isIdentity: true,
-                  },
-                  {
-                    name: "Column2",
-                    type: "int",
-                    isPrimaryKey: false,
-                    isIdentity: false,
-                  },
-                  {
-                    name: "Column2",
-                    type: "int",
-                    isPrimaryKey: false,
-                    isIdentity: false,
-                  },
-                ],
-              },
-              {
-                name: "New Table 3",
-                schema: "dbo",
-                columns: [
-                  {
-                    name: "Column1",
-                    type: "int",
-                    isPrimaryKey: true,
-                    isIdentity: true,
-                  },
-                ],
-              },
-              {
-                name: "New Table 4",
-                schema: "dbo",
-                columns: [
-                  {
-                    name: "Column1",
-                    type: "int",
-                    isPrimaryKey: true,
-                    isIdentity: true,
-                  },
-                ],
-              }
-            ],
-            relationships: [
-              {
-                foreignKeyName: "",
-                onDeleteAction: "0",
-                onUpdateAction: "0",
-                column: "Column1",
-                entity: "New Table 2",
-                referencedEntity: "New Table",
-                referencedColumn: "Column2",
-              },
-              {
-                foreignKeyName: "",
-                onDeleteAction: "0",
-                onUpdateAction: "0",
-                column: "Column1",
-                entity: "New Table 4",
-                referencedEntity: "New Table 3",
-                referencedColumn: "Column1",
-              }
-            ],
-          }, true);
+          schemaDesigner.renderModel(test);
+          // schemaDesigner.renderModel({
+          //   entities: [
+          //     {
+          //       name: "New Table",
+          //       schema: "dbo",
+          //       columns: [
+          //         {
+          //           name: "Column1",
+          //           type: "int",
+          //           isPrimaryKey: true,
+          //           isIdentity: true,
+          //         },
+          //         {
+          //           name: "Column2",
+          //           type: "int",
+          //           isPrimaryKey: false,
+          //           isIdentity: false,
+          //         },
+          //         {
+          //           name: "Column2",
+          //           type: "int",
+          //           isPrimaryKey: false,
+          //           isIdentity: false,
+          //         },
+          //       ],
+          //     },
+          //     {
+          //       name: "New Table 2",
+          //       schema: "dbo",
+          //       columns: [
+          //         {
+          //           name: "Column1",
+          //           type: "int",
+          //           isPrimaryKey: true,
+          //           isIdentity: true,
+          //         },
+          //         {
+          //           name: "Column2",
+          //           type: "int",
+          //           isPrimaryKey: false,
+          //           isIdentity: false,
+          //         },
+          //         {
+          //           name: "Column2",
+          //           type: "int",
+          //           isPrimaryKey: false,
+          //           isIdentity: false,
+          //         },
+          //       ],
+          //     },
+          //     {
+          //       name: "New Table 3",
+          //       schema: "dbo",
+          //       columns: [
+          //         {
+          //           name: "Column1",
+          //           type: "int",
+          //           isPrimaryKey: true,
+          //           isIdentity: true,
+          //         },
+          //       ],
+          //     },
+          //     {
+          //       name: "New Table 4",
+          //       schema: "dbo",
+          //       columns: [
+          //         {
+          //           name: "Column1",
+          //           type: "int",
+          //           isPrimaryKey: true,
+          //           isIdentity: true,
+          //         },
+          //       ],
+          //     }
+          //   ],
+          //   relationships: [
+          //     {
+          //       foreignKeyName: "",
+          //       onDeleteAction: "0",
+          //       onUpdateAction: "0",
+          //       column: "Column1",
+          //       entity: "New Table 2",
+          //       referencedEntity: "New Table",
+          //       referencedColumn: "Column2",
+          //     },
+          //     {
+          //       foreignKeyName: "",
+          //       onDeleteAction: "0",
+          //       onUpdateAction: "0",
+          //       column: "Column1",
+          //       entity: "New Table 4",
+          //       referencedEntity: "New Table 3",
+          //       referencedColumn: "Column1",
+          //     }
+          //   ],
+          // }, true);
         }
       };
     </script>
@@ -161,7 +162,7 @@
       }
       #graphContainer {
         position: relative;
-        overflow: hidden;
+        overflow: scroll;
         width: 100%;
         height: calc(100vh - 20px);
         user-select: none;

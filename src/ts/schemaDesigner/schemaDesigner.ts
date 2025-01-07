@@ -21,7 +21,6 @@ export class SchemaDesigner {
     private _editor!: mxEditor;
     public _graph!: mxGraph;
     private _model!: mxGraphModel;
-    public _graphContainer!: HTMLElement;
     private _toolbar!: SchemaDesignerToolbar;
     private _layout!: mxHierarchicalLayout;
 
@@ -35,11 +34,7 @@ export class SchemaDesigner {
     private initializeGraph() {
         this.overwriteMxGraphDefaults();
         this._editor = new mx.mxEditor();
-        const graphContainer = document.createElement("div");
-        graphContainer.classList.add("sd-graph");
-        this._graphContainer = graphContainer;
-        this._container.appendChild(graphContainer);
-        this._editor.setGraphContainer(graphContainer);
+        this._editor.setGraphContainer(this._container);
         this._graph = this._editor.graph;
         this._model = this._graph.getModel();
         this.setupEditorOptions();
@@ -61,7 +56,7 @@ export class SchemaDesigner {
     }
 
     private setupGraphOptions() {
-
+        this._graph.setAllowNegativeCoordinates(true);
         this._graph.setGridEnabled(true);
         this._graph.tooltipHandler.setEnabled(false);
         this._graph.setPanning(true);
@@ -82,7 +77,8 @@ export class SchemaDesigner {
         );
         this._graph.graphHandler.htmlPreview = true;
         this._graph.connectionHandler.factoryMethod = null!;
-        this._layout = new mx.mxHierarchicalLayout(this._graph, mx.mxConstants.DIRECTION_WEST);
+        this._layout = new mx.mxHierarchicalLayout(this._graph, mx.mxConstants.DIRECTION_EAST, true);
+        this._layout.intraCellSpacing = 30;
         this._graph.setCellsDisconnectable(false);
         this._graph.autoExtend = true;
 
@@ -495,7 +491,7 @@ export class SchemaDesigner {
             this._config.autoarrangeIcon,
             "Auto Arrange",
             () => {
-                this._layout.execute(this._graph.getDefaultParent());
+                this.autoArrange();
             }
         );
         this._toolbar.addButton(
@@ -557,8 +553,8 @@ export class SchemaDesigner {
 
                 }
             }
-            console.log(parentCells);
-            this._layout.execute(this._graph.getDefaultParent());
+
+            this.autoArrange();
             if (cleanUndoManager) {
                 this._editor.undoManager.clear();
             }
@@ -636,6 +632,48 @@ export class SchemaDesigner {
             }
         }
         return schema;
+    }
+
+    public autoArrange() {
+        this._model.beginUpdate();
+        this._layout.execute(this._graph.getDefaultParent());
+        const cells = this._graph.getChildCells(this._graph.getDefaultParent());
+        this._graph.center();
+
+        const mostNegativeX = this.mostNegativeX();
+        const cellsWithNegativeX = cells.filter((cell) => cell.geometry.x < 0 || cell.isEdge());
+        console.log(cellsWithNegativeX);
+        this._graph.moveCells(cellsWithNegativeX, -mostNegativeX + 500, 0, false);
+
+        const mostNegativeY = this.mostNegativeY();
+        const cellsWithNegativeY = cells.filter((cell) => cell.geometry.y < 0 || cell.isEdge());
+        this._graph.moveCells(cellsWithNegativeY, 0, -mostNegativeY + 500, false);
+        console.log(cellsWithNegativeY);
+        this._model.endUpdate();
+    }
+
+    private mostNegativeX() {
+        let mostNegativeX = 0;
+        const cells = this._graph.getChildCells(this._graph.getDefaultParent());
+        for (let i = 0; i < cells.length; i++) {
+            const cell = cells[i];
+            if (cell.geometry.x < mostNegativeX) {
+                mostNegativeX = cell.geometry.x;
+            }
+        }
+        return mostNegativeX;
+    }
+
+    private mostNegativeY() {
+        let mostNegativeY = 0;
+        const cells = this._graph.getChildCells(this._graph.getDefaultParent());
+        for (let i = 0; i < cells.length; i++) {
+            const cell = cells[i];
+            if (cell.geometry.y < mostNegativeY) {
+                mostNegativeY = cell.geometry.y;
+            }
+        }
+        return mostNegativeY;
     }
 }
 
