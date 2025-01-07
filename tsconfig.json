@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "jsx": "react",
     "target": "es2016",
     "module": "commonjs",
     "declaration": true,
@@ -19,5 +20,5 @@
     },
     "moduleResolution": "node",
   },
-  "include": ["index.d.ts", "src/ts/**/*.ts", "src/ts/**/*.d.ts"]
+  "include": ["index.d.ts", "src/ts/**/*.ts", "src/ts/**/*.d.ts", "src/ts/examples/**/*.tsx"]
 }

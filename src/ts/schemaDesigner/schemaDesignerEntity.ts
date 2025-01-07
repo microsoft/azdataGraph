@@ -28,7 +28,7 @@ export class SchemaDesignerEntity implements IEntity {
         header.classList.add("sd-table-header");
         const headerIcon = document.createElement("div");
         headerIcon.classList.add("sd-table-header-icon");
-        headerIcon.style.backgroundImage = `url(${this._config.entityIcon})`;
+        headerIcon.style.backgroundImage = `url(${this._config.icons.entityIcon})`;
         header.appendChild(headerIcon);
         const headerText = document.createElement("div");
         headerText.classList.add("sd-table-header-text");
@@ -43,7 +43,7 @@ export class SchemaDesignerEntity implements IEntity {
             columnDiv.classList.add("sd-table-column");
             const columnIcon = document.createElement("div");
             columnIcon.classList.add("sd-table-column-icon");
-            columnIcon.style.backgroundImage = `url(${this._config.dataTypeIcons[column.type]
+            columnIcon.style.backgroundImage = `url(${this._config.icons.dataTypeIcons![column.type]
                 })`;
             columnDiv.appendChild(columnIcon);
             const columnText = document.createElement("div");
