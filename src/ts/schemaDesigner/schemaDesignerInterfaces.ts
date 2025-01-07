@@ -83,23 +83,27 @@ export enum OnAction {
 
 
 export interface SchemaDesignerConfig {
+    icons: {
+        addTableIcon: string;
+        undoIcon: string;
+        redoIcon: string;
+        zoomInIcon: string;
+        zoomOutIcon: string;
+        deleteIcon: string;
+        entityIcon: string;
+        dataTypeIcons: { [key: string]: string };
+        connectorIcon: string;
+        exportIcon: string;
+        autoarrangeIcon: string;
+    }
+    color: {
+        cellFillColor: string;
+        cellHighlightColor: string;
+        edgeStrokeColor: string;
+        outlineColor: string;
+        toolbarBackgroundColor: string;
+        validColor: string;
+        invalidColor: string;
+    }
     graphFontFamily: string;
-    cellFillColor: string;
-    cellHighlightColor: string;
-    edgeStrokeColor: string;
-    outlineColor: string;
-    toolbarBackgroundColor: string;
-    addTableIcon: string;
-    undoIcon: string;
-    redoIcon: string;
-    zoomInIcon: string;
-    zoomOutIcon: string;
-    deleteIcon: string;
-    entityIcon: string;
-    dataTypeIcons: { [key: string]: string };
-    connectorIcon: string;
-    validColor: string;
-    invalidColor: string;
-    exportIcon: string;
-    autoarrangeIcon: string;
 }

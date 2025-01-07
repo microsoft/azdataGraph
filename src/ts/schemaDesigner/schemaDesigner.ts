@@ -46,9 +46,9 @@ export class SchemaDesigner {
     private overwriteMxGraphDefaults() {
         mx.mxClient.NO_FO = true;
         mx.mxEvent.disableContextMenu(this._container);
-        mx.mxConstants.DEFAULT_VALID_COLOR = this._config.validColor;
-        mx.mxConstants.VALID_COLOR = this._config.validColor;
-        mx.mxConstants.INVALID_COLOR = this._config.invalidColor;
+        mx.mxConstants.DEFAULT_VALID_COLOR = this._config.color.validColor;
+        mx.mxConstants.VALID_COLOR = this._config.color.validColor;
+        mx.mxConstants.INVALID_COLOR = this._config.color.invalidColor;
     }
 
     private setupEditorOptions() {
@@ -71,7 +71,7 @@ export class SchemaDesigner {
         this._graph.connectionHandler.movePreviewAway = false;
         this._graph.connectionHandler.moveIconFront = true;
         this._graph.connectionHandler.connectImage = new mx.mxImage(
-            this._config.connectorIcon,
+            this._config.icons.connectorIcon,
             24,
             24
         );
@@ -420,7 +420,7 @@ export class SchemaDesigner {
         this._container.appendChild(toolbarBelt);
         this._toolbar = new SchemaDesignerToolbar(toolbarBelt, this._graph, this._config);
         this._toolbar.addButton(
-            this._config.addTableIcon,
+            this._config.icons.addTableIcon,
             "Add Table",
             () => {
             },
@@ -453,14 +453,14 @@ export class SchemaDesigner {
         );
         this._toolbar.addDivider();
         this._toolbar.addButton(
-            this._config.undoIcon,
+            this._config.icons.undoIcon,
             "Undo",
             () => {
                 this._editor.execute("undo");
             }
         );
         this._toolbar.addButton(
-            this._config.redoIcon,
+            this._config.icons.redoIcon,
             "Redo",
             () => {
                 this._editor.execute("redo");
@@ -468,7 +468,7 @@ export class SchemaDesigner {
         );
         this._toolbar.addDivider();
         this._toolbar.addButton(
-            this._config.zoomInIcon,
+            this._config.icons.zoomInIcon,
             "Zoom In",
             () => {
                 this._editor.execute("zoomIn");
@@ -477,7 +477,7 @@ export class SchemaDesigner {
         );
 
         this._toolbar.addButton(
-            this._config.zoomOutIcon,
+            this._config.icons.zoomOutIcon,
             "Zoom Out",
             () => {
                 this._editor.execute("zoomOut");
@@ -488,14 +488,14 @@ export class SchemaDesigner {
         this._toolbar.addDivider();
 
         this._toolbar.addButton(
-            this._config.autoarrangeIcon,
+            this._config.icons.autoarrangeIcon,
             "Auto Arrange",
             () => {
                 this.autoArrange();
             }
         );
         this._toolbar.addButton(
-            this._config.exportIcon,
+            this._config.icons.exportIcon,
             "Export",
             () => {
                 const schema = this.schema;
@@ -504,7 +504,7 @@ export class SchemaDesigner {
         );
         this._toolbar.addDivider();
         this._toolbar.addButton(
-            this._config.deleteIcon,
+            this._config.icons.deleteIcon,
             "Delete",
             () => {
                 const cell = this._graph.getSelectionCell();

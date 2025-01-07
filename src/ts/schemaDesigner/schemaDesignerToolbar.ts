@@ -28,7 +28,7 @@ export class SchemaDesignerToolbar {
         button.title = title;
         if (onDragEndCallback) {
             const dragImage = button.cloneNode(true) as HTMLElement;
-            dragImage.style.backgroundColor = this._config.toolbarBackgroundColor;
+            dragImage.style.backgroundColor = this._config.color.toolbarBackgroundColor;
             const ds = mx.mxUtils.makeDraggable(
                 button,
                 this._graph,
