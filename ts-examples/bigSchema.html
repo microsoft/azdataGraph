@@ -40,6 +40,9 @@
             isEditable: false,
           });
           schemaDesigner.renderModel(test);
+          schemaDesigner.addCellClickListener((cell) => {
+            console.log(cell);
+          })
         }
       };
     </script>

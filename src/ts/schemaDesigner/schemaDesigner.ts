@@ -7,7 +7,7 @@ import './schemaDesigner.css';
 import '../../css/common.css';
 
 import { IColumn, IEntity, IRelationship, ISchema, OnAction, SchemaDesignerConfig } from './schemaDesignerInterfaces';
-import { mxEditor, mxGraph, mxGraphModel, mxHierarchicalLayout } from 'mxgraph';
+import { mxCell, mxEditor, mxGraph, mxGraphModel, mxHierarchicalLayout } from 'mxgraph';
 
 import { mxGraphFactory as mx } from '../mx';
 import { SchemaDesignerToolbar } from './schemaDesignerToolbar';
@@ -23,6 +23,8 @@ export class SchemaDesigner {
     private _model!: mxGraphModel;
     private _toolbar!: SchemaDesignerToolbar;
     private _layout!: mxHierarchicalLayout;
+
+    private cellClickListeners: ((cell: mxCell) => void)[] = [];
 
     constructor(
         private _container: HTMLElement,
@@ -402,6 +404,19 @@ export class SchemaDesigner {
             this._graph.view.validate(source);
         });
 
+        // this._graph.dblClick = (_evt, cell) => {
+        //     if (cell !== undefined) {
+        //         this.cellClickListeners.forEach((listener) => listener(cell));
+        //     }
+        // };
+
+        this._graph.addListener(mx.mxEvent.DOUBLE_CLICK, (_sender, evt) => {
+            const cell = this._graph.getSelectionCell();
+            if (cell !== undefined) {
+                this.cellClickListeners.forEach((listener) => listener(cell));
+            }
+        });
+
         this._graph.getStylesheet().getDefaultVertexStyle()['cellHighlightColor'] = "red";
         this._graph.getStylesheet().getDefaultEdgeStyle()['edgeStyle'] = mx.mxEdgeStyle.ElbowConnector;
         this._graph.stylesheet.getDefaultEdgeStyle()[mx.mxConstants.STYLE_EDGE] = mx.mxConstants.EDGESTYLE_ENTITY_RELATION;
@@ -415,6 +430,7 @@ export class SchemaDesigner {
         outline.createSizer();
         outline.labelsVisible = true;
         outline.sizerSize = 5;
+        outline.minScale = 0.0002;
     }
 
     private setupToolbar() {
@@ -683,6 +699,10 @@ export class SchemaDesigner {
             }
         }
         return mostNegativeY;
+    }
+
+    public addCellClickListener(listener: (cell: mxCell) => void) {
+        this.cellClickListeners.push(listener);
     }
 }
 
