@@ -56,6 +56,7 @@ export class SchemaDesigner {
     }
 
     private setupGraphOptions() {
+        this._graph.setResizeContainer(true);
         this._graph.setAllowNegativeCoordinates(true);
         this._graph.setGridEnabled(true);
         this._graph.tooltipHandler.setEnabled(false);
@@ -68,6 +69,7 @@ export class SchemaDesigner {
         this._graph.setAllowDanglingEdges(false);
         this._graph.setHtmlLabels(true);
         this._graph.view.optimizeVmlReflows = false;
+        this._graph.connectionHandler.enabled = false;
         this._graph.connectionHandler.movePreviewAway = false;
         this._graph.connectionHandler.moveIconFront = true;
         this._graph.connectionHandler.connectImage = new mx.mxImage(
@@ -192,7 +194,7 @@ export class SchemaDesigner {
             return !this._model.isEdge(cell);
         }
         this._graph.isCellEditable = (cell) => {
-            return !this._model.isEdge(cell);
+            return this._config.isEditable && !this._model.isEdge(cell);
         }
         this._graph.isCellMovable = (cell) => {
             return !this._model.isEdge(cell);
@@ -399,7 +401,7 @@ export class SchemaDesigner {
             this._graph.view.invalidate(source, false, false);
             this._graph.view.validate(source);
         });
-        
+
         this._graph.getStylesheet().getDefaultVertexStyle()['cellHighlightColor'] = "red";
         this._graph.getStylesheet().getDefaultEdgeStyle()['edgeStyle'] = mx.mxEdgeStyle.ElbowConnector;
         this._graph.stylesheet.getDefaultEdgeStyle()[mx.mxConstants.STYLE_EDGE] = mx.mxConstants.EDGESTYLE_ENTITY_RELATION;
@@ -420,54 +422,58 @@ export class SchemaDesigner {
         toolbarBelt.classList.add("sd-toolbar-belt");
         this._container.appendChild(toolbarBelt);
         this._toolbar = new SchemaDesignerToolbar(toolbarBelt, this._graph, this._config);
-        this._toolbar.addButton(
-            this._config.icons.addTableIcon,
-            "Add Table",
-            () => {
-            },
-            (_graph, evt, _cell) => {
-                this._graph.stopEditing(false);
-                const pt = this._graph.getPointForEvent(evt, true);
-                const entity = {
-                    name: "New Table",
-                    schema: "dbo",
-                    columns: [{
-                        name: "Column1",
-                        type: "int",
-                        isPrimaryKey: true,
-                        isIdentity: true
-                    }, {
-                        name: "Column2",
-                        type: "int",
-                        isPrimaryKey: false,
-                        isIdentity: false
-                    }, {
-                        name: "Column2",
-                        type: "int",
-                        isPrimaryKey: false,
-                        isIdentity: false
-                    }]
-                };
+        if (this._config.isEditable) {
+            this._toolbar.addButton(
+                this._config.icons.addTableIcon,
+                "Add Table",
+                () => {
+                },
+                (_graph, evt, _cell) => {
+                    this._graph.stopEditing(false);
+                    const pt = this._graph.getPointForEvent(evt, true);
+                    const entity = {
+                        name: "New Table",
+                        schema: "dbo",
+                        columns: [{
+                            name: "Column1",
+                            type: "int",
+                            isPrimaryKey: true,
+                            isIdentity: true
+                        }, {
+                            name: "Column2",
+                            type: "int",
+                            isPrimaryKey: false,
+                            isIdentity: false
+                        }, {
+                            name: "Column2",
+                            type: "int",
+                            isPrimaryKey: false,
+                            isIdentity: false
+                        }]
+                    };
 
-                this.renderEntity(entity, pt.x, pt.y);
-            }
-        );
-        this._toolbar.addDivider();
-        this._toolbar.addButton(
-            this._config.icons.undoIcon,
-            "Undo",
-            () => {
-                this._editor.execute("undo");
-            }
-        );
-        this._toolbar.addButton(
-            this._config.icons.redoIcon,
-            "Redo",
-            () => {
-                this._editor.execute("redo");
-            }
-        );
-        this._toolbar.addDivider();
+                    this.renderEntity(entity, pt.x, pt.y);
+                }
+            );
+            this._toolbar.addDivider();
+            this._toolbar.addButton(
+                this._config.icons.undoIcon,
+                "Undo",
+                () => {
+                    this._editor.execute("undo");
+                }
+            );
+            this._toolbar.addButton(
+                this._config.icons.redoIcon,
+                "Redo",
+                () => {
+                    this._editor.execute("redo");
+                }
+            );
+            this._toolbar.addDivider();
+        }
+
+
         this._toolbar.addButton(
             this._config.icons.zoomInIcon,
             "Zoom In",
@@ -503,17 +509,19 @@ export class SchemaDesigner {
                 console.log(schema);
             }
         );
-        this._toolbar.addDivider();
-        this._toolbar.addButton(
-            this._config.icons.deleteIcon,
-            "Delete",
-            () => {
-                const cell = this._graph.getSelectionCell();
-                if (cell !== undefined) {
-                    this._editor.execute("delete", cell);
+        if (this._config.isEditable) {
+            this._toolbar.addDivider();
+            this._toolbar.addButton(
+                this._config.icons.deleteIcon,
+                "Delete",
+                () => {
+                    const cell = this._graph.getSelectionCell();
+                    if (cell !== undefined) {
+                        this._editor.execute("delete", cell);
+                    }
                 }
-            }
-        );
+            );
+        }
     }
 
     private redrawEdges() {
@@ -642,12 +650,14 @@ export class SchemaDesigner {
         this._graph.center();
 
         const mostNegativeX = this.mostNegativeX();
-        const cellsWithNegativeX = cells.filter((cell) => cell.geometry.x < 0 || cell.isEdge());
-        this._graph.moveCells(cellsWithNegativeX, -mostNegativeX + 500, 0, false);
+        console.log('-x', mostNegativeX);
 
         const mostNegativeY = this.mostNegativeY();
-        const cellsWithNegativeY = cells.filter((cell) => cell.geometry.y < 0 || cell.isEdge());
-        this._graph.moveCells(cellsWithNegativeY, 0, -mostNegativeY + 500, false);
+        console.log('-y', mostNegativeY);
+
+        this._graph.moveCells(cells, -mostNegativeX + 100, -mostNegativeY + 100, false);
+        this._graph.sizeDidChange();
+
         this._model.endUpdate();
     }
 

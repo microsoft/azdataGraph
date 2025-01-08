@@ -106,4 +106,5 @@ export interface SchemaDesignerConfig {
         invalidColor: string;
     }
     graphFontFamily: string;
+    isEditable: boolean;
 }
