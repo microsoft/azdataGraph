@@ -14,123 +14,32 @@
         if (targetDiv1) {
           const schemaDesigner = new SchemaDesigner(targetDiv1, {
             graphFontFamily: "Segoe UI",
-            toolbarBackgroundColor: "var(--color-toolbar-bg)",
-            addTableIcon: "./resources/addTable.svg",
-            undoIcon: "./resources/undo.svg",
-            redoIcon: "./resources/redo.svg",
-            zoomInIcon: "./resources/zoomIn.svg",
-            zoomOutIcon: "./resources/zoomOut.svg",
-            deleteIcon: "./resources/delete.svg",
-            entityIcon: "./resources/tableNode.svg",
-            dataTypeIcons: {
-              int: "./resources/numberDataType.svg",
+            color: {
+              toolbarBackgroundColor: "var(--color-toolbar-bg)",
+              cellFillColor: "var(--color-graph-column-indicator)",
+              cellHighlightColor: "var(--color-graph-cell-highlight)",
+              edgeStrokeColor: "black",
+              validColor: "#2ecc71",
+              invalidColor: "#e74c3c",
+
             },
-            connectorIcon: "./resources/connector.svg",
-            cellFillColor: "var(--color-graph-column-indicator)",
-            cellHighlightColor: "var(--color-graph-cell-highlight)",
-            edgeStrokeColor: "black",
-            validColor: "#2ecc71",
-            invalidColor: "#e74c3c",
-            exportIcon: "./resources/export.svg",
-            autoarrangeIcon: "./resources/arrange.svg",
+            icons: {
+              addTableIcon: "./resources/addTable.svg",
+              undoIcon: "./resources/undo.svg",
+              redoIcon: "./resources/redo.svg",
+              zoomInIcon: "./resources/zoomIn.svg",
+              zoomOutIcon: "./resources/zoomOut.svg",
+              deleteIcon: "./resources/delete.svg",
+              entityIcon: "./resources/tableNode.svg",
+              dataTypeIcons: {
+                int: "./resources/numberDataType.svg",
+              },
+              connectorIcon: "./resources/connector.svg",
+              exportIcon: "./resources/export.svg",
+              autoarrangeIcon: "./resources/arrange.svg",
+            },
           });
           schemaDesigner.renderModel(test);
-          // schemaDesigner.renderModel({
-          //   entities: [
-          //     {
-          //       name: "New Table",
-          //       schema: "dbo",
-          //       columns: [
-          //         {
-          //           name: "Column1",
-          //           type: "int",
-          //           isPrimaryKey: true,
-          //           isIdentity: true,
-          //         },
-          //         {
-          //           name: "Column2",
-          //           type: "int",
-          //           isPrimaryKey: false,
-          //           isIdentity: false,
-          //         },
-          //         {
-          //           name: "Column2",
-          //           type: "int",
-          //           isPrimaryKey: false,
-          //           isIdentity: false,
-          //         },
-          //       ],
-          //     },
-          //     {
-          //       name: "New Table 2",
-          //       schema: "dbo",
-          //       columns: [
-          //         {
-          //           name: "Column1",
-          //           type: "int",
-          //           isPrimaryKey: true,
-          //           isIdentity: true,
-          //         },
-          //         {
-          //           name: "Column2",
-          //           type: "int",
-          //           isPrimaryKey: false,
-          //           isIdentity: false,
-          //         },
-          //         {
-          //           name: "Column2",
-          //           type: "int",
-          //           isPrimaryKey: false,
-          //           isIdentity: false,
-          //         },
-          //       ],
-          //     },
-          //     {
-          //       name: "New Table 3",
-          //       schema: "dbo",
-          //       columns: [
-          //         {
-          //           name: "Column1",
-          //           type: "int",
-          //           isPrimaryKey: true,
-          //           isIdentity: true,
-          //         },
-          //       ],
-          //     },
-          //     {
-          //       name: "New Table 4",
-          //       schema: "dbo",
-          //       columns: [
-          //         {
-          //           name: "Column1",
-          //           type: "int",
-          //           isPrimaryKey: true,
-          //           isIdentity: true,
-          //         },
-          //       ],
-          //     }
-          //   ],
-          //   relationships: [
-          //     {
-          //       foreignKeyName: "",
-          //       onDeleteAction: "0",
-          //       onUpdateAction: "0",
-          //       column: "Column1",
-          //       entity: "New Table 2",
-          //       referencedEntity: "New Table",
-          //       referencedColumn: "Column2",
-          //     },
-          //     {
-          //       foreignKeyName: "",
-          //       onDeleteAction: "0",
-          //       onUpdateAction: "0",
-          //       column: "Column1",
-          //       entity: "New Table 4",
-          //       referencedEntity: "New Table 3",
-          //       referencedColumn: "Column1",
-          //     }
-          //   ],
-          // }, true);
         }
       };
     </script>

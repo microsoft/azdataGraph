@@ -4,19 +4,16 @@ const fs = require("fs");
 const path = require("path");
 
 const config = {
-    entryPoints: ['./src/ts/index.ts', 'src/ts/examples/main.tsx'],
-    outdir: './dist',
-    //outfile: './dist/index.js',
+    entryPoints: ['./src/ts/index.ts'],
+    outfile: './dist/index.js',
     bundle: true,
     format: 'esm',
     target: 'esnext',
     sourcemap: true,
     loader: {
         ".ts": "ts",
-        ".tsx": "tsx",
         ".css": "css",
         ".gif": "dataurl",
-        '.svg': 'dataurl',
     },
     plugins: [{
         name: 'rebuild-notify',
