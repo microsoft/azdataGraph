@@ -118,6 +118,8 @@
     text-align: left;
     flex: 1;
     user-select: none;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
   
   .sd-table-columns {

@@ -399,8 +399,9 @@ export class SchemaDesigner {
             this._graph.view.invalidate(source, false, false);
             this._graph.view.validate(source);
         });
-
+        
         this._graph.getStylesheet().getDefaultVertexStyle()['cellHighlightColor'] = "red";
+        this._graph.getStylesheet().getDefaultEdgeStyle()['edgeStyle'] = mx.mxEdgeStyle.ElbowConnector;
         this._graph.stylesheet.getDefaultEdgeStyle()[mx.mxConstants.STYLE_EDGE] = mx.mxConstants.EDGESTYLE_ENTITY_RELATION;
     }
 
@@ -642,13 +643,11 @@ export class SchemaDesigner {
 
         const mostNegativeX = this.mostNegativeX();
         const cellsWithNegativeX = cells.filter((cell) => cell.geometry.x < 0 || cell.isEdge());
-        console.log(cellsWithNegativeX);
         this._graph.moveCells(cellsWithNegativeX, -mostNegativeX + 500, 0, false);
 
         const mostNegativeY = this.mostNegativeY();
         const cellsWithNegativeY = cells.filter((cell) => cell.geometry.y < 0 || cell.isEdge());
         this._graph.moveCells(cellsWithNegativeY, 0, -mostNegativeY + 500, false);
-        console.log(cellsWithNegativeY);
         this._model.endUpdate();
     }
 
