@@ -410,7 +410,7 @@ export class SchemaDesigner {
         //     }
         // };
 
-        this._graph.addListener(mx.mxEvent.DOUBLE_CLICK, (_sender, evt) => {
+        this._graph.addListener(mx.mxEvent.DOUBLE_CLICK, (_sender, _evt) => {
             const cell = this._graph.getSelectionCell();
             if (cell !== undefined) {
                 this.cellClickListeners.forEach((listener) => listener(cell));
