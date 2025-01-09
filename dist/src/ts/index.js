@@ -1,8 +1,4 @@
 "use strict";
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the Source EULA.See License.txt in the project root for license information.
- * --------------------------------------------------------------------------------------------*/
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -26,3 +22,4 @@ exports.mx = void 0;
 const mxgraph_1 = __importDefault(require("mxgraph"));
 exports.mx = mxgraph_1.default;
 __exportStar(require("mxgraph"), exports);
+__exportStar(require("./schemaDesigner/schemaDesigner"), exports);

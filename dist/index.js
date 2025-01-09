@@ -33,13 +33,13 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var require_build = __commonJS({
   "dist/build.js"(exports, module) {
     "use strict";
-    (function(root, factory) {
+    (function(root, factory2) {
       if (typeof define === "function" && define.amd) {
-        define([], factory);
+        define([], factory2);
       } else if (typeof module === "object" && module.exports) {
-        module.exports = factory();
+        module.exports = factory2();
       } else {
-        root.mxgraph = factory();
+        root.mxgraph = factory2();
       }
     })(exports, function() {
       return function(opts) {
@@ -39688,7 +39688,7 @@ var require_build = __commonJS({
           return this.toolbar.addSwitchMode(title, icon, clickHandler, pressed);
         };
         mxDefaultToolbar.prototype.addPrototype = function(title, icon, ptype, pressed, insert, toggle) {
-          var factory = mxUtils.bind(this, function() {
+          var factory2 = mxUtils.bind(this, function() {
             if (typeof ptype == "function") {
               return ptype();
             } else if (ptype != null) {
@@ -39698,9 +39698,9 @@ var require_build = __commonJS({
           });
           var clickHandler = mxUtils.bind(this, function(evt, cell2) {
             if (typeof insert == "function") {
-              insert(this.editor, factory(), evt, cell2);
+              insert(this.editor, factory2(), evt, cell2);
             } else {
-              this.drop(factory(), evt, cell2);
+              this.drop(factory2(), evt, cell2);
             }
             this.toolbar.resetMode();
             mxEvent.consume(evt);
@@ -43238,12 +43238,729 @@ var require_build = __commonJS({
 // src/ts/index.ts
 var ts_exports = {};
 __export(ts_exports, {
-  mx: () => import_mxgraph.default
+  SchemaDesigner: () => SchemaDesigner,
+  extendedConnectionHandler: () => extendedConnectionHandler,
+  mx: () => import_mxgraph2.default
 });
-var import_mxgraph = __toESM(require_build());
+var import_mxgraph2 = __toESM(require_build());
 __reExport(ts_exports, __toESM(require_build()));
-var export_mx = import_mxgraph.default;
+
+// src/ts/mx.ts
+var import_mxgraph = __toESM(require_build());
+window.mxLoadResources = false;
+window.mxForceIncludes = false;
+window.mxLoadStylesheets = false;
+window.mxResourceExtension = ".txt";
+var mxGraphFactory = (0, import_mxgraph.default)({});
+
+// src/ts/schemaDesigner/schemaDesignerToolbar.ts
+var SchemaDesignerToolbar = class {
+  constructor(_container, _graph, _config) {
+    this._container = _container;
+    this._graph = _graph;
+    this._config = _config;
+    this._toolbarDiv = document.createElement("div");
+    this._container.appendChild(this._toolbarDiv);
+    this._toolbarDiv.classList.add("sd-toolbar");
+  }
+  addButton(icon, title, callback, onDragEndCallback) {
+    const button = document.createElement("div");
+    this._toolbarDiv.appendChild(button);
+    button.classList.add("sd-toolbar-button");
+    button.style.backgroundImage = `url(${icon})`;
+    button.onclick = callback;
+    button.title = title;
+    if (onDragEndCallback) {
+      const dragImage = button.cloneNode(true);
+      dragImage.style.backgroundColor = this._config.color.toolbarBackgroundColor;
+      const ds = mxGraphFactory.mxUtils.makeDraggable(
+        button,
+        this._graph,
+        onDragEndCallback,
+        dragImage
+      );
+      ds.highlightDropTargets = true;
+    }
+  }
+  addDivider() {
+    const divider = document.createElement("div");
+    this._toolbarDiv.appendChild(divider);
+    divider.classList.add("sd-toolbar-divider");
+  }
+};
+
+// src/ts/schemaDesigner/utils.ts
+function getRowY(state, column) {
+  const s = state.view.scale;
+  if (!column) {
+    return state.y;
+  }
+  const div = column.parentNode;
+  let y = state.y + (column.offsetTop - div.scrollTop + column.offsetHeight / 2) * s;
+  if (div.scrollTop > column.offsetTop) {
+    y = state.y + (div.offsetTop - 15) * s;
+  }
+  if (y > state.y + div.offsetTop * s + div.clientHeight * s) {
+    y = state.y + (div.offsetTop + div.clientHeight - 5) * s;
+  }
+  return y;
+}
+
+// src/ts/schemaDesigner/schemaDesignerEntity.ts
+var SchemaDesignerEntity = class {
+  constructor(entity, _config, _graph) {
+    this._config = _config;
+    this._graph = _graph;
+    this.name = entity.name;
+    this.schema = entity.schema;
+    this.columns = entity.columns;
+  }
+  render() {
+    const parent = document.createElement("div");
+    parent.classList.add("sd-table");
+    const colorIndicator = document.createElement("div");
+    colorIndicator.classList.add("sd-table-color-indicator");
+    parent.appendChild(colorIndicator);
+    const header = document.createElement("div");
+    header.classList.add("sd-table-header");
+    const headerIcon = document.createElement("div");
+    headerIcon.classList.add("sd-table-header-icon");
+    headerIcon.style.backgroundImage = `url(${this._config.icons.entityIcon})`;
+    header.appendChild(headerIcon);
+    const headerText = document.createElement("div");
+    headerText.classList.add("sd-table-header-text");
+    headerText.innerText = `${this.schema}.${this.name}`;
+    header.appendChild(headerText);
+    parent.appendChild(header);
+    const columns = document.createElement("div");
+    columns.classList.add("sd-table-columns");
+    this.columns.forEach((column, index) => {
+      const columnDiv = document.createElement("div");
+      columnDiv.classList.add("sd-table-column");
+      const columnIcon = document.createElement("div");
+      columnIcon.classList.add("sd-table-column-icon");
+      columnIcon.style.backgroundImage = `url(${this._config.icons.dataTypeIcons[column.dataType]})`;
+      columnDiv.appendChild(columnIcon);
+      const columnText = document.createElement("div");
+      columnText.classList.add("sd-table-column-text");
+      columnText.innerText = column.name;
+      columnDiv.appendChild(columnText);
+      const columnConstraints = document.createElement("div");
+      columnConstraints.classList.add("sd-table-column-constraints");
+      columnConstraints.innerText = this.getConstraintText(column, index);
+      columnDiv.appendChild(columnConstraints);
+      columnDiv.setAttribute("column-id", index.toString());
+      columns.appendChild(columnDiv);
+    });
+    parent.appendChild(columns);
+    this.div = parent;
+    return parent;
+  }
+  getConstraintText(col, index) {
+    const constraints = [];
+    if (col.isPrimaryKey) {
+      constraints.push("PK");
+    }
+    const cells = this._graph.getChildCells(this._graph.getDefaultParent());
+    const vertex = cells.find((cell2) => cell2.vertex && cell2.value.name === this.name && cell2.value.schema === this.schema);
+    if (vertex) {
+      const edges = this._graph.getEdges(vertex);
+      const outgoingEdges = edges.filter((edge) => edge.source === vertex);
+      for (const edge of outgoingEdges) {
+        if (edge.value.sourceRow - 1 === index) {
+          constraints.push("FK");
+          break;
+        }
+      }
+    }
+    return constraints.join(", ");
+  }
+};
+
+// src/ts/schemaDesigner/schemaDesignerLayout.ts
+var SchemaDesignerLayout = class extends mxGraphFactory.mxHierarchicalLayout {
+  constructor(graph) {
+    super(graph, mxGraphFactory.mxConstants.DIRECTION_EAST, true);
+  }
+  execute(parent) {
+    super.execute(parent);
+  }
+};
+
+// src/ts/schemaDesigner/schemaDesigner.ts
+var ENTITY_COLUMNS_CONTAINER_CLASS = "sd-table-columns";
+var ENTITY_COLUMN_DIV_CLASS = "sd-table-column";
+var SchemaDesigner = class {
+  constructor(_container, _config) {
+    this._container = _container;
+    this._config = _config;
+    this.cellClickListeners = [];
+    this.initializeGraph();
+  }
+  initializeGraph() {
+    this.overwriteMxGraphDefaults();
+    this._editor = new mxGraphFactory.mxEditor();
+    const graphContainer = document.createElement("div");
+    graphContainer.classList.add("sd-graph-container");
+    this._container.appendChild(graphContainer);
+    this._editor.setGraphContainer(graphContainer);
+    this._graph = this._editor.graph;
+    this._model = this._graph.getModel();
+    this.setupEditorOptions();
+    this.setupGraphOptions();
+    this.setupGraphOutlineOptions();
+    this.setupToolbar();
+  }
+  overwriteMxGraphDefaults() {
+    mxGraphFactory.mxClient.NO_FO = true;
+    mxGraphFactory.mxEvent.disableContextMenu(this._container);
+    mxGraphFactory.mxConstants.DEFAULT_VALID_COLOR = this._config.color.validColor;
+    mxGraphFactory.mxConstants.VALID_COLOR = this._config.color.validColor;
+    mxGraphFactory.mxConstants.INVALID_COLOR = this._config.color.invalidColor;
+  }
+  setupEditorOptions() {
+    this._editor.layoutSwimlanes = true;
+  }
+  setupGraphOptions() {
+    this._graph.setResizeContainer(true);
+    this._graph.tooltipHandler.setEnabled(false);
+    this._graph.setConnectable(true);
+    this._graph.setAllowDanglingEdges(false);
+    this._graph.setHtmlLabels(true);
+    this._graph.allowLoops = false;
+    this._graph.connectionHandler.enabled = false;
+    this._graph.connectionHandler.movePreviewAway = false;
+    this._graph.connectionHandler.moveIconFront = true;
+    this._graph.connectionHandler.connectImage = new mxGraphFactory.mxImage(
+      this._config.icons.connectorIcon,
+      24,
+      24
+    );
+    this._graph.connectionHandler.factoryMethod = null;
+    this._layout = new SchemaDesignerLayout(this._graph);
+    this._layout.intraCellSpacing = 30;
+    this._graph.setCellsDisconnectable(false);
+    this._graph.autoExtend = true;
+    new mxGraphFactory.mxRubberband(this._graph);
+    this._graph.view.updateFloatingTerminalPoint = function(edge, start, end, source) {
+      const next = this.getNextPoint(edge, end, source);
+      if (start?.text?.node === void 0) {
+        return;
+      }
+      const div = start.text.node.getElementsByClassName(ENTITY_COLUMNS_CONTAINER_CLASS)[0];
+      let x = start.x;
+      let y = start.getCenterY();
+      if (next.x > x + start.width / 2) {
+        x += start.width;
+      }
+      if (div !== null && div !== void 0) {
+        y = start.getCenterY() - div.scrollTop;
+        if (edge.cell.value !== void 0 && !this.graph.isCellCollapsed(start.cell)) {
+          const edgeCellValue = edge.cell.value;
+          const row = source ? edgeCellValue.sourceRow : edgeCellValue.targetRow;
+          const columns = div.getElementsByClassName(ENTITY_COLUMN_DIV_CLASS);
+          const column = columns[Math.min(columns.length - 1, row - 1)];
+          if (column !== void 0 || column !== null) {
+            y = getRowY(start, column);
+          } else {
+            return;
+          }
+        }
+        if (edge !== null && edge.absolutePoints !== null) {
+          next.y = y;
+        }
+      } else {
+        return;
+      }
+      edge.setAbsoluteTerminalPoint(new mxGraphFactory.mxPoint(x, y), source);
+      if (source && edge.cell.value !== void 0 && start !== null && end !== null) {
+        let edges = this.graph.getEdgesBetween(start.cell, end.cell, true);
+        const tmp = [];
+        const row = edge.cell.value.targetRow;
+        for (let i = 0; i < edges.length; i++) {
+          if (edges[i].value !== void 0 && edges[i].value.targetRow === row) {
+            tmp.push(edges[i]);
+          }
+        }
+        edges = tmp;
+        if (edges.length > 1 && edge.cell === edges[edges.length - 1]) {
+          const states = [];
+          let y2 = 0;
+          for (let i = 0; i < edges.length; i++) {
+            states[i] = this.getState(edges[i]);
+            y2 += states[i].absolutePoints[0].y;
+          }
+          y2 /= edges.length;
+          for (let i = 0; i < states.length; i++) {
+            const x2 = states[i].absolutePoints[1].x;
+            if (states[i].absolutePoints.length < 5) {
+              states[i].absolutePoints.splice(2, 0, new mxGraphFactory.mxPoint(x2, y2));
+            } else {
+              states[i].absolutePoints[2] = new mxGraphFactory.mxPoint(x2, y2);
+            }
+            if (i < states.length - 1) {
+              this.graph.cellRenderer.redraw(states[i]);
+            }
+          }
+        }
+      }
+      if (start.cell.value.scrollTop) {
+        div.scrollTop = start.cell.value.scrollTop;
+      }
+    };
+    this._graph.getLabel = (cell2) => {
+      if (cell2?.value?.render !== void 0) {
+        return cell2.value.render();
+      }
+      return document.createElement("div");
+    };
+    this._graph.isHtmlLabel = (cell2) => {
+      return !this._model.isEdge(cell2);
+    };
+    this._graph.isCellEditable = (cell2) => {
+      return this._config.isEditable && !this._model.isEdge(cell2);
+    };
+    this._graph.isCellMovable = (cell2) => {
+      return this._config.isEditable && !this._model.isEdge(cell2);
+    };
+    this._graph.isCellResizable = (_cell) => {
+      return false;
+    };
+    this._graph.isCellFoldable = (_cell) => {
+      return false;
+    };
+    this._graph.convertValueToString = function(cell2) {
+      if (cell2?.value?.entity?.name !== void 0) {
+        return cell2.value.entity.name;
+      }
+      return mxGraphFactory.mxGraph.prototype.convertValueToString.apply(this, [cell2]);
+    };
+    this._graph.model.valueForCellChanged = function(cell2, value) {
+      const old = cell2.value.name;
+      cell2.value.name = value;
+      return old;
+    };
+    const oldRedrawLabel = this._graph.cellRenderer.redrawLabel;
+    this._graph.cellRenderer.redrawLabel = function(state) {
+      oldRedrawLabel.apply(this, arguments);
+      const graph = state.view.graph;
+      const model = graph.model;
+      if (model.isVertex(state.cell) && state.text !== null) {
+        const div = state.text.node.getElementsByClassName(ENTITY_COLUMNS_CONTAINER_CLASS)[0];
+        if (div !== null) {
+          if (div.getAttribute("scrollHandler") === null) {
+            div.setAttribute("scrollHandler", "true");
+            const updateEdges = mxGraphFactory.mxUtils.bind(this, function() {
+              graph.clearSelection();
+              const edgeCount = model.getEdgeCount(state.cell);
+              for (let i = 0; i < edgeCount; i++) {
+                const edge = model.getEdgeAt(state.cell, i);
+                graph.view.invalidate(edge, true, false);
+                graph.view.validate(edge);
+              }
+            });
+            mxGraphFactory.mxEvent.addListener(div, "scroll", () => {
+              state.cell.value.scrollTop = div.scrollTop;
+              updateEdges();
+            });
+            mxGraphFactory.mxEvent.addListener(div, "mouseup", updateEdges);
+          }
+        }
+      }
+    };
+    this._graph.connectionHandler.updateRow = function(target) {
+      while (target !== null && target.className.includes !== null && typeof target.className === "string" && target?.className?.includes("sd-table-column-")) {
+        target = target.parentNode;
+      }
+      this.currentRow = void 0;
+      if (target !== null && target?.className === "sd-table-column") {
+        this.currentRow = parseInt(target.getAttribute("column-id")) + 1;
+      } else {
+        target = null;
+      }
+      return target;
+    };
+    this._graph.connectionHandler.updateIcons = function(state, icons, me) {
+      let target = me.getSource();
+      target = this.updateRow(target);
+      if (target !== void 0 && this.currentRow !== void 0) {
+        const div = target.parentNode;
+        const s = state.view.scale;
+        icons[0].node.style.userSelect = "none";
+        icons[0].node.style.visibility = "visible";
+        icons[0].bounds.width = s * 24;
+        icons[0].bounds.height = s * 24;
+        icons[0].bounds.x = state.x + target.offsetWidth * s;
+        icons[0].bounds.y = state.y + target.offsetTop * s + -div.scrollTop + target.offsetHeight * s / 2 - icons[0].bounds.height / 2;
+        icons[0].redraw();
+        this.currentRowNode = target;
+      } else {
+        icons[0].node.style.visibility = "hidden";
+      }
+    };
+    const oldMouseMove = this._graph.connectionHandler.mouseMove;
+    this._graph.connectionHandler.mouseMove = function(_sender, me) {
+      if (this.edgeState !== null) {
+        this.currentRowNode = this.updateRow(me.getSource());
+        if (this.currentRow !== null) {
+          this.edgeState.cell.value.targetRow = this.currentRow;
+        } else {
+          this.edgeState.cell.value.targetRow = 0;
+        }
+      }
+      oldMouseMove.apply(this, arguments);
+    };
+    this._graph.connectionHandler.createEdgeState = function(_me) {
+      const relation = {
+        sourceRow: this.currentRow || 0,
+        targetRow: 0
+      };
+      const edge = this.createEdge(relation);
+      const style = this.graph.getCellStyle(edge);
+      const state = new mxGraphFactory.mxCellState(this.graph.view, edge, style);
+      this.sourceRowNode = this.currentRowNode;
+      return state;
+    };
+    this._graph.connectionHandler.isValidTarget = function(_cell) {
+      return this.currentRowNode !== null;
+    };
+    this._graph.connectionHandler.validateConnection = function(source, target) {
+      if (this.edgeState === null) {
+        return null;
+      }
+      if (this.currentRowNode === null) {
+        return "";
+      }
+      if (this.graph.model.isEdge(target)) {
+        return "";
+      }
+      if (source === target) {
+        return "";
+      }
+      const edgeState = this.edgeState;
+      const edgeStateValue = edgeState.cell.value;
+      const edgeBetweenSourceAndTarget = this.graph.model.getEdgesBetween(source, target);
+      for (let i = 0; i < edgeBetweenSourceAndTarget.length; i++) {
+        const edge = edgeBetweenSourceAndTarget[i];
+        const edgeValue = edge.value;
+        if (edgeValue.sourceRow === edgeStateValue.sourceRow && edgeValue.targetRow === edgeStateValue.targetRow && edge.source === source && edge.target === target) {
+          return "";
+        }
+        if (
+          // edgeValue.sourceRow === edgeStateValue.targetRow &&
+          // edgeValue.targetRow === edgeStateValue.sourceRow &&
+          edge.source === target && edge.target === source
+        ) {
+          return "";
+        }
+      }
+      return null;
+    };
+    this._graph.connectionHandler.getTargetPerimeterPoint = function(state, me) {
+      let y = me.getY();
+      if (this.currentRowNode !== null) {
+        y = getRowY(state, this.currentRowNode);
+      }
+      let x = state.x;
+      if (this.getEventSource().getCenterX() > state.getCenterX()) {
+        x += state.width;
+      }
+      return new mxGraphFactory.mxPoint(x, y);
+    };
+    this._graph.connectionHandler.getSourcePerimeterPoint = function(state, next, me) {
+      let y = me.getY();
+      if (this.sourceRowNode !== null) {
+        y = getRowY(state, this.sourceRowNode);
+      }
+      let x = state.x;
+      if (next.x > state.getCenterX()) {
+        x += state.width;
+      }
+      return new mxGraphFactory.mxPoint(x, y);
+    };
+    this._graph.connectionHandler.addListener(mxGraphFactory.mxEvent.CONNECT, (_sender, evt) => {
+      const edge = evt.getProperty("cell");
+      const source = this._graph.getModel().getTerminal(edge, true);
+      this._graph.view.invalidate(source, false, false);
+      this._graph.view.validate(source);
+    });
+    this._graph.addListener(mxGraphFactory.mxEvent.DOUBLE_CLICK, (_sender, _evt) => {
+      const cell2 = this._graph.getSelectionCell();
+      if (cell2 !== void 0) {
+        this.cellClickListeners.forEach((listener) => listener(cell2));
+      }
+    });
+    this._graph.getStylesheet().getDefaultVertexStyle()["cellHighlightColor"] = "red";
+    this._graph.getStylesheet().getDefaultEdgeStyle()["edgeStyle"] = mxGraphFactory.mxEdgeStyle.ElbowConnector;
+    this._graph.stylesheet.getDefaultEdgeStyle()[mxGraphFactory.mxConstants.STYLE_EDGE] = mxGraphFactory.mxConstants.EDGESTYLE_ENTITY_RELATION;
+  }
+  setupGraphOutlineOptions() {
+    const outlineContainer = document.createElement("div");
+    outlineContainer.classList.add("sd-outline");
+    this._container.appendChild(outlineContainer);
+    new mxGraphFactory.mxOutline(this._graph, outlineContainer);
+  }
+  setupToolbar() {
+    const toolbarBelt = document.createElement("div");
+    toolbarBelt.classList.add("sd-toolbar-belt");
+    this._container.appendChild(toolbarBelt);
+    this._toolbar = new SchemaDesignerToolbar(toolbarBelt, this._graph, this._config);
+    if (this._config.isEditable) {
+      this._toolbar.addButton(
+        this._config.icons.addTableIcon,
+        "Add Table",
+        () => {
+        },
+        (_graph, evt, _cell) => {
+          this._graph.stopEditing(false);
+          const pt = this._graph.getPointForEvent(evt, true);
+          const entity = {
+            name: "New Table",
+            schema: "dbo",
+            columns: [{
+              name: "Column1",
+              dataType: "int",
+              isPrimaryKey: true,
+              isIdentity: true
+            }, {
+              name: "Column2",
+              dataType: "int",
+              isPrimaryKey: false,
+              isIdentity: false
+            }, {
+              name: "Column2",
+              dataType: "int",
+              isPrimaryKey: false,
+              isIdentity: false
+            }]
+          };
+          this.renderEntity(entity, pt.x, pt.y);
+        }
+      );
+      this._toolbar.addDivider();
+      this._toolbar.addButton(
+        this._config.icons.undoIcon,
+        "Undo",
+        () => {
+          this._editor.execute("undo");
+        }
+      );
+      this._toolbar.addButton(
+        this._config.icons.redoIcon,
+        "Redo",
+        () => {
+          this._editor.execute("redo");
+        }
+      );
+      this._toolbar.addDivider();
+    }
+    this._toolbar.addButton(
+      this._config.icons.zoomInIcon,
+      "Zoom In",
+      () => {
+        this._editor.execute("zoomIn");
+        this.redrawEdges();
+      }
+    );
+    this._toolbar.addButton(
+      this._config.icons.zoomOutIcon,
+      "Zoom Out",
+      () => {
+        this._editor.execute("zoomOut");
+        this.redrawEdges();
+      }
+    );
+    this._toolbar.addDivider();
+    this._toolbar.addButton(
+      this._config.icons.autoarrangeIcon,
+      "Auto Arrange",
+      () => {
+        this.autoArrange();
+      }
+    );
+    this._toolbar.addButton(
+      this._config.icons.exportIcon,
+      "Export",
+      () => {
+        const schema = this.schema;
+        console.log(schema);
+      }
+    );
+    if (this._config.isEditable) {
+      this._toolbar.addDivider();
+      this._toolbar.addButton(
+        this._config.icons.deleteIcon,
+        "Delete",
+        () => {
+          const cell2 = this._graph.getSelectionCell();
+          if (cell2 !== void 0) {
+            this._editor.execute("delete", cell2);
+          }
+        }
+      );
+    }
+  }
+  redrawEdges() {
+    const cells = this._model.getChildCells(this._graph.getDefaultParent());
+    for (let i = 0; i < cells.length; i++) {
+      if (!cells[i].edge) {
+        continue;
+      }
+      const edge = cells[i];
+      this._graph.view.invalidate(edge, true, false);
+      this._graph.view.validate(edge);
+    }
+  }
+  renderModel(schema, cleanUndoManager = false) {
+    const parent = this._graph.getDefaultParent();
+    this._model.beginUpdate();
+    try {
+      this._graph.removeCells(this._model.getChildCells(parent));
+      const entities = schema.entities;
+      for (let i = 0; i < entities.length; i++) {
+        const entity = entities[i];
+        this.renderEntity(entity, 100 + i * 50, 100 + i * 50);
+      }
+      for (let i = 0; i < schema.relationships.length; i++) {
+        const relationship = schema.relationships[i];
+        this.renderRelationship(relationship);
+      }
+    } finally {
+      this._model.endUpdate();
+      this._graph.view.refresh();
+      const parentCells = [];
+      for (let i = 0; i < this._model.cells.length; i++) {
+        if (this._model.cells[i].vertex) {
+          if (this._model.getIncomingEdges(this._model.cells[i]).length === 0) {
+            parentCells.push(this._model.cells[i]);
+          }
+        }
+      }
+      this.autoArrange();
+      if (cleanUndoManager) {
+        this._editor.undoManager.clear();
+      }
+    }
+  }
+  renderEntity(entity, x, y) {
+    const entityValue = new SchemaDesignerEntity(entity, this._config, this._graph);
+    const entityCell = new mxGraphFactory.mxCell(
+      entityValue,
+      new mxGraphFactory.mxGeometry(
+        0,
+        0,
+        260 + 4,
+        Math.min(330, 52 + entityValue.columns.length * 28) + 4
+      )
+    );
+    entityCell.setVertex(true);
+    this._model.beginUpdate();
+    try {
+      entityCell.geometry.x = x;
+      entityCell.geometry.y = y;
+      entityCell.geometry.alternateBounds = new mxGraphFactory.mxRectangle(0, 0, entityCell.geometry.width, entityCell.geometry.height);
+      this._graph.addCell(entityCell, this._graph.getDefaultParent());
+    } finally {
+      this._model.endUpdate();
+    }
+    this._graph.setSelectionCell(entityCell);
+  }
+  renderRelationship(relationship) {
+    const cells = this._model.getChildCells(this._graph.getDefaultParent());
+    const source = cells.find((cell2) => cell2.value.name === relationship.entity);
+    const target = cells.find((cell2) => cell2.value.name === relationship.referencedEntity);
+    if (source === void 0 || target === void 0) {
+      return;
+    }
+    const edgeValue = {
+      sourceRow: source.value.columns.findIndex((column) => column.name === relationship.column) + 1,
+      targetRow: target.value.columns.findIndex((column) => column.name === relationship.referencedColumn) + 1
+    };
+    this._graph.insertEdge(this._graph.getDefaultParent(), null, edgeValue, source, target);
+    this._graph.view.invalidate(source, false, false);
+    this._graph.view.validate(source);
+    this._graph.view.invalidate(target, false, false);
+    this._graph.view.validate(target);
+  }
+  get schema() {
+    const schema = {
+      entities: [],
+      relationships: []
+    };
+    const cells = this._model.getChildCells(this._graph.getDefaultParent());
+    for (let i = 0; i < cells.length; i++) {
+      const cell2 = cells[i];
+      if (cell2.vertex) {
+        const entity = {
+          columns: cell2.value.columns,
+          name: cell2.value.name,
+          schema: cell2.value.schema
+        };
+        schema.entities.push(entity);
+      } else if (cell2.edge) {
+        const relationship = {
+          foreignKeyName: "",
+          onDeleteAction: "0" /* CASCADE */,
+          onUpdateAction: "0" /* CASCADE */,
+          column: cell2.target.value.columns[cell2.value.sourceRow - 1].name,
+          entity: cell2.target.value.name,
+          referencedEntity: cell2.source.value.name,
+          referencedColumn: cell2.source.value.columns[cell2.value.targetRow - 1].name
+        };
+        schema.relationships.push(relationship);
+      }
+    }
+    return schema;
+  }
+  autoArrange() {
+    this._model.beginUpdate();
+    this._layout.execute(this._graph.getDefaultParent());
+    const cells = this._graph.getChildCells(this._graph.getDefaultParent());
+    this._graph.center();
+    const mostNegativeX = this.mostNegativeX();
+    console.log("-x", mostNegativeX);
+    const mostNegativeY = this.mostNegativeY();
+    console.log("-y", mostNegativeY);
+    this._graph.moveCells(cells, -mostNegativeX + 100, -mostNegativeY + 100, false);
+    this._graph.sizeDidChange();
+    this._model.endUpdate();
+  }
+  mostNegativeX() {
+    let mostNegativeX = 0;
+    const cells = this._graph.getChildCells(this._graph.getDefaultParent());
+    for (let i = 0; i < cells.length; i++) {
+      const cell2 = cells[i];
+      if (cell2.geometry.x < mostNegativeX) {
+        mostNegativeX = cell2.geometry.x;
+      }
+    }
+    return mostNegativeX;
+  }
+  mostNegativeY() {
+    let mostNegativeY = 0;
+    const cells = this._graph.getChildCells(this._graph.getDefaultParent());
+    for (let i = 0; i < cells.length; i++) {
+      const cell2 = cells[i];
+      if (cell2.geometry.y < mostNegativeY) {
+        mostNegativeY = cell2.geometry.y;
+      }
+    }
+    return mostNegativeY;
+  }
+  addCellClickListener(listener) {
+    this.cellClickListeners.push(listener);
+  }
+};
+var extendedConnectionHandler = class extends mxGraphFactory.mxConnectionHandler {
+  constructor() {
+    super(...arguments);
+    this.currentRow = 0;
+  }
+};
+var export_mx = import_mxgraph2.default;
 export {
+  SchemaDesigner,
+  extendedConnectionHandler,
   export_mx as mx
 };
 //# sourceMappingURL=index.js.map

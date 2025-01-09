@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "jsx": "react",
     "target": "es2016",
     "module": "commonjs",
     "declaration": true,
@@ -13,10 +14,11 @@
     "noFallthroughCasesInSwitch": true,
     "composite": true,
     "allowSyntheticDefaultImports": true,
+    "noImplicitOverride": true,
     "paths": {
       "mxgraph": ["./dist/build.js"]
     },
     "moduleResolution": "node",
   },
-  "include": ["index.d.ts", "src/ts/**/*.ts", "src/ts/**/*.d.ts"]
+  "include": ["index.d.ts", "src/ts/**/*.ts", "src/ts/**/*.d.ts", "src/ts/examples/**/*.tsx"]
 }

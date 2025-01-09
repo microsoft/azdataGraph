@@ -1,8 +1,3 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the Source EULA. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
 const GRAPH_PADDING_RIGHT = 40;
 const GRAPH_PADDING_TOP = 0;
 const GRAPH_PADDING_BOTTOM = 80;
