@@ -8,6 +8,5 @@ export class SchemaDesignerLayout extends mx.mxHierarchicalLayout {
 
     public override execute(parent: mxCell): void {
         super.execute(parent);
-        console.log('Layout executed');
     }
 }
