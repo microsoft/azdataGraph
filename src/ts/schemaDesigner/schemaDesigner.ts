@@ -438,22 +438,22 @@ export class SchemaDesigner {
                 (_graph, evt, _cell) => {
                     this._graph.stopEditing(false);
                     const pt = this._graph.getPointForEvent(evt, true);
-                    const entity = {
+                    const entity: IEntity = {
                         name: "New Table",
                         schema: "dbo",
                         columns: [{
                             name: "Column1",
-                            type: "int",
+                            dataType: "int",
                             isPrimaryKey: true,
                             isIdentity: true
                         }, {
                             name: "Column2",
-                            type: "int",
+                            dataType: "int",
                             isPrimaryKey: false,
                             isIdentity: false
                         }, {
                             name: "Column2",
-                            type: "int",
+                            dataType: "int",
                             isPrimaryKey: false,
                             isIdentity: false
                         }]
