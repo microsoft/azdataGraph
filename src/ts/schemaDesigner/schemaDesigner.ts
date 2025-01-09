@@ -2,7 +2,7 @@ import './schemaDesigner.css';
 import '../../css/common.css';
 
 import { IColumn, IEntity, IRelationship, ISchema, OnAction, SchemaDesignerConfig } from './schemaDesignerInterfaces';
-import { mxCell, mxEditor, mxGraph, mxGraphModel, mxHierarchicalLayout, mxOutline } from 'mxgraph';
+import { mxCell, mxEditor, mxGraph, mxGraphModel, mxHierarchicalLayout } from 'mxgraph';
 
 import { mxGraphFactory as mx } from '../mx';
 import { SchemaDesignerToolbar } from './schemaDesignerToolbar';
@@ -19,7 +19,6 @@ export class SchemaDesigner {
     private _model!: mxGraphModel;
     private _toolbar!: SchemaDesignerToolbar;
     private _layout!: mxHierarchicalLayout;
-    private _outline!: mxOutline;
 
     private cellClickListeners: ((cell: mxCell) => void)[] = [];
 
@@ -413,7 +412,7 @@ export class SchemaDesigner {
         const outlineContainer = document.createElement("div");
         outlineContainer.classList.add("sd-outline");
         this._container.appendChild(outlineContainer);
-        this._outline = new mx.mxOutline(this._graph, outlineContainer);
+        new mx.mxOutline(this._graph, outlineContainer);
     }
 
     private setupToolbar() {
