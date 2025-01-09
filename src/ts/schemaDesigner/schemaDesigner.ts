@@ -404,12 +404,6 @@ export class SchemaDesigner {
             this._graph.view.validate(source);
         });
 
-        // this._graph.dblClick = (_evt, cell) => {
-        //     if (cell !== undefined) {
-        //         this.cellClickListeners.forEach((listener) => listener(cell));
-        //     }
-        // };
-
         this._graph.addListener(mx.mxEvent.DOUBLE_CLICK, (_sender, _evt) => {
             const cell = this._graph.getSelectionCell();
             if (cell !== undefined) {
@@ -427,9 +421,6 @@ export class SchemaDesigner {
         outlineContainer.classList.add("sd-outline");
         this._container.appendChild(outlineContainer);
         const outline = new mx.mxOutline(this._graph, outlineContainer);
-        outline.createSizer();
-        outline.labelsVisible = true;
-        outline.sizerSize = 5;
         outline.minScale = 0.0002;
     }
 

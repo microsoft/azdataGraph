@@ -63,7 +63,7 @@
   .sd-outline {
     position: fixed;
     right: 10px;
-    top: 10px;
+    bottom: 10px;
     border-radius: 0.3rem;
     background-color: var(--color-outline-bg);
     z-index: 5;
@@ -72,6 +72,8 @@
       inset 0px 0.5px 0px rgba(255, 255, 255, 0.08),
       inset 0px 0px 0.5px rgba(255, 255, 255, 0.3);
     background-color: var(--color-graph-outline-background);
+    width: 100px;
+    height: 100px;
   }
   
   .sd-table {
