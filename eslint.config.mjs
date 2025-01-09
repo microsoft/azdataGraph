@@ -4,7 +4,7 @@ import tseslint from 'typescript-eslint';
 export default [
     {
         files: ['src/ts/**/*.ts'],
-        ignores: ['src/ts/mxtypings/**/*.d.ts'],
+        ignores: ['src/ts/mxtypings/**/*.d.ts', 'dist/**/*.js'],
         languageOptions: {
             parser: tseslint.parser,
         },
@@ -12,15 +12,6 @@ export default [
             'license-header': licenseHeader,
         },
         rules: {
-            "license-header/header": [
-                "error",
-                [
-                    "/*---------------------------------------------------------------------------------------------",
-                    " *  Copyright (c) Microsoft Corporation. All rights reserved.",
-                    " *  Licensed under the Source EULA.See License.txt in the project root for license information.",
-                    " * --------------------------------------------------------------------------------------------*/",
-                ]
-            ],
             "no-var": "error",
             "prefer-const": "error",
             "eqeqeq": "error",

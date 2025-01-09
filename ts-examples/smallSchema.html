@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Big Schema Designer</title>
+    <link rel="stylesheet" href="../dist/index.css" />
+    <script type="module">
+      import { SchemaDesigner } from "../dist/index.js";
+      import { test } from "./schemaDesigner.js";
+      window.onload = () => {
+        console.log(test);
+        const targetDiv1 = document.getElementById("graphContainer");
+        if (targetDiv1) {
+          const schemaDesigner = new SchemaDesigner(targetDiv1, {
+            graphFontFamily: "Segoe UI",
+            color: {
+              toolbarBackgroundColor: "var(--color-toolbar-bg)",
+              cellFillColor: "var(--color-graph-column-indicator)",
+              cellHighlightColor: "var(--color-graph-cell-highlight)",
+              edgeStrokeColor: "black",
+              validColor: "#2ecc71",
+              invalidColor: "#e74c3c",
+            },
+            icons: {
+              addTableIcon: "./resources/addTable.svg",
+              undoIcon: "./resources/undo.svg",
+              redoIcon: "./resources/redo.svg",
+              zoomInIcon: "./resources/zoomIn.svg",
+              zoomOutIcon: "./resources/zoomOut.svg",
+              deleteIcon: "./resources/delete.svg",
+              entityIcon: "./resources/tableNode.svg",
+              dataTypeIcons: {
+                int: "./resources/numberDataType.svg",
+              },
+              connectorIcon: "./resources/connector.svg",
+              exportIcon: "./resources/export.svg",
+              autoarrangeIcon: "./resources/arrange.svg",
+            },
+            isEditable: false,
+          });
+          schemaDesigner.renderModel({
+            entities: [
+              {
+                name: "New Table",
+                schema: "dbo",
+                columns: [
+                  {
+                    name: "Column1",
+                    type: "int",
+                    isPrimaryKey: true,
+                    isIdentity: true,
+                  },
+                  {
+                    name: "Column2",
+                    type: "int",
+                    isPrimaryKey: false,
+                    isIdentity: false,
+                  },
+                  {
+                    name: "Column2",
+                    type: "int",
+                    isPrimaryKey: false,
+                    isIdentity: false,
+                  },
+                ],
+              },
+              {
+                name: "New Table 2",
+                schema: "dbo",
+                columns: [
+                  {
+                    name: "Column1",
+                    type: "int",
+                    isPrimaryKey: true,
+                    isIdentity: true,
+                  },
+                  {
+                    name: "Column2",
+                    type: "int",
+                    isPrimaryKey: false,
+                    isIdentity: false,
+                  },
+                  {
+                    name: "Column2",
+                    type: "int",
+                    isPrimaryKey: false,
+                    isIdentity: false,
+                  },
+                ],
+              },
+              {
+                name: "New Table 3",
+                schema: "dbo",
+                columns: [
+                  {
+                    name: "Column1",
+                    type: "int",
+                    isPrimaryKey: true,
+                    isIdentity: true,
+                  },
+                ],
+              },
+              {
+                name: "New Table 4",
+                schema: "dbo",
+                columns: [
+                  {
+                    name: "Column1",
+                    type: "int",
+                    isPrimaryKey: true,
+                    isIdentity: true,
+                  },
+                ],
+              },
+            ],
+            relationships: [
+              {
+                foreignKeyName: "",
+                onDeleteAction: "0",
+                onUpdateAction: "0",
+                column: "Column1",
+                entity: "New Table 2",
+                referencedEntity: "New Table",
+                referencedColumn: "Column2",
+              },
+              {
+                foreignKeyName: "",
+                onDeleteAction: "0",
+                onUpdateAction: "0",
+                column: "Column1",
+                entity: "New Table 4",
+                referencedEntity: "New Table 3",
+                referencedColumn: "Column1",
+              },
+            ],
+          });
+        }
+      };
+    </script>
+    <style>
+      :root {
+        --graph-font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        --color-toolbar-bg: #2c2c2c;
+        --color-toolbar-text: #fff;
+        --color-toolbar-button-hover: #383838;
+        --color-toolbar-divider: #444444;
+        --color-border: #c3c3c3;
+        --color-outline-color: #0c8ce9;
+        --color-graph-gridLines: #c3c3c3;
+        --color-graph-outline-background: #fff;
+        --color-graph-cell-highlight: #0c8ce9;
+        --color-graph-outline-tableCell: #1e272e;
+        --color-graph-outline-columnCell: #bdc3c7;
+        --color-graph-background: #ffffff;
+        --color-graph-table-indicator: #00a2ad;
+        --color-graph-column-indicator: #f0f0f0;
+        --color-graph-node-hover: #f0f0f0;
+      }
+      .body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        padding: 10px;
+      }
+      #graphContainer {
+        position: relative;
+        overflow: scroll;
+        width: 100%;
+        height: calc(100vh - 20px);
+        min-width: 100%;
+        min-height: calc(100vh - 20px);
+        user-select: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="graphContainer"></div>
+  </body>
+</html>
