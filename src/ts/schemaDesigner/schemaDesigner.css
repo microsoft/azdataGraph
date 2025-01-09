@@ -71,7 +71,7 @@
       inset 0px 0.5px 0px rgba(255, 255, 255, 0.08),
       inset 0px 0px 0.5px rgba(255, 255, 255, 0.3);
     background-color: var(--color-graph-outline-background);
-    width: 100px;
+    width: 200px;
     height: 100px;
   }
   
@@ -137,6 +137,7 @@
     display: flex;
     gap: 10px;
     height: 28px;
+    min-height: 28px;
     box-sizing: border-box;
   }
   

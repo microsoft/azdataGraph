@@ -1,12 +1,13 @@
-import { mxCell, mxGraph, mxGraphLayout } from "mxgraph";
+import { mxCell, mxGraph } from "mxgraph";
+import { mxGraphFactory as mx } from '../mx';
 
-export class SchemaDesignerLayout extends mxGraphLayout {
+export class SchemaDesignerLayout extends mx.mxHierarchicalLayout {
     constructor(graph: mxGraph) {
-        super(graph);
+        super(graph, mx.mxConstants.DIRECTION_EAST, true);
     }
 
     public override execute(parent: mxCell): void {
-        const childCells = this.graph.getChildCells(parent);
-        console.log(childCells);
+        super.execute(parent);
+        console.log('Layout executed');
     }
 }

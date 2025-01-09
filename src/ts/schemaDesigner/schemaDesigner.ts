@@ -2,12 +2,13 @@ import './schemaDesigner.css';
 import '../../css/common.css';
 
 import { IColumn, IEntity, IRelationship, ISchema, OnAction, SchemaDesignerConfig } from './schemaDesignerInterfaces';
-import { mxCell, mxEditor, mxGraph, mxGraphModel, mxHierarchicalLayout } from 'mxgraph';
+import { mxCell, mxEditor, mxGraph, mxGraphModel, mxHierarchicalLayout, mxOutline } from 'mxgraph';
 
 import { mxGraphFactory as mx } from '../mx';
 import { SchemaDesignerToolbar } from './schemaDesignerToolbar';
 import { getRowY } from './utils';
 import { SchemaDesignerEntity } from './schemaDesignerEntity';
+import { SchemaDesignerLayout } from './schemaDesignerLayout';
 
 const ENTITY_COLUMNS_CONTAINER_CLASS = 'sd-table-columns';
 const ENTITY_COLUMN_DIV_CLASS = 'sd-table-column';
@@ -18,6 +19,7 @@ export class SchemaDesigner {
     private _model!: mxGraphModel;
     private _toolbar!: SchemaDesignerToolbar;
     private _layout!: mxHierarchicalLayout;
+    private _outline!: mxOutline;
 
     private cellClickListeners: ((cell: mxCell) => void)[] = [];
 
@@ -31,7 +33,10 @@ export class SchemaDesigner {
     private initializeGraph() {
         this.overwriteMxGraphDefaults();
         this._editor = new mx.mxEditor();
-        this._editor.setGraphContainer(this._container);
+        const graphContainer = document.createElement("div");
+        graphContainer.classList.add("sd-graph-container");
+        this._container.appendChild(graphContainer);
+        this._editor.setGraphContainer(graphContainer);
         this._graph = this._editor.graph;
         this._model = this._graph.getModel();
         this.setupEditorOptions();
@@ -54,18 +59,11 @@ export class SchemaDesigner {
 
     private setupGraphOptions() {
         this._graph.setResizeContainer(true);
-        this._graph.setAllowNegativeCoordinates(true);
-        this._graph.setGridEnabled(true);
         this._graph.tooltipHandler.setEnabled(false);
-        this._graph.setPanning(true);
-        this._graph.panningHandler.useLeftButtonForPanning = true;
-        this._graph.swimlaneNesting = false;
         this._graph.setConnectable(true);
-        this._graph.setPanning(true);
-        this._graph.centerZoom = false;
         this._graph.setAllowDanglingEdges(false);
         this._graph.setHtmlLabels(true);
-        this._graph.view.optimizeVmlReflows = false;
+        this._graph.allowLoops = false;
         this._graph.connectionHandler.enabled = false;
         this._graph.connectionHandler.movePreviewAway = false;
         this._graph.connectionHandler.moveIconFront = true;
@@ -74,12 +72,12 @@ export class SchemaDesigner {
             24,
             24
         );
-        this._graph.graphHandler.htmlPreview = true;
         this._graph.connectionHandler.factoryMethod = null!;
-        this._layout = new mx.mxHierarchicalLayout(this._graph, mx.mxConstants.DIRECTION_EAST, true);
+        this._layout = new SchemaDesignerLayout(this._graph);
         this._layout.intraCellSpacing = 30;
         this._graph.setCellsDisconnectable(false);
         this._graph.autoExtend = true;
+        new mx.mxRubberband(this._graph);
 
         this._graph.view.updateFloatingTerminalPoint = function (edge, start, end, source) {
             const next = this.getNextPoint(edge, end, source);
@@ -194,7 +192,7 @@ export class SchemaDesigner {
             return this._config.isEditable && !this._model.isEdge(cell);
         }
         this._graph.isCellMovable = (cell) => {
-            return !this._model.isEdge(cell);
+            return this._config.isEditable && !this._model.isEdge(cell);
         }
         this._graph.isCellResizable = (_cell) => {
             return false;
@@ -415,8 +413,7 @@ export class SchemaDesigner {
         const outlineContainer = document.createElement("div");
         outlineContainer.classList.add("sd-outline");
         this._container.appendChild(outlineContainer);
-        const outline = new mx.mxOutline(this._graph, outlineContainer);
-        outline.minScale = 0.0002;
+        this._outline = new mx.mxOutline(this._graph, outlineContainer);
     }
 
     private setupToolbar() {
