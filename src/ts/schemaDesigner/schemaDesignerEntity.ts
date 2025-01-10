@@ -41,7 +41,11 @@ export class SchemaDesignerEntity implements IEntity {
             columnDiv.classList.add("sd-table-column");
             const columnIcon = document.createElement("div");
             columnIcon.classList.add("sd-table-column-icon");
-            columnIcon.style.backgroundImage = `url(${this._config.icons.dataTypeIcons![column.dataType]})`;
+            if(this._config.icons.dataTypeIcons[column.dataType]){
+                columnIcon.style.backgroundImage = `url(${this._config.icons.dataTypeIcons[column.dataType]})`;
+            } else {
+                columnIcon.style.backgroundImage = `url(${this._config.icons.customDataTypeIcon})`;
+            }
             columnDiv.appendChild(columnIcon);
             const columnText = document.createElement("div");
             columnText.classList.add("sd-table-column-text");

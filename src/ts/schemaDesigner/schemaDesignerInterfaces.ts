@@ -87,6 +87,7 @@ export interface SchemaDesignerConfig {
         deleteIcon: string;
         entityIcon: string;
         dataTypeIcons: { [key: string]: string };
+        customDataTypeIcon: string;
         connectorIcon: string;
         exportIcon: string;
         autoarrangeIcon: string;
