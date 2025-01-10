@@ -201,7 +201,6 @@ export class SchemaDesigner {
             return this._config.isEditable && !this._model.isEdge(cell);
         }
         this._graph.isCellMovable = (cell) => {
-            return true;
             return this._config.isEditable && !this._model.isEdge(cell);
         }
         this._graph.isCellResizable = (_cell) => {
