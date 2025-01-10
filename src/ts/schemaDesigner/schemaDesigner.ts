@@ -2,7 +2,7 @@ import './schemaDesigner.css';
 import '../../css/common.css';
 
 import { IColumn, IEntity, IRelationship, ISchema, OnAction, SchemaDesignerConfig } from './schemaDesignerInterfaces';
-import { mxCell, mxEditor, mxGraph, mxGraphModel, mxHierarchicalLayout } from 'mxgraph';
+import { mxCell, mxEditor, mxGraph, mxGraphLayout, mxGraphModel } from 'mxgraph';
 
 import { mxGraphFactory as mx } from '../mx';
 import { SchemaDesignerToolbar } from './schemaDesignerToolbar';
@@ -18,7 +18,7 @@ export class SchemaDesigner {
     public _graph!: mxGraph;
     private _model!: mxGraphModel;
     private _toolbar!: SchemaDesignerToolbar;
-    private _layout!: mxHierarchicalLayout;
+    private _layout!: mxGraphLayout;
 
     private cellClickListeners: ((cell: mxCell) => void)[] = [];
 
@@ -73,10 +73,16 @@ export class SchemaDesigner {
         );
         this._graph.connectionHandler.factoryMethod = null!;
         this._layout = new SchemaDesignerLayout(this._graph);
-        this._layout.intraCellSpacing = 30;
+
         this._graph.setCellsDisconnectable(false);
         this._graph.autoExtend = true;
         new mx.mxRubberband(this._graph);
+
+        this._graph.setPanning(true);
+        this._graph.panningHandler.useLeftButtonForPanning = true;
+        this._graph.autoSizeCellsOnAdd = true;
+        this._graph.autoExtend = false;
+        this._graph.getSelectionModel().setSingleSelection(true);
 
         this._graph.view.updateFloatingTerminalPoint = function (edge, start, end, source) {
             const next = this.getNextPoint(edge, end, source);
@@ -648,13 +654,13 @@ export class SchemaDesigner {
         this._graph.center();
 
         const mostNegativeX = this.mostNegativeX();
-        console.log('-x', mostNegativeX);
 
         const mostNegativeY = this.mostNegativeY();
-        console.log('-y', mostNegativeY);
 
         this._graph.moveCells(cells, -mostNegativeX + 100, -mostNegativeY + 100, false);
         this._graph.sizeDidChange();
+
+        this.redrawEdges();
 
         this._model.endUpdate();
     }

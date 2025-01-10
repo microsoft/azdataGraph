@@ -7,9 +7,7 @@
     <link rel="stylesheet" href="../dist/index.css" />
     <script type="module">
       import { SchemaDesigner } from "../dist/index.js";
-      import { test } from "./schemaDesigner.js";
       window.onload = () => {
-        console.log(test);
         const targetDiv1 = document.getElementById("graphContainer");
         if (targetDiv1) {
           const schemaDesigner = new SchemaDesigner(targetDiv1, {
@@ -113,6 +111,43 @@
                   },
                 ],
               },
+              {
+                name: "New Table 5",
+                schema: "dbo",
+                columns: [
+                  {
+                    name: "Column1",
+                    type: "int",
+                    isPrimaryKey: true,
+                    isIdentity: true,
+                  },
+                ],
+              },
+              {
+                name: "New Table 6",
+                schema: "dbo",
+                columns: [
+                  {
+                    name: "Column1",
+                    type: "int",
+                    isPrimaryKey: true,
+                    isIdentity: true,
+                  },
+                ],
+              },
+              {
+                name: "New Table 7",
+                schema: "dbo",
+                columns: [
+                  {
+                    name: "Column1",
+                    type: "int",
+                    isPrimaryKey: true,
+                    isIdentity: true,
+                  },
+                ],
+              }
+
             ],
             relationships: [
               {
@@ -133,6 +168,33 @@
                 referencedEntity: "New Table 3",
                 referencedColumn: "Column1",
               },
+              {
+                foreignKeyName: "",
+                onDeleteAction: "0",
+                onUpdateAction: "0",
+                column: "Column1",
+                entity: "New Table 6",
+                referencedEntity: "New Table 2",
+                referencedColumn: "Column1",
+              },
+              {
+                foreignKeyName: "",
+                onDeleteAction: "0",
+                onUpdateAction: "0",
+                column: "Column1",
+                entity: "New Table 7",
+                referencedEntity: "New Table 2",
+                referencedColumn: "Column1",
+              },
+              {
+                foreignKeyName: "",
+                onDeleteAction: "0",
+                onUpdateAction: "0",
+                column: "Column1",
+                entity: "New Table 5",
+                referencedEntity: "New Table 2",
+                referencedColumn: "Column1",
+              }
             ],
           });
         }

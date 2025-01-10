@@ -1042,6 +1042,11 @@ corser@^2.0.1:
   resolved "https://registry.npmjs.org/corser/-/corser-2.0.1.tgz"
   integrity sha512-utCYNzRSQIZNPIcGZdQc92UVJYAhtGAteCFg0yRaFm8f0P+CPtyGyHXJcGXnffjCybUCEx3FQ2G7U3/o9eIkVQ==
 
+create-color@^2.0.6:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/create-color/-/create-color-2.0.6.tgz#ecbf619952fc9e3f75c830eaaf48ac443a3f8bf8"
+  integrity sha512-Yt2zNH+mYsWZJeOrVmwZ2OJFqJ4a6KlmjYxZCNgKz4HRz0+l1nl2r4hz9JP/SSxUELCxfUzFJi4OF8aDbL5Jnw==
+
 cross-spawn@^7.0.6:
   version "7.0.6"
   resolved "https://registry.npmjs.org/cross-spawn/-/cross-spawn-7.0.6.tgz"
