@@ -78,6 +78,15 @@ export class SchemaDesigner {
         this._graph.autoExtend = true;
         new mx.mxRubberband(this._graph);
 
+        // Experimenting
+        this._graph.setPanning(true);
+        this._graph.panningHandler.useLeftButtonForPanning = true;
+        this._graph.autoSizeCellsOnAdd = true;
+        this._graph.autoExtend = false;
+        this._graph.getSelectionModel().setSingleSelection(true);
+
+
+
         this._graph.view.updateFloatingTerminalPoint = function (edge, start, end, source) {
             const next = this.getNextPoint(edge, end, source);
             if (start?.text?.node === undefined) {
@@ -648,13 +657,13 @@ export class SchemaDesigner {
         this._graph.center();
 
         const mostNegativeX = this.mostNegativeX();
-        console.log('-x', mostNegativeX);
 
         const mostNegativeY = this.mostNegativeY();
-        console.log('-y', mostNegativeY);
 
         this._graph.moveCells(cells, -mostNegativeX + 100, -mostNegativeY + 100, false);
         this._graph.sizeDidChange();
+
+        this.redrawEdges();
 
         this._model.endUpdate();
     }
