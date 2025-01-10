@@ -2,7 +2,7 @@ import './schemaDesigner.css';
 import '../../css/common.css';
 
 import { IColumn, IEntity, IRelationship, ISchema, OnAction, SchemaDesignerConfig } from './schemaDesignerInterfaces';
-import { mxCell, mxEditor, mxGraph, mxGraphModel, mxHierarchicalLayout } from 'mxgraph';
+import { mxCell, mxEditor, mxGraph, mxGraphLayout, mxGraphModel } from 'mxgraph';
 
 import { mxGraphFactory as mx } from '../mx';
 import { SchemaDesignerToolbar } from './schemaDesignerToolbar';
@@ -18,7 +18,7 @@ export class SchemaDesigner {
     public _graph!: mxGraph;
     private _model!: mxGraphModel;
     private _toolbar!: SchemaDesignerToolbar;
-    private _layout!: mxHierarchicalLayout;
+    private _layout!: mxGraphLayout;
 
     private cellClickListeners: ((cell: mxCell) => void)[] = [];
 
@@ -73,7 +73,8 @@ export class SchemaDesigner {
         );
         this._graph.connectionHandler.factoryMethod = null!;
         this._layout = new SchemaDesignerLayout(this._graph);
-        this._layout.intraCellSpacing = 30;
+        //this._layout = new mx.mxCircleLayout(this._graph) as any as mxGraphLayout;
+        //this._layout.intraCellSpacing = 30;
         this._graph.setCellsDisconnectable(false);
         this._graph.autoExtend = true;
         new mx.mxRubberband(this._graph);
