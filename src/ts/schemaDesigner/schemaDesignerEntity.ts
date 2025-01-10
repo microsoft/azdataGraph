@@ -1,5 +1,6 @@
 import { mxGraph } from "mxgraph";
 import { IColumn, IEntity, SchemaDesignerConfig } from "./schemaDesignerInterfaces";
+import createColor from "create-color";
 
 export class SchemaDesignerEntity implements IEntity {
     public div!: HTMLElement;
@@ -14,11 +15,13 @@ export class SchemaDesignerEntity implements IEntity {
     }
 
     render(): HTMLElement {
+        const color = createColor(this.schema, { format: "hex" });
         const parent = document.createElement("div");
         parent.classList.add("sd-table");
         const colorIndicator = document.createElement("div");
         colorIndicator.classList.add("sd-table-color-indicator");
         parent.appendChild(colorIndicator);
+        colorIndicator.style.backgroundColor = color;
         const header = document.createElement("div");
         header.classList.add("sd-table-header");
         const headerIcon = document.createElement("div");

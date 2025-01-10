@@ -56,6 +56,27 @@ export class SchemaDesignerLayout extends mx.mxHierarchicalLayout {
             //offsetY = Math.max(offsetY, height);
         }
 
+        for (const subGraph of subGraphs) {
+            for (const cell of subGraph) {
+                let inDegree = 0;
+                let outDegree = 0;
+                const edges = this.graph.getModel().getEdges(cell);
+                for (const edge of edges) {
+                    if(edge.source.id === edge.target.id) {
+                        console.log('Self loop');
+                        continue;
+                    }
+                    if (edge.source.id === cell.id) {
+                        outDegree++;
+                    } else if (edge.target.id === cell.id) {
+                        inDegree++;
+                    }
+                }
+                console.log(`cell: ${cell.value.name}, inDegree: ${inDegree}, outDegree: ${outDegree}`);
+            }
+            console.log('---');
+        }
+
         // this.graph.refresh();
 
         this.graph.getModel().endUpdate();
@@ -92,7 +113,6 @@ export class SchemaDesignerLayout extends mx.mxHierarchicalLayout {
         for (const cell of cells) {
             maxX = Math.max(maxX, cell.geometry.x + cell.geometry.width);
         }
-        console.log(`maxX: ${maxX}`);
 
         return {
             maxX: maxX,

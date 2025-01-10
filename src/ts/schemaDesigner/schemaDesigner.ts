@@ -73,7 +73,7 @@ export class SchemaDesigner {
         );
         this._graph.connectionHandler.factoryMethod = null!;
         this._layout = new SchemaDesignerLayout(this._graph);
-        //this._layout = new mx.mxCircleLayout(this._graph) as any as mxGraphLayout;
+        //this._layout = new mx.mxHierarchicalLayout(this._graph) as any as mxGraphLayout;
         //this._layout.intraCellSpacing = 30;
         this._graph.setCellsDisconnectable(false);
         this._graph.autoExtend = true;
@@ -201,6 +201,7 @@ export class SchemaDesigner {
             return this._config.isEditable && !this._model.isEdge(cell);
         }
         this._graph.isCellMovable = (cell) => {
+            return true;
             return this._config.isEditable && !this._model.isEdge(cell);
         }
         this._graph.isCellResizable = (_cell) => {
