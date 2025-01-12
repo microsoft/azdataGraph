@@ -32,10 +32,7 @@ export class SchemaDesigner {
     private initializeGraph() {
         this.overwriteMxGraphDefaults();
         this._editor = new mx.mxEditor();
-        const graphContainer = document.createElement("div");
-        graphContainer.classList.add("sd-graph-container");
-        this._container.appendChild(graphContainer);
-        this._editor.setGraphContainer(graphContainer);
+        this._editor.setGraphContainer(this._container);
         this._graph = this._editor.graph;
         this._model = this._graph.getModel();
         this.setupEditorOptions();
@@ -57,12 +54,10 @@ export class SchemaDesigner {
     }
 
     private setupGraphOptions() {
-        this._graph.setResizeContainer(true);
         this._graph.tooltipHandler.setEnabled(false);
         this._graph.setConnectable(true);
         this._graph.setAllowDanglingEdges(false);
         this._graph.setHtmlLabels(true);
-        this._graph.allowLoops = false;
         this._graph.connectionHandler.enabled = false;
         this._graph.connectionHandler.movePreviewAway = false;
         this._graph.connectionHandler.moveIconFront = true;
@@ -75,13 +70,7 @@ export class SchemaDesigner {
         this._layout = new SchemaDesignerLayout(this._graph);
 
         this._graph.setCellsDisconnectable(false);
-        this._graph.autoExtend = true;
-        new mx.mxRubberband(this._graph);
-
-        this._graph.setPanning(true);
-        this._graph.panningHandler.useLeftButtonForPanning = true;
         this._graph.autoSizeCellsOnAdd = true;
-        this._graph.autoExtend = false;
         this._graph.getSelectionModel().setSingleSelection(true);
 
         this._graph.view.updateFloatingTerminalPoint = function (edge, start, end, source) {
@@ -496,6 +485,14 @@ export class SchemaDesigner {
             }
         );
 
+        this._toolbar.addButton(
+            this._config.icons.zoomFitIcon,
+            "Fit",
+            () => {
+                this._graph.fit(undefined!);
+            }
+        )
+
         this._toolbar.addDivider();
 
         this._toolbar.addButton(
@@ -650,17 +647,6 @@ export class SchemaDesigner {
     public autoArrange() {
         this._model.beginUpdate();
         this._layout.execute(this._graph.getDefaultParent());
-        const cells = this._graph.getChildCells(this._graph.getDefaultParent());
-        this._graph.center();
-
-        const mostNegativeX = this.mostNegativeX();
-
-        const mostNegativeY = this.mostNegativeY();
-
-        this._graph.moveCells(cells, -mostNegativeX + 100, -mostNegativeY + 100, false);
-        this._graph.sizeDidChange();
-
-        this.redrawEdges();
 
         this._model.endUpdate();
     }

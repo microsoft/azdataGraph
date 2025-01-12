@@ -84,6 +84,7 @@ export interface SchemaDesignerConfig {
         redoIcon: string;
         zoomInIcon: string;
         zoomOutIcon: string;
+        zoomFitIcon: string;
         deleteIcon: string;
         entityIcon: string;
         dataTypeIcons: { [key: string]: string };

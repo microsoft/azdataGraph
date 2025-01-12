@@ -30,6 +30,7 @@
               zoomOutIcon: "./resources/zoomOut.svg",
               deleteIcon: "./resources/delete.svg",
               entityIcon: "./resources/tableNode.svg",
+              zoomFitIcon: "./resources/zoomFit.svg",
               dataTypeIcons: {
                 int: "./resources/datatype_int.svg",
                 nvarchar: "./resources/datatype_text.svg",
@@ -82,8 +83,7 @@
         padding: 10px;
       }
       #graphContainer {
-        position: relative;
-        overflow: scroll;
+        position: absolute;
         width: 100%;
         height: calc(100vh - 20px);
         min-width: 100%;
