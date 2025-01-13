@@ -75,7 +75,7 @@
     0px 1px 3px rgba(0, 0, 0, 0.5),
     inset 0px 0.5px 0px rgba(255, 255, 255, 0.08),
     inset 0px 0px 0.5px rgba(255, 255, 255, 0.3);
-  background-color: var(--color-graph-outline-background);
+  background-color: var(--sd-graph-background-color);
   width: 200px;
   height: 100px;
 }
@@ -139,7 +139,7 @@
   box-sizing: border-box;
 }
 .sd-table-column:hover {
-  background-color: var(--color-graph-node-hover);
+  background-color: var(--sd-cell-html-hover-column-background);
 }
 .sd-table-column-icon {
   width: 26px;

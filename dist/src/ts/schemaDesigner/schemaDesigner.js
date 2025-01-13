@@ -40,6 +40,7 @@ class SchemaDesigner {
         this._container.style.setProperty("--sd-graph-grid-color", this._config.colors.graphGrid);
         this._container.style.setProperty("--sd-border-color", this._config.colors.cellBorder);
         this._container.style.setProperty("--sd-cell-html-foreground", this._config.colors.cellForeground);
+        this._container.style.setProperty("--sd-cell-html-hover-column-background", this._config.colors.cellColumnHover);
         this._graph.getStylesheet().getDefaultVertexStyle()["fillColor"] = this._config.colors.cellBackground;
         this._graph.getStylesheet().getDefaultEdgeStyle()["strokeColor"] = this._config.colors.edge;
         this._graph.getStylesheet().getDefaultVertexStyle()['cellHighlightColor'] = this._config.colors.cellHighlight;
@@ -419,17 +420,17 @@ class SchemaDesigner {
                     schema: "dbo",
                     columns: [{
                             name: "Column1",
-                            dataType: "int",
+                            datatype: "int",
                             isPrimaryKey: true,
                             isIdentity: true
                         }, {
                             name: "Column2",
-                            dataType: "int",
+                            datatype: "int",
                             isPrimaryKey: false,
                             isIdentity: false
                         }, {
                             name: "Column2",
-                            dataType: "int",
+                            datatype: "int",
                             isPrimaryKey: false,
                             isIdentity: false
                         }]
