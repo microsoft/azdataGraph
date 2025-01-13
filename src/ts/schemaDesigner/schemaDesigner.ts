@@ -2,7 +2,7 @@ import './schemaDesigner.css';
 import '../../css/common.css';
 
 import { IColumn, IEntity, IRelationship, ISchema, OnAction, SchemaDesignerConfig } from './schemaDesignerInterfaces';
-import { mxCell, mxEditor, mxGraph, mxGraphModel, mxHierarchicalLayout } from 'mxgraph';
+import { mxCell, mxEditor, mxGraph, mxGraphLayout, mxGraphModel } from 'mxgraph';
 
 import { mxGraphFactory as mx } from '../mx';
 import { SchemaDesignerToolbar } from './schemaDesignerToolbar';
@@ -18,7 +18,7 @@ export class SchemaDesigner {
     public _graph!: mxGraph;
     private _model!: mxGraphModel;
     private _toolbar!: SchemaDesignerToolbar;
-    private _layout!: mxHierarchicalLayout;
+    private _layout!: mxGraphLayout;
 
     private cellClickListeners: ((cell: mxCell) => void)[] = [];
 
@@ -31,25 +31,88 @@ export class SchemaDesigner {
 
     private initializeGraph() {
         this.overwriteMxGraphDefaults();
+        this.addCustomEdgeTerminals();
         this._editor = new mx.mxEditor();
-        const graphContainer = document.createElement("div");
-        graphContainer.classList.add("sd-graph-container");
-        this._container.appendChild(graphContainer);
-        this._editor.setGraphContainer(graphContainer);
+        this._editor.setGraphContainer(this._container);
         this._graph = this._editor.graph;
         this._model = this._graph.getModel();
         this.setupEditorOptions();
         this.setupGraphOptions();
+        this.setupColors();
         this.setupGraphOutlineOptions();
         this.setupToolbar();
+    }
+
+    private setupColors() {
+        this._container.style.setProperty("--sd-toolbar-background-color", this._config.colors.toolbarBackground);
+        this._container.style.setProperty("--sd-toolbar-foreground-color", this._config.colors.toolbarForeground);
+        this._container.style.setProperty("--sd-toolbar-hover-background-color", this._config.colors.toolbarHoverBackground);
+        this._container.style.setProperty("--sd-toolbar-divider-background-color", this._config.colors.toolbarDividerBackground);
+        
+        this._container.style.setProperty("--sd-graph-background-color", this._config.colors.graphBackground);
+        this._container.style.setProperty("--sd-graph-grid-color", this._config.colors.graphGrid);
+        this._container.style.setProperty("--sd-border-color", this._config.colors.cellBorder);
+
+        this._container.style.setProperty("--sd-cell-html-foreground", this._config.colors.cellForeground);
+       
+        this._graph.getStylesheet().getDefaultVertexStyle()["fillColor"] = this._config.colors.cellBackground;
+        this._graph.getStylesheet().getDefaultEdgeStyle()["strokeColor"] = this._config.colors.edge;
+        this._graph.getStylesheet().getDefaultVertexStyle()['cellHighlightColor'] = this._config.colors.cellHighlight;
+        this._graph.getStylesheet().getDefaultVertexStyle()['cellHightlightStrokeWidth'] = 3;
+        
+
+        this._graph.getStylesheet().getDefaultEdgeStyle()['cellHighlightColor'] = this._config.colors.cellHighlight;        
+        mx.mxConstants.OUTLINE_HANDLE_FILLCOLOR = this._config.colors.cellHighlight
+        mx.mxConstants.OUTLINE_HANDLE_STROKECOLOR = this._config.colors.cellHighlight;
+        mx.mxConstants.OUTLINE_COLOR = this._config.colors.cellHighlight;
     }
 
     private overwriteMxGraphDefaults() {
         mx.mxClient.NO_FO = true;
         mx.mxEvent.disableContextMenu(this._container);
-        mx.mxConstants.DEFAULT_VALID_COLOR = this._config.color.validColor;
-        mx.mxConstants.VALID_COLOR = this._config.color.validColor;
-        mx.mxConstants.INVALID_COLOR = this._config.color.invalidColor;
+    }
+
+    private addCustomEdgeTerminals() {
+        mx.mxMarker.addMarker("one", (canvas, _shape, _type, pe, unitX, unitY, size, _source, _sw, _filled) => {
+            return () => {
+                const endX = pe.x - unitX * size;
+                const endY = pe.y - unitY * size;
+
+                const midX = endX - unitY * size;
+                const midY = endY + unitX * size;
+
+                const startX = endX + unitY * size;
+                const startY = endY - unitX * size;
+
+                canvas.begin();
+                canvas.moveTo(startX, startY);
+                canvas.lineTo(midX, midY);
+                canvas.stroke();
+            };
+        });
+
+        mx.mxMarker.addMarker("many", (canvas, _shape, _type, pe, unitX, unitY, size, _source, _sw, _filled) => {
+            return () => {
+                const arrowSize = 1.5;
+                const startX = pe.x - unitX * size * arrowSize;
+                const startY = pe.y - unitY * size * arrowSize;
+
+                const Y1 = pe.y + unitX * size * arrowSize;
+                const X1 = pe.x;
+                const Y2 = pe.y - unitX * size * arrowSize;
+                const X2 = pe.x;
+
+                canvas.begin();
+                canvas.moveTo(startX, startY);
+                canvas.lineTo(X1, Y1);
+                canvas.stroke();
+
+                canvas.begin();
+                canvas.moveTo(startX, startY);
+                canvas.lineTo(X2, Y2);
+                canvas.stroke();
+            };
+        });
     }
 
     private setupEditorOptions() {
@@ -57,12 +120,10 @@ export class SchemaDesigner {
     }
 
     private setupGraphOptions() {
-        this._graph.setResizeContainer(true);
         this._graph.tooltipHandler.setEnabled(false);
         this._graph.setConnectable(true);
         this._graph.setAllowDanglingEdges(false);
         this._graph.setHtmlLabels(true);
-        this._graph.allowLoops = false;
         this._graph.connectionHandler.enabled = false;
         this._graph.connectionHandler.movePreviewAway = false;
         this._graph.connectionHandler.moveIconFront = true;
@@ -73,10 +134,12 @@ export class SchemaDesigner {
         );
         this._graph.connectionHandler.factoryMethod = null!;
         this._layout = new SchemaDesignerLayout(this._graph);
-        this._layout.intraCellSpacing = 30;
+
         this._graph.setCellsDisconnectable(false);
-        this._graph.autoExtend = true;
-        new mx.mxRubberband(this._graph);
+        this._graph.autoSizeCellsOnAdd = true;
+        this._graph.getSelectionModel().setSingleSelection(true);
+        this._graph.setPanning(true);
+        this._graph.panningHandler.useLeftButtonForPanning = true;
 
         this._graph.view.updateFloatingTerminalPoint = function (edge, start, end, source) {
             const next = this.getNextPoint(edge, end, source);
@@ -402,10 +465,7 @@ export class SchemaDesigner {
                 this.cellClickListeners.forEach((listener) => listener(cell));
             }
         });
-
-        this._graph.getStylesheet().getDefaultVertexStyle()['cellHighlightColor'] = "red";
         this._graph.getStylesheet().getDefaultEdgeStyle()['edgeStyle'] = mx.mxEdgeStyle.ElbowConnector;
-        this._graph.stylesheet.getDefaultEdgeStyle()[mx.mxConstants.STYLE_EDGE] = mx.mxConstants.EDGESTYLE_ENTITY_RELATION;
     }
 
     private setupGraphOutlineOptions() {
@@ -489,6 +549,14 @@ export class SchemaDesigner {
                 this.redrawEdges();
             }
         );
+
+        this._toolbar.addButton(
+            this._config.icons.zoomFitIcon,
+            "Fit",
+            () => {
+                this._graph.fit(undefined!);
+            }
+        )
 
         this._toolbar.addDivider();
 
@@ -644,43 +712,8 @@ export class SchemaDesigner {
     public autoArrange() {
         this._model.beginUpdate();
         this._layout.execute(this._graph.getDefaultParent());
-        const cells = this._graph.getChildCells(this._graph.getDefaultParent());
-        this._graph.center();
-
-        const mostNegativeX = this.mostNegativeX();
-        console.log('-x', mostNegativeX);
-
-        const mostNegativeY = this.mostNegativeY();
-        console.log('-y', mostNegativeY);
-
-        this._graph.moveCells(cells, -mostNegativeX + 100, -mostNegativeY + 100, false);
-        this._graph.sizeDidChange();
 
         this._model.endUpdate();
-    }
-
-    private mostNegativeX() {
-        let mostNegativeX = 0;
-        const cells = this._graph.getChildCells(this._graph.getDefaultParent());
-        for (let i = 0; i < cells.length; i++) {
-            const cell = cells[i];
-            if (cell.geometry.x < mostNegativeX) {
-                mostNegativeX = cell.geometry.x;
-            }
-        }
-        return mostNegativeX;
-    }
-
-    private mostNegativeY() {
-        let mostNegativeY = 0;
-        const cells = this._graph.getChildCells(this._graph.getDefaultParent());
-        for (let i = 0; i < cells.length; i++) {
-            const cell = cells[i];
-            if (cell.geometry.y < mostNegativeY) {
-                mostNegativeY = cell.geometry.y;
-            }
-        }
-        return mostNegativeY;
     }
 
     public addCellClickListener(listener: (cell: mxCell) => void) {

@@ -3,33 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Big Schema Designer</title>
+    <title>Medium Schema Designer</title>
     <link rel="stylesheet" href="../dist/index.css" />
     <script type="module">
       import { SchemaDesigner } from "../dist/index.js";
-      import { test } from "./worldWideImporters.js";
+      import { adventureWorks } from "./adventureworks.js";
       window.onload = () => {
-        console.log(test);
         const targetDiv1 = document.getElementById("graphContainer");
         if (targetDiv1) {
           const schemaDesigner = new SchemaDesigner(targetDiv1, {
             graphFontFamily: "Segoe UI",
-            colors: {
-              cellHighlight: "#2ecc71",
-              cellBorder: "#c3c3c3",
-              cellBackground: "#70a1ff",
-              cellForeground: "#000",
-
-              toolbarBackground: "#2c2c2c",
-              toolbarForeground: "#ffffff",
-              toolbarHoverBackground: "#383838",
-              toolbarDividerBackground: "#444444",
-
-              edge: "#57606f",
-
-              graphGrid: "#c3c3c3",
-              graphBackground: "#fff"
-              
+            color: {
+              toolbarBackgroundColor: "var(--color-toolbar-bg)",
+              cellFillColor: "var(--color-graph-column-indicator)",
+              cellHighlightColor: "var(--color-graph-cell-highlight)",
+              edgeStrokeColor: "black",
+              validColor: "#2ecc71",
+              invalidColor: "#e74c3c",
             },
             icons: {
               addTableIcon: "./resources/addTable.svg",
@@ -39,18 +29,35 @@
               zoomOutIcon: "./resources/zoomOut.svg",
               deleteIcon: "./resources/delete.svg",
               entityIcon: "./resources/tableNode.svg",
-              zoomFitIcon: "./resources/zoomFit.svg",
+              customDataTypeIcon: "./resources/datatype_custom.svg",
               dataTypeIcons: {
                 int: "./resources/datatype_int.svg",
+                tinyint: "./resources/datatype_int.svg",
+                smallint: "./resources/datatype_int.svg",
+                bigint: "./resources/datatype_int.svg",
+                numeric: "./resources/datatype_decimal.svg",
+                decimal: "./resources/datatype_decimal.svg",
+                money: "./resources/datatype_money.svg",
+                smallmoney: "./resources/datatype_money.svg",
+                bit: "./resources/datatype_bit.svg",
+                float: "./resources/datatype_float.svg",
+                real: "./resources/datatype_float.svg",
+                char: "./resources/datatype_text.svg",
+                varchar: "./resources/datatype_text.svg",
+                text: "./resources/datatype_text.svg",
+                nchar: "./resources/datatype_text.svg",
                 nvarchar: "./resources/datatype_text.svg",
+                ntext: "./resources/datatype_text.svg",
+                binary: "./resources/datatype_varbinary.svg",
+                varbinary: "./resources/datatype_varbinary.svg",
+                image: "./resources/datatype_varbinary.svg",
+                geography: "./resources/datatype_geography.svg",
                 datetime: "./resources/datatype_datetime.svg",
                 datetime2: "./resources/datatype_datetime.svg",
-                bit: "./resources/datatype_bit.svg",
-                geography: "./resources/datatype_geography.svg",
-                bigint: "./resources/datatype_int.svg",
-                varbinary: "./resources/datatype_varbinary.svg",
-                decimal: "./resources/datatype_decimal.svg",
                 date: "./resources/datatype_datetime.svg",
+                time: "./resources/datatype_datetime.svg",
+                datetimeoffset: "./resources/datatype_datetime.svg",
+                smalldatetime: "./resources/datatype_datetime.svg",
               },
               connectorIcon: "./resources/connector.svg",
               exportIcon: "./resources/export.svg",
@@ -58,7 +65,7 @@
             },
             isEditable: false,
           });
-          schemaDesigner.renderModel(test);
+          schemaDesigner.renderModel(adventureWorks);
           schemaDesigner.addCellClickListener((cell) => {
             console.log(cell);
           })
@@ -68,7 +75,13 @@
     <style>
       :root {
         --graph-font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        --color-toolbar-bg: #2c2c2c;
+        --color-toolbar-text: #fff;
+        --color-toolbar-button-hover: #383838;
+        --color-toolbar-divider: #444444;
+        --color-border: #c3c3c3;
         --color-outline-color: #0c8ce9;
+        --color-graph-gridLines: #c3c3c3;
         --color-graph-outline-background: #fff;
         --color-graph-cell-highlight: #0c8ce9;
         --color-graph-outline-tableCell: #1e272e;
@@ -86,7 +99,8 @@
         padding: 10px;
       }
       #graphContainer {
-        position: absolute;
+        position: relative;
+        overflow: scroll;
         width: 100%;
         height: calc(100vh - 20px);
         min-width: 100%;
