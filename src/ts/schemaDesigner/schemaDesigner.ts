@@ -31,22 +31,89 @@ export class SchemaDesigner {
 
     private initializeGraph() {
         this.overwriteMxGraphDefaults();
+        this.addCustomEdgeTerminals();
         this._editor = new mx.mxEditor();
         this._editor.setGraphContainer(this._container);
         this._graph = this._editor.graph;
         this._model = this._graph.getModel();
         this.setupEditorOptions();
         this.setupGraphOptions();
+        this.setupColors();
         this.setupGraphOutlineOptions();
         this.setupToolbar();
+    }
+
+    private setupColors() {
+        this._container.style.setProperty("--sd-toolbar-background-color", this._config.colors.toolbarBackground);
+        this._container.style.setProperty("--sd-toolbar-foreground-color", this._config.colors.toolbarForeground);
+        this._container.style.setProperty("--sd-toolbar-hover-background-color", this._config.colors.toolbarHoverBackground);
+        this._container.style.setProperty("--sd-toolbar-divider-background-color", this._config.colors.toolbarDividerBackground);
+        
+        this._container.style.setProperty("--sd-graph-background-color", this._config.colors.graphBackground);
+        this._container.style.setProperty("--sd-graph-grid-color", this._config.colors.graphGrid);
+        this._container.style.setProperty("--sd-border-color", this._config.colors.cellBorder);
+
+        this._container.style.setProperty("--sd-cell-html-foreground", this._config.colors.cellForeground);
+       
+        this._graph.getStylesheet().getDefaultVertexStyle()["fillColor"] = this._config.colors.cellBackground;
+        this._graph.getStylesheet().getDefaultVertexStyle()["strokeColor"] = this._config.colors.cellBorder;
+        this._graph.getStylesheet().getDefaultEdgeStyle()["strokeColor"] = this._config.colors.edge;
+        this._graph.getStylesheet().getDefaultVertexStyle()['cellHighlightColor'] = this._config.colors.cellHighlight;
+        this._graph.getStylesheet().getDefaultVertexStyle()['cellHightlightStrokeWidth'] = 3;
+        
+
+        this._graph.getStylesheet().getDefaultEdgeStyle()['cellHighlightColor'] = this._config.colors.cellHighlight;        
+        mx.mxConstants.OUTLINE_HANDLE_FILLCOLOR = this._config.colors.cellHighlight
+        mx.mxConstants.OUTLINE_HANDLE_STROKECOLOR = this._config.colors.cellHighlight;
+        mx.mxConstants.OUTLINE_COLOR = this._config.colors.cellHighlight;
     }
 
     private overwriteMxGraphDefaults() {
         mx.mxClient.NO_FO = true;
         mx.mxEvent.disableContextMenu(this._container);
-        mx.mxConstants.DEFAULT_VALID_COLOR = this._config.color.validColor;
-        mx.mxConstants.VALID_COLOR = this._config.color.validColor;
-        mx.mxConstants.INVALID_COLOR = this._config.color.invalidColor;
+    }
+
+    private addCustomEdgeTerminals() {
+        mx.mxMarker.addMarker("one", (canvas, _shape, _type, pe, unitX, unitY, size, _source, _sw, _filled) => {
+            return () => {
+                const endX = pe.x - unitX * size;
+                const endY = pe.y - unitY * size;
+
+                const midX = endX - unitY * size;
+                const midY = endY + unitX * size;
+
+                const startX = endX + unitY * size;
+                const startY = endY - unitX * size;
+
+                canvas.begin();
+                canvas.moveTo(startX, startY);
+                canvas.lineTo(midX, midY);
+                canvas.stroke();
+            };
+        });
+
+        mx.mxMarker.addMarker("many", (canvas, _shape, _type, pe, unitX, unitY, size, _source, _sw, _filled) => {
+            return () => {
+                const arrowSize = 1.5;
+                const startX = pe.x - unitX * size * arrowSize;
+                const startY = pe.y - unitY * size * arrowSize;
+
+                const Y1 = pe.y + unitX * size * arrowSize;
+                const X1 = pe.x;
+                const Y2 = pe.y - unitX * size * arrowSize;
+                const X2 = pe.x;
+
+                canvas.begin();
+                canvas.moveTo(startX, startY);
+                canvas.lineTo(X1, Y1);
+                canvas.stroke();
+
+                canvas.begin();
+                canvas.moveTo(startX, startY);
+                canvas.lineTo(X2, Y2);
+                canvas.stroke();
+            };
+        });
     }
 
     private setupEditorOptions() {
@@ -72,6 +139,8 @@ export class SchemaDesigner {
         this._graph.setCellsDisconnectable(false);
         this._graph.autoSizeCellsOnAdd = true;
         this._graph.getSelectionModel().setSingleSelection(true);
+        this._graph.setPanning(true);
+        this._graph.panningHandler.useLeftButtonForPanning = true;
 
         this._graph.view.updateFloatingTerminalPoint = function (edge, start, end, source) {
             const next = this.getNextPoint(edge, end, source);
@@ -397,10 +466,7 @@ export class SchemaDesigner {
                 this.cellClickListeners.forEach((listener) => listener(cell));
             }
         });
-
-        this._graph.getStylesheet().getDefaultVertexStyle()['cellHighlightColor'] = "red";
         this._graph.getStylesheet().getDefaultEdgeStyle()['edgeStyle'] = mx.mxEdgeStyle.ElbowConnector;
-        this._graph.stylesheet.getDefaultEdgeStyle()[mx.mxConstants.STYLE_EDGE] = mx.mxConstants.EDGESTYLE_ENTITY_RELATION;
     }
 
     private setupGraphOutlineOptions() {
@@ -649,30 +715,6 @@ export class SchemaDesigner {
         this._layout.execute(this._graph.getDefaultParent());
 
         this._model.endUpdate();
-    }
-
-    private mostNegativeX() {
-        let mostNegativeX = 0;
-        const cells = this._graph.getChildCells(this._graph.getDefaultParent());
-        for (let i = 0; i < cells.length; i++) {
-            const cell = cells[i];
-            if (cell.geometry.x < mostNegativeX) {
-                mostNegativeX = cell.geometry.x;
-            }
-        }
-        return mostNegativeX;
-    }
-
-    private mostNegativeY() {
-        let mostNegativeY = 0;
-        const cells = this._graph.getChildCells(this._graph.getDefaultParent());
-        for (let i = 0; i < cells.length; i++) {
-            const cell = cells[i];
-            if (cell.geometry.y < mostNegativeY) {
-                mostNegativeY = cell.geometry.y;
-            }
-        }
-        return mostNegativeY;
     }
 
     public addCellClickListener(listener: (cell: mxCell) => void) {

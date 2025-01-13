@@ -93,14 +93,27 @@ export interface SchemaDesignerConfig {
         exportIcon: string;
         autoarrangeIcon: string;
     }
-    color: {
-        cellFillColor: string;
-        cellHighlightColor: string;
-        edgeStrokeColor: string;
-        outlineColor: string;
-        toolbarBackgroundColor: string;
-        validColor: string;
-        invalidColor: string;
+    colors: {
+
+        cellHighlight: string;
+        cellForeground: string;
+        cellBackground: string;
+        cellBorder: string;
+
+        toolbarBackground: string;
+        toolbarForeground: string;
+        toolbarHoverBackground: string;
+        toolbarDividerBackground: string;
+
+        graphBackground: string;
+        graphGrid: string;
+
+        edge: string;
+
+        outlineCellBackground: string;
+        outlineBorder: string;
+        outlineSize: string;
+        outlineSizerRectangle: string;
     }
     graphFontFamily: string;
     isEditable: boolean;

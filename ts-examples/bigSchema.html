@@ -14,13 +14,22 @@
         if (targetDiv1) {
           const schemaDesigner = new SchemaDesigner(targetDiv1, {
             graphFontFamily: "Segoe UI",
-            color: {
-              toolbarBackgroundColor: "var(--color-toolbar-bg)",
-              cellFillColor: "var(--color-graph-column-indicator)",
-              cellHighlightColor: "var(--color-graph-cell-highlight)",
-              edgeStrokeColor: "black",
-              validColor: "#2ecc71",
-              invalidColor: "#e74c3c",
+            colors: {
+              cellHighlight: "#2ecc71",
+              cellBorder: "#70a1ff",
+              cellBackground: "#70a1ff",
+              cellForeground: "#000",
+
+              toolbarBackground: "#2c2c2c",
+              toolbarForeground: "#ffffff",
+              toolbarHoverBackground: "#383838",
+              toolbarDividerBackground: "#444444",
+
+              edge: "#57606f",
+
+              graphGrid: "#c3c3c3",
+              graphBackground: "#fff"
+              
             },
             icons: {
               addTableIcon: "./resources/addTable.svg",
@@ -59,13 +68,7 @@
     <style>
       :root {
         --graph-font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        --color-toolbar-bg: #2c2c2c;
-        --color-toolbar-text: #fff;
-        --color-toolbar-button-hover: #383838;
-        --color-toolbar-divider: #444444;
-        --color-border: #c3c3c3;
         --color-outline-color: #0c8ce9;
-        --color-graph-gridLines: #c3c3c3;
         --color-graph-outline-background: #fff;
         --color-graph-cell-highlight: #0c8ce9;
         --color-graph-outline-tableCell: #1e272e;

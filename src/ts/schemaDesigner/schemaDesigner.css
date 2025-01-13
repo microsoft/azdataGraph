@@ -19,8 +19,8 @@
     width: fit-content;
     gap: 0.5rem;
     display: flex;
-    background-color: var(--color-toolbar-bg);
-    color: var(--color-toolbar-text);
+    background-color: var(--sd-toolbar-background-color);
+    color: var(--sd-toolbar-foreground-color);
     padding: 5px;
     border-radius: 0.8rem;
     vertical-align: middle;
@@ -43,13 +43,13 @@
   }
   
   .sd-toolbar-button:hover {
-    background-color: var(--color-toolbar-button-hover);
+    background-color: var(--sd-toolbar-hover-background-color);
   }
   
   .sd-toolbar-divider {
     height: 100%;
     width: 1px;
-    background-color: var(--color-toolbar-divider);
+    background-color: var(--sd-toolbar-divider-background-color);
   }
   
   #graphContainer {
@@ -58,21 +58,22 @@
     z-index: var(--sd-z-base);
     background-image: radial-gradient(
       circle,
-      var(--color-graph-gridLines) 10%,
+      var(--sd-graph-grid-color) 10%,
       transparent 10%
     );
     background-size: 20px 20px;
     background-repeat: repeat;
     overflow: auto;
+    background-color: var(--sd-graph-background-color);
   }
 
   .sd-outline {
     position: fixed;
     right: 10px;
     bottom: 10px;
-    border-radius: 0.3rem;
+    border-radius: 0.2rem;
     z-index: var(--sd-z-toolbar);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--sd-border-color);
     box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.35), 0px 1px 3px rgba(0, 0, 0, 0.5),
       inset 0px 0.5px 0px rgba(255, 255, 255, 0.08),
       inset 0px 0px 0.5px rgba(255, 255, 255, 0.3);
@@ -85,12 +86,13 @@
     width: 260px;
     height: 100%;
     border-radius: 2px;
+    color: var(--sd-cell-html-foreground);
     box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.35), 0px 1px 3px rgba(0, 0, 0, 0.5),
     inset 0px 0.5px 0px rgba(255, 255, 255, 0.08),
     inset 0px 0px 0.5px rgba(255, 255, 255, 0.3);
     display: flex;
     flex-direction: column;
-    background-color: var(--color-graph-background);
+    background-color: var(--sd-graph-background-color);
   }
   
   .sd-table-color-indicator {
@@ -104,7 +106,7 @@
     display: flex;
     gap: 10px;
     height: 40px;
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--sd-border-color);
   }
   
   
