@@ -56,7 +56,6 @@ export class SchemaDesigner {
         this._container.style.setProperty("--sd-cell-html-foreground", this._config.colors.cellForeground);
        
         this._graph.getStylesheet().getDefaultVertexStyle()["fillColor"] = this._config.colors.cellBackground;
-        this._graph.getStylesheet().getDefaultVertexStyle()["strokeColor"] = this._config.colors.cellBorder;
         this._graph.getStylesheet().getDefaultEdgeStyle()["strokeColor"] = this._config.colors.edge;
         this._graph.getStylesheet().getDefaultVertexStyle()['cellHighlightColor'] = this._config.colors.cellHighlight;
         this._graph.getStylesheet().getDefaultVertexStyle()['cellHightlightStrokeWidth'] = 3;
