@@ -20,7 +20,7 @@ class SchemaDesignerToolbar {
         button.title = title;
         if (onDragEndCallback) {
             const dragImage = button.cloneNode(true);
-            dragImage.style.backgroundColor = this._config.color.toolbarBackgroundColor;
+            dragImage.style.backgroundColor = this._config.colors.toolbarBackground;
             const ds = mx_1.mxGraphFactory.mxUtils.makeDraggable(button, this._graph, onDragEndCallback, dragImage);
             ds.highlightDropTargets = true;
         }

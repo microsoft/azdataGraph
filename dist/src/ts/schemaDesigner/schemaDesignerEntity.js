@@ -1,6 +1,10 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SchemaDesignerEntity = void 0;
+const create_color_1 = __importDefault(require("create-color"));
 class SchemaDesignerEntity {
     constructor(entity, _config, _graph) {
         this._config = _config;
@@ -10,11 +14,13 @@ class SchemaDesignerEntity {
         this.columns = entity.columns;
     }
     render() {
+        const color = (0, create_color_1.default)(this.schema, { format: "hex" });
         const parent = document.createElement("div");
         parent.classList.add("sd-table");
         const colorIndicator = document.createElement("div");
         colorIndicator.classList.add("sd-table-color-indicator");
         parent.appendChild(colorIndicator);
+        colorIndicator.style.backgroundColor = color;
         const header = document.createElement("div");
         header.classList.add("sd-table-header");
         const headerIcon = document.createElement("div");
@@ -33,7 +39,12 @@ class SchemaDesignerEntity {
             columnDiv.classList.add("sd-table-column");
             const columnIcon = document.createElement("div");
             columnIcon.classList.add("sd-table-column-icon");
-            columnIcon.style.backgroundImage = `url(${this._config.icons.dataTypeIcons[column.dataType]})`;
+            if (this._config.icons.dataTypeIcons[column.dataType]) {
+                columnIcon.style.backgroundImage = `url(${this._config.icons.dataTypeIcons[column.dataType]})`;
+            }
+            else {
+                columnIcon.style.backgroundImage = `url(${this._config.icons.customDataTypeIcon})`;
+            }
             columnDiv.appendChild(columnIcon);
             const columnText = document.createElement("div");
             columnText.classList.add("sd-table-column-text");

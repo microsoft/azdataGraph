@@ -14,7 +14,9 @@ export declare class SchemaDesigner {
     private cellClickListeners;
     constructor(_container: HTMLElement, _config: SchemaDesignerConfig);
     private initializeGraph;
+    private setupColors;
     private overwriteMxGraphDefaults;
+    private addCustomEdgeTerminals;
     private setupEditorOptions;
     private setupGraphOptions;
     private setupGraphOutlineOptions;
@@ -25,8 +27,6 @@ export declare class SchemaDesigner {
     private renderRelationship;
     get schema(): ISchema;
     autoArrange(): void;
-    private mostNegativeX;
-    private mostNegativeY;
     addCellClickListener(listener: (cell: mxCell) => void): void;
 }
 export interface EdgeCellValue {

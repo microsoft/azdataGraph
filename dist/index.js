@@ -43272,7 +43272,7 @@ var SchemaDesignerToolbar = class {
     button.title = title;
     if (onDragEndCallback) {
       const dragImage = button.cloneNode(true);
-      dragImage.style.backgroundColor = this._config.color.toolbarBackgroundColor;
+      dragImage.style.backgroundColor = this._config.colors.toolbarBackground;
       const ds = mxGraphFactory.mxUtils.makeDraggable(
         button,
         this._graph,
@@ -43306,6 +43306,73 @@ function getRowY(state, column) {
   return y;
 }
 
+// node_modules/create-color/src/hashToHex.js
+var hashToHex = (hash) => {
+  const c = (hash & 16777215).toString(16);
+  return `#${"00000".substring(0, 6 - c.length) + c}`;
+};
+
+// node_modules/create-color/src/hashToHsl.js
+var hashToHsl = (hash) => {
+  const r = ((hash & 16711680) >> 16) / 255;
+  const g = ((hash & 65280) >> 8) / 255;
+  const b = (hash & 255) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h2 = 0;
+  let s = 0;
+  let l = (max + min) / 2;
+  if (max === min) {
+    h2 = s = 0;
+  } else {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r:
+        h2 = (g - b) / d + (g < b ? 6 : 0);
+        break;
+      case g:
+        h2 = (b - r) / d + 2;
+        break;
+      case b:
+        h2 = (r - g) / d + 4;
+        break;
+    }
+    h2 /= 6;
+  }
+  return `hsl(${Math.round(h2 * 360)},${Math.round(s * 100)}%,${Math.round(l * 100)}%)`;
+};
+
+// node_modules/create-color/src/hashToRgb.js
+var hashToRgb = (hash) => `rgb(${(hash & 16711680) >> 16},${(hash & 65280) >> 8},${hash & 255})`;
+
+// node_modules/create-color/src/index.js
+var createColor = (str, params = { format: "hex" }) => {
+  if (str == null) {
+    throw new Error(`[X] You didn't specify an input parameter for the hash`);
+  }
+  const hash = getHash(str);
+  const allFormats = {
+    hex: () => hashToHex(hash),
+    rgb: () => hashToRgb(hash),
+    hsl: () => hashToHsl(hash)
+  };
+  const format = params && params.format;
+  const keys = Object.keys(allFormats);
+  if (!keys.includes(format)) {
+    throw new Error(`
+      [X] Unknown format: ${format}. 
+      The following formats are available: ${keys}
+    `);
+  }
+  return allFormats[format]();
+};
+var getHash = (str) => {
+  const s = JSON.stringify(str);
+  return s.split("").reduce((a, _, i) => a += s.charCodeAt(i) + (a << 5), 0);
+};
+var src_default = createColor;
+
 // src/ts/schemaDesigner/schemaDesignerEntity.ts
 var SchemaDesignerEntity = class {
   constructor(entity, _config, _graph) {
@@ -43316,11 +43383,13 @@ var SchemaDesignerEntity = class {
     this.columns = entity.columns;
   }
   render() {
+    const color = src_default(this.schema, { format: "hex" });
     const parent = document.createElement("div");
     parent.classList.add("sd-table");
     const colorIndicator = document.createElement("div");
     colorIndicator.classList.add("sd-table-color-indicator");
     parent.appendChild(colorIndicator);
+    colorIndicator.style.backgroundColor = color;
     const header = document.createElement("div");
     header.classList.add("sd-table-header");
     const headerIcon = document.createElement("div");
@@ -43339,7 +43408,11 @@ var SchemaDesignerEntity = class {
       columnDiv.classList.add("sd-table-column");
       const columnIcon = document.createElement("div");
       columnIcon.classList.add("sd-table-column-icon");
-      columnIcon.style.backgroundImage = `url(${this._config.icons.dataTypeIcons[column.dataType]})`;
+      if (this._config.icons.dataTypeIcons[column.dataType]) {
+        columnIcon.style.backgroundImage = `url(${this._config.icons.dataTypeIcons[column.dataType]})`;
+      } else {
+        columnIcon.style.backgroundImage = `url(${this._config.icons.customDataTypeIcon})`;
+      }
       columnDiv.appendChild(columnIcon);
       const columnText = document.createElement("div");
       columnText.classList.add("sd-table-column-text");
@@ -43383,6 +43456,8 @@ var SchemaDesignerLayout = class extends mxGraphFactory.mxHierarchicalLayout {
     super(graph, mxGraphFactory.mxConstants.DIRECTION_EAST, true);
   }
   execute(parent) {
+    this.interHierarchySpacing = 100;
+    this.orientation = mxGraphFactory.mxConstants.DIRECTION_WEST;
     super.execute(parent);
   }
 };
@@ -43399,35 +43474,82 @@ var SchemaDesigner = class {
   }
   initializeGraph() {
     this.overwriteMxGraphDefaults();
+    this.addCustomEdgeTerminals();
     this._editor = new mxGraphFactory.mxEditor();
-    const graphContainer = document.createElement("div");
-    graphContainer.classList.add("sd-graph-container");
-    this._container.appendChild(graphContainer);
-    this._editor.setGraphContainer(graphContainer);
+    this._editor.setGraphContainer(this._container);
     this._graph = this._editor.graph;
     this._model = this._graph.getModel();
     this.setupEditorOptions();
     this.setupGraphOptions();
+    this.setupColors();
     this.setupGraphOutlineOptions();
     this.setupToolbar();
+  }
+  setupColors() {
+    this._container.style.setProperty("--sd-toolbar-background-color", this._config.colors.toolbarBackground);
+    this._container.style.setProperty("--sd-toolbar-foreground-color", this._config.colors.toolbarForeground);
+    this._container.style.setProperty("--sd-toolbar-hover-background-color", this._config.colors.toolbarHoverBackground);
+    this._container.style.setProperty("--sd-toolbar-divider-background-color", this._config.colors.toolbarDividerBackground);
+    this._container.style.setProperty("--sd-graph-background-color", this._config.colors.graphBackground);
+    this._container.style.setProperty("--sd-graph-grid-color", this._config.colors.graphGrid);
+    this._container.style.setProperty("--sd-border-color", this._config.colors.cellBorder);
+    this._container.style.setProperty("--sd-cell-html-foreground", this._config.colors.cellForeground);
+    this._graph.getStylesheet().getDefaultVertexStyle()["fillColor"] = this._config.colors.cellBackground;
+    this._graph.getStylesheet().getDefaultEdgeStyle()["strokeColor"] = this._config.colors.edge;
+    this._graph.getStylesheet().getDefaultVertexStyle()["cellHighlightColor"] = this._config.colors.cellHighlight;
+    this._graph.getStylesheet().getDefaultVertexStyle()["cellHightlightStrokeWidth"] = 3;
+    this._graph.getStylesheet().getDefaultEdgeStyle()["cellHighlightColor"] = this._config.colors.cellHighlight;
+    mxGraphFactory.mxConstants.OUTLINE_HANDLE_FILLCOLOR = this._config.colors.cellHighlight;
+    mxGraphFactory.mxConstants.OUTLINE_HANDLE_STROKECOLOR = this._config.colors.cellHighlight;
+    mxGraphFactory.mxConstants.OUTLINE_COLOR = this._config.colors.cellHighlight;
   }
   overwriteMxGraphDefaults() {
     mxGraphFactory.mxClient.NO_FO = true;
     mxGraphFactory.mxEvent.disableContextMenu(this._container);
-    mxGraphFactory.mxConstants.DEFAULT_VALID_COLOR = this._config.color.validColor;
-    mxGraphFactory.mxConstants.VALID_COLOR = this._config.color.validColor;
-    mxGraphFactory.mxConstants.INVALID_COLOR = this._config.color.invalidColor;
+  }
+  addCustomEdgeTerminals() {
+    mxGraphFactory.mxMarker.addMarker("one", (canvas, _shape, _type, pe, unitX, unitY, size, _source, _sw, _filled) => {
+      return () => {
+        const endX = pe.x - unitX * size;
+        const endY = pe.y - unitY * size;
+        const midX = endX - unitY * size;
+        const midY = endY + unitX * size;
+        const startX = endX + unitY * size;
+        const startY = endY - unitX * size;
+        canvas.begin();
+        canvas.moveTo(startX, startY);
+        canvas.lineTo(midX, midY);
+        canvas.stroke();
+      };
+    });
+    mxGraphFactory.mxMarker.addMarker("many", (canvas, _shape, _type, pe, unitX, unitY, size, _source, _sw, _filled) => {
+      return () => {
+        const arrowSize = 1.5;
+        const startX = pe.x - unitX * size * arrowSize;
+        const startY = pe.y - unitY * size * arrowSize;
+        const Y1 = pe.y + unitX * size * arrowSize;
+        const X1 = pe.x;
+        const Y2 = pe.y - unitX * size * arrowSize;
+        const X2 = pe.x;
+        canvas.begin();
+        canvas.moveTo(startX, startY);
+        canvas.lineTo(X1, Y1);
+        canvas.stroke();
+        canvas.begin();
+        canvas.moveTo(startX, startY);
+        canvas.lineTo(X2, Y2);
+        canvas.stroke();
+      };
+    });
   }
   setupEditorOptions() {
     this._editor.layoutSwimlanes = true;
   }
   setupGraphOptions() {
-    this._graph.setResizeContainer(true);
     this._graph.tooltipHandler.setEnabled(false);
     this._graph.setConnectable(true);
     this._graph.setAllowDanglingEdges(false);
     this._graph.setHtmlLabels(true);
-    this._graph.allowLoops = false;
     this._graph.connectionHandler.enabled = false;
     this._graph.connectionHandler.movePreviewAway = false;
     this._graph.connectionHandler.moveIconFront = true;
@@ -43438,10 +43560,11 @@ var SchemaDesigner = class {
     );
     this._graph.connectionHandler.factoryMethod = null;
     this._layout = new SchemaDesignerLayout(this._graph);
-    this._layout.intraCellSpacing = 30;
     this._graph.setCellsDisconnectable(false);
-    this._graph.autoExtend = true;
-    new mxGraphFactory.mxRubberband(this._graph);
+    this._graph.autoSizeCellsOnAdd = true;
+    this._graph.getSelectionModel().setSingleSelection(true);
+    this._graph.setPanning(true);
+    this._graph.panningHandler.useLeftButtonForPanning = true;
     this._graph.view.updateFloatingTerminalPoint = function(edge, start, end, source) {
       const next = this.getNextPoint(edge, end, source);
       if (start?.text?.node === void 0) {
@@ -43690,9 +43813,7 @@ var SchemaDesigner = class {
         this.cellClickListeners.forEach((listener) => listener(cell2));
       }
     });
-    this._graph.getStylesheet().getDefaultVertexStyle()["cellHighlightColor"] = "red";
     this._graph.getStylesheet().getDefaultEdgeStyle()["edgeStyle"] = mxGraphFactory.mxEdgeStyle.ElbowConnector;
-    this._graph.stylesheet.getDefaultEdgeStyle()[mxGraphFactory.mxConstants.STYLE_EDGE] = mxGraphFactory.mxConstants.EDGESTYLE_ENTITY_RELATION;
   }
   setupGraphOutlineOptions() {
     const outlineContainer = document.createElement("div");
@@ -43768,6 +43889,13 @@ var SchemaDesigner = class {
       () => {
         this._editor.execute("zoomOut");
         this.redrawEdges();
+      }
+    );
+    this._toolbar.addButton(
+      this._config.icons.zoomFitIcon,
+      "Fit",
+      () => {
+        this._graph.fit(void 0);
       }
     );
     this._toolbar.addDivider();
@@ -43915,37 +44043,7 @@ var SchemaDesigner = class {
   autoArrange() {
     this._model.beginUpdate();
     this._layout.execute(this._graph.getDefaultParent());
-    const cells = this._graph.getChildCells(this._graph.getDefaultParent());
-    this._graph.center();
-    const mostNegativeX = this.mostNegativeX();
-    console.log("-x", mostNegativeX);
-    const mostNegativeY = this.mostNegativeY();
-    console.log("-y", mostNegativeY);
-    this._graph.moveCells(cells, -mostNegativeX + 100, -mostNegativeY + 100, false);
-    this._graph.sizeDidChange();
     this._model.endUpdate();
-  }
-  mostNegativeX() {
-    let mostNegativeX = 0;
-    const cells = this._graph.getChildCells(this._graph.getDefaultParent());
-    for (let i = 0; i < cells.length; i++) {
-      const cell2 = cells[i];
-      if (cell2.geometry.x < mostNegativeX) {
-        mostNegativeX = cell2.geometry.x;
-      }
-    }
-    return mostNegativeX;
-  }
-  mostNegativeY() {
-    let mostNegativeY = 0;
-    const cells = this._graph.getChildCells(this._graph.getDefaultParent());
-    for (let i = 0; i < cells.length; i++) {
-      const cell2 = cells[i];
-      if (cell2.geometry.y < mostNegativeY) {
-        mostNegativeY = cell2.geometry.y;
-      }
-    }
-    return mostNegativeY;
   }
   addCellClickListener(listener) {
     this.cellClickListeners.push(listener);
