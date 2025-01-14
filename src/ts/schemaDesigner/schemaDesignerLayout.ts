@@ -80,14 +80,11 @@ export class SchemaDesignerLayout extends mx.mxHierarchicalLayout {
                 standaloneCells.push(...subGraph);
             }
         }
-        console.log(standaloneCells);
 
         const startX = Math.min(...standaloneCells.map(cell => cell.geometry.x));
         const startY = Math.min(...standaloneCells.map(cell => cell.geometry.y));
 
         const intercellSpacing = 100;
-
-        console.log(startX, startY, maxX);
 
         let currentX = startX;
         let currentY = startY;
