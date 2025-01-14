@@ -19,8 +19,7 @@
     "build": "yarn compile-mxgraph && npx tsc && node build.js",
     "watch": "yarn compile-mxgraph && node build.js --watch",
     "examples": "http-server -p 4000",
-    "lint": "eslint",
-    "dev": "vite"
+    "lint": "eslint"
   },
   "devDependencies": {
     "@jgoz/esbuild-plugin-typecheck": "^4.0.2",
@@ -40,8 +39,7 @@
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.1.1",
     "typescript": "^5.7.2",
-    "typescript-eslint": "^8.18.0",
-    "vite": "^6.0.7"
+    "typescript-eslint": "^8.18.0"
   },
   "dependencies": {
     "create-color": "^2.0.6"
