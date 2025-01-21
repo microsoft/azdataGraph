@@ -41,7 +41,7 @@
     "react-router-dom": "^7.1.1",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.18.0",
-    "vite": "^6.0.7"
+    "vite": "^6.0.9"
   },
   "dependencies": {
     "create-color": "^2.0.6"
