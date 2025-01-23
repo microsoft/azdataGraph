@@ -7,36 +7,12 @@
     <link rel="stylesheet" href="../dist/index.css" />
     <script type="module">
       import { SchemaDesigner } from "../dist/index.js";
+      import { schemaDesignerConfig } from "./schemas/schema_designer_config.js";
+
       window.onload = () => {
         const targetDiv1 = document.getElementById("graphContainer");
         if (targetDiv1) {
-          const schemaDesigner = new SchemaDesigner(targetDiv1, {
-            graphFontFamily: "Segoe UI",
-            color: {
-              toolbarBackgroundColor: "var(--color-toolbar-bg)",
-              cellFillColor: "var(--color-graph-column-indicator)",
-              cellHighlightColor: "var(--color-graph-cell-highlight)",
-              edgeStrokeColor: "black",
-              validColor: "#2ecc71",
-              invalidColor: "#e74c3c",
-            },
-            icons: {
-              addTableIcon: "./resources/addTable.svg",
-              undoIcon: "./resources/undo.svg",
-              redoIcon: "./resources/redo.svg",
-              zoomInIcon: "./resources/zoomIn.svg",
-              zoomOutIcon: "./resources/zoomOut.svg",
-              deleteIcon: "./resources/delete.svg",
-              entityIcon: "./resources/tableNode.svg",
-              dataTypeIcons: {
-                int: "./resources/numberDataType.svg",
-              },
-              connectorIcon: "./resources/connector.svg",
-              exportIcon: "./resources/export.svg",
-              autoarrangeIcon: "./resources/arrange.svg",
-            },
-            isEditable: false,
-          });
+          const schemaDesigner = new SchemaDesigner(targetDiv1, schemaDesignerConfig);
           schemaDesigner.renderModel({
             entities: [
               {

@@ -55,7 +55,10 @@ export class SchemaDesigner {
 
         this._container.style.setProperty("--sd-cell-html-foreground", this._config.colors.cellForeground);
         this._container.style.setProperty("--sd-cell-html-hover-column-background", this._config.colors.cellColumnHover);
-       
+        this._container.style.setProperty("--sd-cell-divider-color", this._config.colors.cellDivider);
+        this._container.style.setProperty("--sd-graph-background-color", this._config.colors.cellBackground);
+
+
         this._graph.getStylesheet().getDefaultVertexStyle()["fillColor"] = this._config.colors.cellBackground;
         this._graph.getStylesheet().getDefaultEdgeStyle()["strokeColor"] = this._config.colors.edge;
         this._graph.getStylesheet().getDefaultVertexStyle()['cellHighlightColor'] = this._config.colors.cellHighlight;
@@ -495,17 +498,17 @@ export class SchemaDesigner {
                         schema: "dbo",
                         columns: [{
                             name: "Column1",
-                            datatype: "int",
+                            dataType: "int",
                             isPrimaryKey: true,
                             isIdentity: true
                         }, {
                             name: "Column2",
-                            datatype: "int",
+                            dataType: "int",
                             isPrimaryKey: false,
                             isIdentity: false
                         }, {
                             name: "Column2",
-                            datatype: "int",
+                            dataType: "int",
                             isPrimaryKey: false,
                             isIdentity: false
                         }]
