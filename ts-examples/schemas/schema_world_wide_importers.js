@@ -3636,19 +3636,19 @@ export const worldWideImporters = {
       columns: [
         {
           name: "Column1",
-          type: "int",
+          dataType: "int",
           isPrimaryKey: true,
           isIdentity: true,
         },
         {
           name: "Column2",
-          type: "int",
+          dataType: "int",
           isPrimaryKey: false,
           isIdentity: false,
         },
         {
           name: "Column2",
-          type: "int",
+          dataType: "int",
           isPrimaryKey: false,
           isIdentity: false,
         },
@@ -3660,19 +3660,19 @@ export const worldWideImporters = {
       columns: [
         {
           name: "Column1",
-          type: "int",
+          dataType: "int",
           isPrimaryKey: true,
           isIdentity: true,
         },
         {
           name: "Column2",
-          type: "int",
+          dataType: "int",
           isPrimaryKey: false,
           isIdentity: false,
         },
         {
           name: "Column2",
-          type: "int",
+          dataType: "int",
           isPrimaryKey: false,
           isIdentity: false,
         },
@@ -3684,7 +3684,7 @@ export const worldWideImporters = {
       columns: [
         {
           name: "Column1",
-          type: "int",
+          dataType: "int",
           isPrimaryKey: true,
           isIdentity: true,
         },
@@ -3696,7 +3696,7 @@ export const worldWideImporters = {
       columns: [
         {
           name: "Column1",
-          type: "int",
+          dataType: "int",
           isPrimaryKey: true,
           isIdentity: true,
         },
@@ -3708,7 +3708,7 @@ export const worldWideImporters = {
       columns: [
         {
           name: "Column1",
-          type: "int",
+          dataType: "int",
           isPrimaryKey: true,
           isIdentity: true,
         },
@@ -3720,7 +3720,7 @@ export const worldWideImporters = {
       columns: [
         {
           name: "Column1",
-          type: "int",
+          dataType: "int",
           isPrimaryKey: true,
           isIdentity: true,
         },
@@ -3732,7 +3732,7 @@ export const worldWideImporters = {
       columns: [
         {
           name: "Column1",
-          type: "int",
+          dataType: "int",
           isPrimaryKey: true,
           isIdentity: true,
         },

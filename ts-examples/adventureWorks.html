@@ -8,63 +8,11 @@
     <script type="module">
       import { SchemaDesigner } from "../dist/index.js";
       import { adventureWorks } from "./schemas/schema_adventure_works.js";
+      import { schemaDesignerConfig } from "./schemas/schema_designer_config.js";
       window.onload = () => {
         const targetDiv1 = document.getElementById("graphContainer");
         if (targetDiv1) {
-          const schemaDesigner = new SchemaDesigner(targetDiv1, {
-            graphFontFamily: "Segoe UI",
-            colors: {
-              toolbarBackgroundColor: "var(--color-toolbar-bg)",
-              cellFillColor: "var(--color-graph-column-indicator)",
-              cellHighlightColor: "var(--color-graph-cell-highlight)",
-              edgeStrokeColor: "black",
-              validColor: "#2ecc71",
-              invalidColor: "#e74c3c",
-            },
-            icons: {
-              addTableIcon: "./resources/addTable.svg",
-              undoIcon: "./resources/undo.svg",
-              redoIcon: "./resources/redo.svg",
-              zoomInIcon: "./resources/zoomIn.svg",
-              zoomOutIcon: "./resources/zoomOut.svg",
-              deleteIcon: "./resources/delete.svg",
-              entityIcon: "./resources/tableNode.svg",
-              customDataTypeIcon: "./resources/datatype_custom.svg",
-              dataTypeIcons: {
-                int: "./resources/datatype_int.svg",
-                tinyint: "./resources/datatype_int.svg",
-                smallint: "./resources/datatype_int.svg",
-                bigint: "./resources/datatype_int.svg",
-                numeric: "./resources/datatype_decimal.svg",
-                decimal: "./resources/datatype_decimal.svg",
-                money: "./resources/datatype_money.svg",
-                smallmoney: "./resources/datatype_money.svg",
-                bit: "./resources/datatype_bit.svg",
-                float: "./resources/datatype_float.svg",
-                real: "./resources/datatype_float.svg",
-                char: "./resources/datatype_text.svg",
-                varchar: "./resources/datatype_text.svg",
-                text: "./resources/datatype_text.svg",
-                nchar: "./resources/datatype_text.svg",
-                nvarchar: "./resources/datatype_text.svg",
-                ntext: "./resources/datatype_text.svg",
-                binary: "./resources/datatype_varbinary.svg",
-                varbinary: "./resources/datatype_varbinary.svg",
-                image: "./resources/datatype_varbinary.svg",
-                geography: "./resources/datatype_geography.svg",
-                datetime: "./resources/datatype_datetime.svg",
-                datetime2: "./resources/datatype_datetime.svg",
-                date: "./resources/datatype_datetime.svg",
-                time: "./resources/datatype_datetime.svg",
-                datetimeoffset: "./resources/datatype_datetime.svg",
-                smalldatetime: "./resources/datatype_datetime.svg",
-              },
-              connectorIcon: "./resources/connector.svg",
-              exportIcon: "./resources/export.svg",
-              autoarrangeIcon: "./resources/arrange.svg",
-            },
-            isEditable: false,
-          });
+          const schemaDesigner = new SchemaDesigner(targetDiv1, schemaDesignerConfig);
           schemaDesigner.renderModel(adventureWorks);
           schemaDesigner.addCellClickListener((cell) => {
             console.log(cell);
