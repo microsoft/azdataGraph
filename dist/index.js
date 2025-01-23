@@ -43400,7 +43400,9 @@ var SchemaDesignerEntity = class {
     header.appendChild(headerIcon);
     const headerText = document.createElement("div");
     headerText.classList.add("sd-table-header-text");
-    headerText.innerText = `${this.schema}.${this.name}`;
+    const tableTitle = `${this.schema}.${this.name}`;
+    headerText.innerText = tableTitle;
+    headerText.title = tableTitle;
     header.appendChild(headerText);
     parent.appendChild(header);
     const columns = document.createElement("div");
@@ -43413,14 +43415,15 @@ var SchemaDesignerEntity = class {
       if (this._config.icons.dataTypeIcons[column.dataType] !== void 0) {
         columnIcon.innerHTML = this._config.icons.dataTypeIcons[column.dataType];
       } else {
-        console.log(column.dataType);
         columnIcon.innerHTML = this._config.icons.customDataTypeIcon;
       }
       columnIcon.title = column.dataType;
       columnDiv.appendChild(columnIcon);
       const columnText = document.createElement("div");
       columnText.classList.add("sd-table-column-text");
+      columnText.title = column.name;
       columnText.innerText = column.name;
+      columnText.title = this.getColumnTitle(column, index);
       columnDiv.appendChild(columnText);
       const columnConstraints = document.createElement("div");
       columnConstraints.classList.add("sd-table-column-constraints");
@@ -43451,6 +43454,24 @@ var SchemaDesignerEntity = class {
       }
     }
     return constraints.join(", ");
+  }
+  getColumnTitle(column, index) {
+    let columnTitle = `${column.name}`;
+    if (column.isPrimaryKey) {
+      columnTitle += ` Primary key`;
+    }
+    const cells = this._graph.getChildCells(this._graph.getDefaultParent());
+    const vertex = cells.find((cell2) => cell2.vertex && cell2.value.name === this.name && cell2.value.schema === this.schema);
+    if (vertex) {
+      const edges = this._graph.getEdges(vertex);
+      const outgoingEdges = edges.filter((edge) => edge.source === vertex);
+      for (const edge of outgoingEdges) {
+        if (edge.value.sourceRow - 1 === index) {
+          return columnTitle + ` Foreign key`;
+        }
+      }
+    }
+    return columnTitle;
   }
 };
 

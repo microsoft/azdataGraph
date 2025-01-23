@@ -10,4 +10,5 @@ export declare class SchemaDesignerEntity implements IEntity {
     constructor(entity: IEntity, _config: SchemaDesignerConfig, _graph: mxGraph);
     render(): HTMLElement;
     private getConstraintText;
+    private getColumnTitle;
 }
