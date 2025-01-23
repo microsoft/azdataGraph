@@ -667,7 +667,7 @@ export class SchemaDesigner {
     private renderRelationship(relationship: IRelationship) {
         const cells = this._model.getChildCells(this._graph.getDefaultParent());
         const source = cells.find((cell) => cell.value.name === relationship.entity && cell.value.schema === relationship.schemaName);
-        const target = cells.find((cell) => cell.value.name === relationship.referencedEntity && cell.value.schema === relationship.referencedSchemaName);
+        const target = cells.find((cell) => cell.value.name === relationship.referencedEntity && cell.value.schema === relationship.referencedSchema);
         if (source === undefined || target === undefined) {
             return;
         }
@@ -707,7 +707,7 @@ export class SchemaDesigner {
                     schemaName: cell.target.value.schema,
                     referencedEntity: cell.source.value.name,
                     referencedColumn: cell.source.value.columns[cell.value.targetRow - 1].name,
-                    referencedSchemaName: cell.source.value.schema,
+                    referencedSchema: cell.source.value.schema,
                 };
                 schema.relationships.push(relationship);
             }

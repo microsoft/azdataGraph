@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Big Schema Designer</title>
+    <link rel="stylesheet" href="../dist/index.css" />
+    <script type="module">
+      import { SchemaDesigner } from "../dist/index.js";
+      import { schemaDesignerConfig } from "./schemas/schema_designer_config.js";
+      import { ecommerceDemoSchema } from "./schemas/schema_ecommerce_demo.js";
+      window.onload = () => {
+        const targetDiv1 = document.getElementById("graphContainer");
+        if (targetDiv1) {
+          const schemaDesigner = new SchemaDesigner(targetDiv1, schemaDesignerConfig);
+          schemaDesigner.renderModel(ecommerceDemoSchema);
+          schemaDesigner.addCellClickListener((cell) => {
+            console.log(cell);
+          })
+        }
+      };
+    </script>
+    <style>
+      :root {
+        --graph-font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        --color-outline-color: #0c8ce9;
+        --color-graph-outline-background: #fff;
+        --color-graph-cell-highlight: #0c8ce9;
+        --color-graph-outline-tableCell: #1e272e;
+        --color-graph-outline-columnCell: #bdc3c7;
+        --color-graph-background: #ffffff;
+        --color-graph-table-indicator: #00a2ad;
+        --color-graph-column-indicator: #f0f0f0;
+        --color-graph-node-hover: #f0f0f0;
+      }
+      .body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        padding: 10px;
+      }
+      #graphContainer {
+        position: absolute;
+        width: 100%;
+        height: calc(100vh - 20px);
+        min-width: 100%;
+        min-height: calc(100vh - 20px);
+        user-select: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="graphContainer"></div>
+  </body>
+</html>
