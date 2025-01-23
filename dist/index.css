@@ -40,6 +40,9 @@
   background-position: center;
   padding: 4px;
   border-radius: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .sd-toolbar-button:hover {
   background-color: var(--sd-toolbar-hover-background-color);
@@ -102,7 +105,7 @@
   display: flex;
   gap: 10px;
   height: 40px;
-  border-bottom: 1px solid var(--sd-border-color);
+  border-bottom: 1px solid var(--sd-cell-divider-color);
 }
 .sd-table-header-icon {
   width: 24px;
@@ -111,6 +114,10 @@
   background-repeat: no-repeat;
   background-position: center;
   margin-left: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--sd-cell-html-foreground);
 }
 .sd-table-header-text {
   font-size: 14px;
@@ -148,6 +155,9 @@
   background-repeat: no-repeat;
   background-position: center;
   margin-left: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .sd-table-column-text {
   font-size: 13px;
@@ -157,6 +167,8 @@
   text-align: left;
   user-select: none;
   flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .sd-table-column-constraints {
   font-size: 13px;

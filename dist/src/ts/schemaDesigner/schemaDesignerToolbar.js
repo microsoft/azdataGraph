@@ -10,12 +10,13 @@ class SchemaDesignerToolbar {
         this._toolbarDiv = document.createElement("div");
         this._container.appendChild(this._toolbarDiv);
         this._toolbarDiv.classList.add("sd-toolbar");
+        this._toolbarDiv.style.color = this._config.colors.toolbarForeground;
     }
     addButton(icon, title, callback, onDragEndCallback) {
         const button = document.createElement("div");
         this._toolbarDiv.appendChild(button);
         button.classList.add("sd-toolbar-button");
-        button.style.backgroundImage = `url(${icon})`;
+        button.innerHTML = icon;
         button.onclick = callback;
         button.title = title;
         if (onDragEndCallback) {

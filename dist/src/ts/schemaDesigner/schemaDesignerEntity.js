@@ -24,8 +24,9 @@ class SchemaDesignerEntity {
         const header = document.createElement("div");
         header.classList.add("sd-table-header");
         const headerIcon = document.createElement("div");
+        headerIcon.innerHTML = this._config.icons.entityIcon;
         headerIcon.classList.add("sd-table-header-icon");
-        headerIcon.style.backgroundImage = `url(${this._config.icons.entityIcon})`;
+        headerIcon.innerHTML = this._config.icons.entityIcon;
         header.appendChild(headerIcon);
         const headerText = document.createElement("div");
         headerText.classList.add("sd-table-header-text");
@@ -39,12 +40,14 @@ class SchemaDesignerEntity {
             columnDiv.classList.add("sd-table-column");
             const columnIcon = document.createElement("div");
             columnIcon.classList.add("sd-table-column-icon");
-            if (this._config.icons.dataTypeIcons[column.datatype]) {
-                columnIcon.style.backgroundImage = `url(${this._config.icons.dataTypeIcons[column.datatype]})`;
+            if (this._config.icons.dataTypeIcons[column.dataType] !== undefined) {
+                columnIcon.innerHTML = this._config.icons.dataTypeIcons[column.dataType];
             }
             else {
-                columnIcon.style.backgroundImage = `url(${this._config.icons.customDataTypeIcon})`;
+                console.log(column.dataType);
+                columnIcon.innerHTML = this._config.icons.customDataTypeIcon;
             }
+            columnIcon.title = column.dataType;
             columnDiv.appendChild(columnIcon);
             const columnText = document.createElement("div");
             columnText.classList.add("sd-table-column-text");

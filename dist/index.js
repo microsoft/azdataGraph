@@ -43262,12 +43262,13 @@ var SchemaDesignerToolbar = class {
     this._toolbarDiv = document.createElement("div");
     this._container.appendChild(this._toolbarDiv);
     this._toolbarDiv.classList.add("sd-toolbar");
+    this._toolbarDiv.style.color = this._config.colors.toolbarForeground;
   }
   addButton(icon, title, callback, onDragEndCallback) {
     const button = document.createElement("div");
     this._toolbarDiv.appendChild(button);
     button.classList.add("sd-toolbar-button");
-    button.style.backgroundImage = `url(${icon})`;
+    button.innerHTML = icon;
     button.onclick = callback;
     button.title = title;
     if (onDragEndCallback) {
@@ -43393,8 +43394,9 @@ var SchemaDesignerEntity = class {
     const header = document.createElement("div");
     header.classList.add("sd-table-header");
     const headerIcon = document.createElement("div");
+    headerIcon.innerHTML = this._config.icons.entityIcon;
     headerIcon.classList.add("sd-table-header-icon");
-    headerIcon.style.backgroundImage = `url(${this._config.icons.entityIcon})`;
+    headerIcon.innerHTML = this._config.icons.entityIcon;
     header.appendChild(headerIcon);
     const headerText = document.createElement("div");
     headerText.classList.add("sd-table-header-text");
@@ -43408,11 +43410,13 @@ var SchemaDesignerEntity = class {
       columnDiv.classList.add("sd-table-column");
       const columnIcon = document.createElement("div");
       columnIcon.classList.add("sd-table-column-icon");
-      if (this._config.icons.dataTypeIcons[column.datatype]) {
-        columnIcon.style.backgroundImage = `url(${this._config.icons.dataTypeIcons[column.datatype]})`;
+      if (this._config.icons.dataTypeIcons[column.dataType] !== void 0) {
+        columnIcon.innerHTML = this._config.icons.dataTypeIcons[column.dataType];
       } else {
-        columnIcon.style.backgroundImage = `url(${this._config.icons.customDataTypeIcon})`;
+        console.log(column.dataType);
+        columnIcon.innerHTML = this._config.icons.customDataTypeIcon;
       }
+      columnIcon.title = column.dataType;
       columnDiv.appendChild(columnIcon);
       const columnText = document.createElement("div");
       columnText.classList.add("sd-table-column-text");
@@ -43456,9 +43460,85 @@ var SchemaDesignerLayout = class extends mxGraphFactory.mxHierarchicalLayout {
     super(graph, mxGraphFactory.mxConstants.DIRECTION_EAST, true);
   }
   execute(parent) {
+    this.graph.getModel().beginUpdate();
     this.interHierarchySpacing = 100;
     this.orientation = mxGraphFactory.mxConstants.DIRECTION_WEST;
     super.execute(parent);
+    let cells = this.graph.getModel().getChildCells(this.graph.getDefaultParent());
+    this.graph.moveCells(cells, 100, 0, false);
+    cells = cells.filter((cell2) => !cell2.edge);
+    const cellSet = new Set(cells.map((cell2) => cell2.id));
+    const subGraphs = [];
+    for (const cell2 of cells) {
+      if (cellSet.has(cell2.id)) {
+        const subGraph = [];
+        const queue = [cell2];
+        cellSet.delete(cell2.id);
+        while (queue.length > 0) {
+          const current = queue.shift();
+          cellSet.delete(current.id);
+          subGraph.push(current);
+          const edges = this.graph.getModel().getEdges(current);
+          for (const edge of edges) {
+            let nextNode = void 0;
+            if (edge.source.id === current.id) {
+              nextNode = edge.target;
+            } else if (edge.target.id === current.id) {
+              nextNode = edge.source;
+            }
+            if (nextNode !== void 0) {
+              if (cellSet.has(nextNode.id)) {
+                queue.push(nextNode);
+                cellSet.delete(nextNode.id);
+              }
+            }
+          }
+        }
+        subGraphs.push(subGraph);
+      }
+    }
+    const boundingBoxes = subGraphs.map((subGraph) => {
+      let minX = Number.MAX_VALUE;
+      let minY = Number.MAX_VALUE;
+      let maxX2 = Number.MIN_VALUE;
+      let maxY = Number.MIN_VALUE;
+      for (const cell2 of subGraph) {
+        const geo = cell2.getGeometry();
+        if (geo) {
+          minX = Math.min(minX, geo.x);
+          minY = Math.min(minY, geo.y);
+          maxX2 = Math.max(maxX2, geo.x + geo.width);
+          maxY = Math.max(maxY, geo.y + geo.height);
+        }
+      }
+      return { minX, minY, maxX: maxX2, maxY };
+    });
+    const maxX = Math.max(...boundingBoxes.map((box) => box.maxX));
+    const standaloneCells = [];
+    for (const subGraph of subGraphs) {
+      if (subGraph.length === 1) {
+        standaloneCells.push(...subGraph);
+      }
+    }
+    const startX = Math.min(...standaloneCells.map((cell2) => cell2.geometry.x));
+    const startY = Math.min(...standaloneCells.map((cell2) => cell2.geometry.y));
+    const intercellSpacing = 100;
+    let currentX = startX;
+    let currentY = startY;
+    let currentRowMaxHeight = 0;
+    for (let i = 0; i < standaloneCells.length; i++) {
+      if (currentX + intercellSpacing > maxX) {
+        currentX = startX;
+        currentY = currentY + currentRowMaxHeight + intercellSpacing;
+        currentRowMaxHeight = 0;
+      }
+      const cell2 = standaloneCells[i];
+      cell2.geometry.x = currentX;
+      cell2.geometry.y = currentY;
+      currentX = currentX + cell2.geometry.width + intercellSpacing;
+      currentRowMaxHeight = Math.max(currentRowMaxHeight, cell2.geometry.height);
+    }
+    this.graph.getModel().endUpdate();
   }
 };
 
@@ -43495,6 +43575,8 @@ var SchemaDesigner = class {
     this._container.style.setProperty("--sd-border-color", this._config.colors.cellBorder);
     this._container.style.setProperty("--sd-cell-html-foreground", this._config.colors.cellForeground);
     this._container.style.setProperty("--sd-cell-html-hover-column-background", this._config.colors.cellColumnHover);
+    this._container.style.setProperty("--sd-cell-divider-color", this._config.colors.cellDivider);
+    this._container.style.setProperty("--sd-graph-background-color", this._config.colors.cellBackground);
     this._graph.getStylesheet().getDefaultVertexStyle()["fillColor"] = this._config.colors.cellBackground;
     this._graph.getStylesheet().getDefaultEdgeStyle()["strokeColor"] = this._config.colors.edge;
     this._graph.getStylesheet().getDefaultVertexStyle()["cellHighlightColor"] = this._config.colors.cellHighlight;
@@ -43841,17 +43923,17 @@ var SchemaDesigner = class {
             schema: "dbo",
             columns: [{
               name: "Column1",
-              datatype: "int",
+              dataType: "int",
               isPrimaryKey: true,
               isIdentity: true
             }, {
               name: "Column2",
-              datatype: "int",
+              dataType: "int",
               isPrimaryKey: false,
               isIdentity: false
             }, {
               name: "Column2",
-              datatype: "int",
+              dataType: "int",
               isPrimaryKey: false,
               isIdentity: false
             }]

@@ -27,7 +27,7 @@ export interface IColumn {
     /**
      * Data type of the column
      */
-    datatype: string;
+    dataType: string;
     /**
      * Is the column primary key
      */
@@ -100,7 +100,8 @@ export interface SchemaDesignerConfig {
         cellBackground: string;
         cellBorder: string;
         cellColumnHover: string;
-
+        cellDivider: string;
+        
         toolbarBackground: string;
         toolbarForeground: string;
         toolbarHoverBackground: string;
