@@ -538,8 +538,8 @@ class SchemaDesigner {
     }
     renderRelationship(relationship) {
         const cells = this._model.getChildCells(this._graph.getDefaultParent());
-        const source = cells.find((cell) => cell.value.name === relationship.entity);
-        const target = cells.find((cell) => cell.value.name === relationship.referencedEntity);
+        const source = cells.find((cell) => cell.value.name === relationship.entity && cell.value.schema === relationship.schemaName);
+        const target = cells.find((cell) => cell.value.name === relationship.referencedEntity && cell.value.schema === relationship.referencedSchema);
         if (source === undefined || target === undefined) {
             return;
         }
@@ -576,8 +576,10 @@ class SchemaDesigner {
                     onUpdateAction: schemaDesignerInterfaces_1.OnAction.CASCADE,
                     column: cell.target.value.columns[cell.value.sourceRow - 1].name,
                     entity: cell.target.value.name,
+                    schemaName: cell.target.value.schema,
                     referencedEntity: cell.source.value.name,
-                    referencedColumn: cell.source.value.columns[cell.value.targetRow - 1].name
+                    referencedColumn: cell.source.value.columns[cell.value.targetRow - 1].name,
+                    referencedSchema: cell.source.value.schema,
                 };
                 schema.relationships.push(relationship);
             }

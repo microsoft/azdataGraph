@@ -1,7 +1,7 @@
 {
   "name": "azdataGraph",
   "description": "azdataGraph is a derivative of mxGraph, which is a fully client side JavaScript diagramming library that uses SVG and HTML for rendering.",
-  "version": "0.0.74",
+  "version": "0.0.75",
   "homepage": "https://github.com/microsoft/azdataGraph",
   "author": "Microsoft",
   "license": "Apache-2.0",
