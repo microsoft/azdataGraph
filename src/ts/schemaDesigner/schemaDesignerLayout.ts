@@ -16,7 +16,7 @@ export class SchemaDesignerLayout extends mx.mxHierarchicalLayout {
 
         // Move all cells to the right by 100px
         let cells = this.graph.getModel().getChildCells(this.graph.getDefaultParent());
-        this.graph.moveCells(cells, 100, 0, false);
+        this.graph.moveCells(cells, 50, 50, false);
 
         cells = cells.filter(cell => !cell.edge);
         const cellSet = new Set(cells.map(cell => cell.id));

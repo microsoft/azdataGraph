@@ -43486,7 +43486,7 @@ var SchemaDesignerLayout = class extends mxGraphFactory.mxHierarchicalLayout {
     this.orientation = mxGraphFactory.mxConstants.DIRECTION_WEST;
     super.execute(parent);
     let cells = this.graph.getModel().getChildCells(this.graph.getDefaultParent());
-    this.graph.moveCells(cells, 100, 0, false);
+    this.graph.moveCells(cells, 50, 50, false);
     cells = cells.filter((cell2) => !cell2.edge);
     const cellSet = new Set(cells.map((cell2) => cell2.id));
     const subGraphs = [];
