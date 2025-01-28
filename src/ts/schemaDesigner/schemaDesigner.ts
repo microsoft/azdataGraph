@@ -2,7 +2,7 @@ import './schemaDesigner.css';
 import '../../css/common.css';
 
 import { IColumn, IEntity, IRelationship, ISchema, OnAction, SchemaDesignerConfig } from './schemaDesignerInterfaces';
-import { mxCell, mxEditor, mxGraph, mxGraphLayout, mxGraphModel } from 'mxgraph';
+import { mxCell, mxCellState, mxEditor, mxGraph, mxGraphLayout, mxGraphModel } from 'mxgraph';
 
 import { mxGraphFactory as mx } from '../mx';
 import { SchemaDesignerToolbar } from './schemaDesignerToolbar';
@@ -19,6 +19,7 @@ export class SchemaDesigner {
     private _model!: mxGraphModel;
     private _toolbar!: SchemaDesignerToolbar;
     private _layout!: mxGraphLayout;
+    private _currentCellUnderEdit!: mxCellState;
 
     private cellClickListeners: ((cell: mxCell) => void)[] = [];
 
@@ -48,7 +49,7 @@ export class SchemaDesigner {
         this._container.style.setProperty("--sd-toolbar-foreground-color", this._config.colors.toolbarForeground);
         this._container.style.setProperty("--sd-toolbar-hover-background-color", this._config.colors.toolbarHoverBackground);
         this._container.style.setProperty("--sd-toolbar-divider-background-color", this._config.colors.toolbarDividerBackground);
-        
+
         this._container.style.setProperty("--sd-graph-background-color", this._config.colors.graphBackground);
         this._container.style.setProperty("--sd-graph-grid-color", this._config.colors.graphGrid);
         this._container.style.setProperty("--sd-border-color", this._config.colors.cellBorder);
@@ -63,9 +64,9 @@ export class SchemaDesigner {
         this._graph.getStylesheet().getDefaultEdgeStyle()["strokeColor"] = this._config.colors.edge;
         this._graph.getStylesheet().getDefaultVertexStyle()['cellHighlightColor'] = this._config.colors.cellHighlight;
         this._graph.getStylesheet().getDefaultVertexStyle()['cellHightlightStrokeWidth'] = 3;
-        
 
-        this._graph.getStylesheet().getDefaultEdgeStyle()['cellHighlightColor'] = this._config.colors.cellHighlight;        
+
+        this._graph.getStylesheet().getDefaultEdgeStyle()['cellHighlightColor'] = this._config.colors.cellHighlight;
         mx.mxConstants.OUTLINE_HANDLE_FILLCOLOR = this._config.colors.cellHighlight
         mx.mxConstants.OUTLINE_HANDLE_STROKECOLOR = this._config.colors.cellHighlight;
         mx.mxConstants.OUTLINE_COLOR = this._config.colors.cellHighlight;
@@ -278,33 +279,51 @@ export class SchemaDesigner {
             return old;
         }
         const oldRedrawLabel = this._graph.cellRenderer.redrawLabel;
+        let self = this;
         this._graph.cellRenderer.redrawLabel = function (state) {
             oldRedrawLabel.apply(this, arguments as any); // super call;
             const graph = state.view.graph;
             const model = graph.model;
             if (model.isVertex(state.cell) && state.text !== null) {
-                // Scrollbars are on the div
-                const div = state.text.node.getElementsByClassName(ENTITY_COLUMNS_CONTAINER_CLASS)[0] as HTMLElement;
-                if (div !== null) {
-                    if (div.getAttribute('scrollHandler') === null) {
-                        div.setAttribute('scrollHandler', 'true');
-                        const updateEdges = mx.mxUtils.bind(this, function () {
-                            graph.clearSelection();
-                            const edgeCount = model.getEdgeCount(state.cell);
-                            // Only updates edges to avoid update in DOM order
-                            // for text label which would reset the scrollbar
-                            for (let i = 0; i < edgeCount; i++) {
-                                const edge = model.getEdgeAt(state.cell, i);
-                                graph.view.invalidate(edge, true, false);
-                                graph.view.validate(edge);
-                            }
-                        });
-                        mx.mxEvent.addListener(div, "scroll", () => {
-                            state.cell.value.scrollTop = div.scrollTop;
-                            updateEdges();
-                        });
-                        mx.mxEvent.addListener(div, "mouseup", updateEdges);
+                if (state.text.node.getElementsByClassName("sd-table").length !== 0) {
+                    console.log("Setting up listeners for table");
+                    const div = state.text.node.getElementsByClassName(ENTITY_COLUMNS_CONTAINER_CLASS)[0] as HTMLElement;
+                    if (div !== null && div !== undefined) {
+                        if (div.getAttribute('scrollHandler') === null) {
+                            div.setAttribute('scrollHandler', 'true');
+                            const updateEdges = mx.mxUtils.bind(this, function () {
+                                graph.clearSelection();
+                                const edgeCount = model.getEdgeCount(state.cell);
+                                // Only updates edges to avoid update in DOM order
+                                // for text label which would reset the scrollbar
+                                for (let i = 0; i < edgeCount; i++) {
+                                    const edge = model.getEdgeAt(state.cell, i);
+                                    graph.view.invalidate(edge, true, false);
+                                    graph.view.validate(edge);
+                                }
+                            });
+                            mx.mxEvent.addListener(div, "scroll", () => {
+                                state.cell.value.scrollTop = div.scrollTop;
+                                updateEdges();
+                            });
+                            mx.mxEvent.addListener(div, "mouseup", updateEdges);
+                        }
                     }
+                    const buttonDiv = state.text.node.getElementsByClassName("sd-entity-edit-button")[0] as HTMLElement;
+                    if (buttonDiv !== undefined) {
+                        buttonDiv.onclick = (_evt: any) => {
+                            state.cell.value.editEntity(state);
+                            graph.cellRenderer.redraw(state);
+                            if(self._currentCellUnderEdit !== undefined) {
+                                self._currentCellUnderEdit.cell.value.editor = false;
+                                self._graph.cellRenderer.redraw(self._currentCellUnderEdit);
+                            }
+                            self._currentCellUnderEdit = state;
+                        };
+                    }
+                }
+                if(state.text.node.getElementsByClassName("sd-entity-editor").length !== 0) {
+                    console.log("Setting up listeners for editor");
                 }
             }
         };

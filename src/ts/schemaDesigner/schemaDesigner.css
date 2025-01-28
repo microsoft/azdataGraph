@@ -190,3 +190,17 @@
   margin-right: 10px;
   user-select: none;
 }
+
+.sd-entity-editor {
+  display: flex;
+  flex-direction: column;
+}
+
+.sd-entity-edit-button {
+  border: none;
+  background-color: var(--sd-graph-background-color);
+}
+
+.sd-entity-edit-button:hover {
+  background-color: var(--sd-cell-html-hover-column-background);
+}

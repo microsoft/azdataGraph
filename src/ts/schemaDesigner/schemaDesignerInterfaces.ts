@@ -100,6 +100,7 @@ export interface SchemaDesignerConfig {
         connectorIcon: string;
         exportIcon: string;
         autoarrangeIcon: string;
+        editIcon: string;
     }
     colors: {
 

@@ -7,6 +7,8 @@ export class SchemaDesignerEntity implements IEntity {
     public name: string;
     public schema: string;
     public columns: IColumn[];
+    public editDiv!: HTMLElement;
+    public editor!: boolean;
 
     constructor(entity: IEntity, private _config: SchemaDesignerConfig, private _graph: mxGraph) {
         this.name = entity.name;
@@ -15,6 +17,14 @@ export class SchemaDesignerEntity implements IEntity {
     }
 
     render(): HTMLElement {
+        if (this.editor) {
+            return this.renderEditor();
+        } else {
+            return this.renderTable();
+        }
+    }
+
+    private renderTable(): HTMLElement {
         const color = createColor(this.schema, { format: "hex" });
         const parent = document.createElement("div");
         parent.classList.add("sd-table");
@@ -35,6 +45,11 @@ export class SchemaDesignerEntity implements IEntity {
         headerText.innerText = tableTitle;
         headerText.title = tableTitle;
         header.appendChild(headerText);
+        const button = document.createElement("button");
+        button.classList.add("sd-entity-edit-button");
+        button.title = "Edit";
+        button.innerHTML = this._config.icons.editIcon;
+        header.appendChild(button);
         parent.appendChild(header);
 
         const columns = document.createElement("div");
@@ -44,7 +59,7 @@ export class SchemaDesignerEntity implements IEntity {
             columnDiv.classList.add("sd-table-column");
             const columnIcon = document.createElement("div");
             columnIcon.classList.add("sd-table-column-icon");
-            if(this._config.icons.dataTypeIcons[column.dataType] !== undefined) {
+            if (this._config.icons.dataTypeIcons[column.dataType] !== undefined) {
                 columnIcon.innerHTML = this._config.icons.dataTypeIcons[column.dataType];
             } else {
                 columnIcon.innerHTML = this._config.icons.customDataTypeIcon;
@@ -67,6 +82,25 @@ export class SchemaDesignerEntity implements IEntity {
         parent.appendChild(columns);
         this.div = parent;
         return parent;
+    }
+
+    private renderEditor(): HTMLElement {
+        const entityEditor = document.createElement("div");
+        entityEditor.classList.add("sd-entity-editor");
+        const entityName = document.createElement("input");
+        entityName.type = "text";
+        console.log(this.name);
+        const div = document.createElement("div");
+        div.innerText = this.name;
+        entityEditor.appendChild(div);
+        entityName.value = this.name;
+        entityEditor.appendChild(entityName);
+        const entitySchema = document.createElement("input");
+        entitySchema.value = this.schema;
+
+        entityEditor.appendChild(entitySchema);
+        entityName.focus();
+        return entityEditor;
     }
 
     private getConstraintText(col: IColumn, index: number): string {
@@ -106,5 +140,9 @@ export class SchemaDesignerEntity implements IEntity {
             }
         }
         return columnTitle;
+    }
+
+    public editEntity(): void {
+      this.editor = true;
     }
 }
