@@ -3,11 +3,16 @@ import { mxGraphFactory as mx } from '../mx';
 
 export class SchemaDesignerLayout extends mx.mxHierarchicalLayout {
     constructor(graph: mxGraph) {
+        
         super(graph, mx.mxConstants.DIRECTION_EAST, true);
+        this.isEdgeIgnored = (_edge: mxCell) => {
+            console.log('edge ignored', _edge.value);
+            return true;
+        };
     }
 
     public override execute(parent: mxCell): void {
-
+        
         this.graph.getModel().beginUpdate();
         this.interHierarchySpacing = 100;
         this.orientation = mx.mxConstants.DIRECTION_WEST;

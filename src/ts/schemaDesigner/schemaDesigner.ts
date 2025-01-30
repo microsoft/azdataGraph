@@ -126,10 +126,10 @@ export class SchemaDesigner {
 
     private setupGraphOptions() {
         this._graph.tooltipHandler.setEnabled(false);
-        this._graph.setConnectable(true);
+        this._graph.setConnectable(this._config.isEditable);
         this._graph.setAllowDanglingEdges(false);
         this._graph.setHtmlLabels(true);
-        this._graph.connectionHandler.enabled = false;
+        this._graph.connectionHandler.enabled = this._config.isEditable;
         this._graph.connectionHandler.movePreviewAway = false;
         this._graph.connectionHandler.moveIconFront = true;
         this._graph.connectionHandler.connectImage = new mx.mxImage(
@@ -255,11 +255,11 @@ export class SchemaDesigner {
         this._graph.isHtmlLabel = (cell) => {
             return !this._model.isEdge(cell);
         }
-        this._graph.isCellEditable = (cell) => {
-            return this._config.isEditable && !this._model.isEdge(cell);
+        this._graph.isCellEditable = (_cell) => {
+            return false; //this._config.isEditable && !this._model.isEdge(cell);
         }
         this._graph.isCellMovable = (cell) => {
-            return this._config.isEditable && !this._model.isEdge(cell);
+            return this._config.isEditable && !this._model.isEdge(cell) && cell.value.editor !== true;
         }
         this._graph.isCellResizable = (_cell) => {
             return false;
@@ -279,54 +279,18 @@ export class SchemaDesigner {
             return old;
         }
         const oldRedrawLabel = this._graph.cellRenderer.redrawLabel;
-        let self = this;
         this._graph.cellRenderer.redrawLabel = function (state) {
             oldRedrawLabel.apply(this, arguments as any); // super call;
             const graph = state.view.graph;
             const model = graph.model;
             if (model.isVertex(state.cell) && state.text !== null) {
-                if (state.text.node.getElementsByClassName("sd-table").length !== 0) {
-                    console.log("Setting up listeners for table");
-                    const div = state.text.node.getElementsByClassName(ENTITY_COLUMNS_CONTAINER_CLASS)[0] as HTMLElement;
-                    if (div !== null && div !== undefined) {
-                        if (div.getAttribute('scrollHandler') === null) {
-                            div.setAttribute('scrollHandler', 'true');
-                            const updateEdges = mx.mxUtils.bind(this, function () {
-                                graph.clearSelection();
-                                const edgeCount = model.getEdgeCount(state.cell);
-                                // Only updates edges to avoid update in DOM order
-                                // for text label which would reset the scrollbar
-                                for (let i = 0; i < edgeCount; i++) {
-                                    const edge = model.getEdgeAt(state.cell, i);
-                                    graph.view.invalidate(edge, true, false);
-                                    graph.view.validate(edge);
-                                }
-                            });
-                            mx.mxEvent.addListener(div, "scroll", () => {
-                                state.cell.value.scrollTop = div.scrollTop;
-                                updateEdges();
-                            });
-                            mx.mxEvent.addListener(div, "mouseup", updateEdges);
-                        }
-                    }
-                    const buttonDiv = state.text.node.getElementsByClassName("sd-entity-edit-button")[0] as HTMLElement;
-                    if (buttonDiv !== undefined) {
-                        buttonDiv.onclick = (_evt: any) => {
-                            state.cell.value.editEntity(state);
-                            graph.cellRenderer.redraw(state);
-                            if(self._currentCellUnderEdit !== undefined) {
-                                self._currentCellUnderEdit.cell.value.editor = false;
-                                self._graph.cellRenderer.redraw(self._currentCellUnderEdit);
-                            }
-                            self._currentCellUnderEdit = state;
-                        };
-                    }
-                }
-                if(state.text.node.getElementsByClassName("sd-entity-editor").length !== 0) {
-                    console.log("Setting up listeners for editor");
+                if (state.cell.value.setupValueAndListeners !== undefined) {
+                    state.cell.value.setupValueAndListeners(state.text.node, state);
                 }
             }
         };
+
+
 
         (this._graph.connectionHandler as extendedConnectionHandler).updateRow = function (target) {
             while (
@@ -491,6 +455,15 @@ export class SchemaDesigner {
         this._graph.getStylesheet().getDefaultEdgeStyle()['edgeStyle'] = mx.mxEdgeStyle.ElbowConnector;
     }
 
+    public set currentCellUnderEdit(value: mxCellState) {
+        if (this._currentCellUnderEdit !== undefined && value.cell.id !== this._currentCellUnderEdit.cell.id
+        ) {
+            this._currentCellUnderEdit.cell.value.editor = false;
+            this._graph.cellRenderer.redraw(this._currentCellUnderEdit);
+        }
+        this._currentCellUnderEdit = value;
+    }
+
     private setupGraphOutlineOptions() {
         const outlineContainer = document.createElement("div");
         outlineContainer.classList.add("sd-outline");
@@ -628,6 +601,23 @@ export class SchemaDesigner {
     public renderModel(schema: ISchema, cleanUndoManager: boolean = false) {
         const parent = this._graph.getDefaultParent();
         this._model.beginUpdate();
+
+        // If no schemas are provided, we will use the schemas from the entities
+        if (this._config.schemas === undefined || this._config.schemas.length === 0) {
+            this._config.schemas = Array.from(new Set(schema.entities.map(entity => entity.schema)));
+        }
+
+        // If no data types are provided, we will use the data types from the entities
+        if (this._config.dataTypes === undefined || this._config.dataTypes.length === 0) {
+            const dataTypes = new Set<string>();
+            schema.entities.forEach(entity => {
+                entity.columns.forEach(column => {
+                    dataTypes.add(column.dataType);
+                });
+            });
+            this._config.dataTypes = Array.from(dataTypes);
+        }
+
         try {
             this._graph.removeCells(this._model.getChildCells(parent));
             const entities = schema.entities;
@@ -660,13 +650,13 @@ export class SchemaDesigner {
     }
 
     private renderEntity(entity: IEntity, x: number, y: number) {
-        const entityValue = new SchemaDesignerEntity(entity, this._config, this._graph);
+        const entityValue = new SchemaDesignerEntity(entity, this._config, this._graph, this);
         const entityCell = new mx.mxCell(
             entityValue,
             new mx.mxGeometry(
                 0,
                 0,
-                260 + 4,
+                400,
                 Math.min(330, 52 + entityValue.columns.length * 28) + 4,
             )
         );

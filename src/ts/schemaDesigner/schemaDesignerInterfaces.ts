@@ -101,6 +101,7 @@ export interface SchemaDesignerConfig {
         exportIcon: string;
         autoarrangeIcon: string;
         editIcon: string;
+        cancelIcon: string;
     }
     colors: {
 
@@ -128,4 +129,6 @@ export interface SchemaDesignerConfig {
     }
     graphFontFamily: string;
     isEditable: boolean;
+    schemas: string[];
+    dataTypes: string[];
 }
