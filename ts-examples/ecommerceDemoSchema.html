@@ -11,13 +11,53 @@
       import { ecommerceDemoSchema } from "./schemas/schema_ecommerce_demo.js";
       window.onload = () => {
         const targetDiv1 = document.getElementById("graphContainer");
+        const floatingDiv = document.createElement("div");
+        floatingDiv.id = "floating-div";
+        floatingDiv.innerHTML = `<p>I'm at (<span id="pos-x"></span>, <span id="pos-y"></span>)</p>
+                                <button id="done-btn">Done</button>`;
+        targetDiv1.appendChild(floatingDiv);
         if (targetDiv1) {
-          const schemaDesigner = new SchemaDesigner(targetDiv1, schemaDesignerConfig);
+          const schemaDesigner = new SchemaDesigner(targetDiv1, {
+            ...schemaDesignerConfig,
+            editEntity: (entity) => {
+              // Update displayed coordinates
+              
+              console.log("Edit Entity", entity);
+              floatingDiv.style.left = `${entity.x}px`;
+              floatingDiv.style.top = `${entity.y}px`;
+              floatingDiv.style.display = "block";
+              document.getElementById("pos-x").innerText = entity.x;
+              document.getElementById("pos-y").innerText = entity.y;
+              overlay.style.display = "block";
+              graphContainer.style.overflow = "hidden";
+              return {
+                name: "Customers",
+                schema: "Demo",
+                columns: [
+                  {
+                    name: "CustomerID",
+                    dataType: "int",
+                    isPrimaryKey: true,
+                    isIdentity: true,
+                  },
+                ],
+              };
+            },
+          });
           schemaDesigner.renderModel(ecommerceDemoSchema);
           schemaDesigner.addCellClickListener((cell) => {
             console.log(cell);
-          })
+          });
         }
+        document.getElementById("done-btn").addEventListener("click", function () {
+            const randomNumber = Math.floor(Math.random() * 100);
+            console.log("Returning:", randomNumber);
+
+            // Hide floating div and overlay after clicking "Done"
+            floatingDiv.style.display = "none";
+            overlay.style.display = "none";
+            graphContainer.style.overflow = "auto";
+        });
       };
     </script>
     <style>
@@ -48,9 +88,32 @@
         min-height: calc(100vh - 20px);
         user-select: none;
       }
+      #floating-div {
+        position: absolute;
+        background: lightblue;
+        padding: 10px;
+        border-radius: 5px;
+        display: none; /* Initially hidden */
+        z-index: 100;
+      }
+
+      #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+            display: none;
+            z-index: 10;
+        }
+
     </style>
   </head>
   <body>
-    <div id="graphContainer"></div>
+    <div id="graphContainer">
+
+      <div id="overlay"></div>
+    </div>
   </body>
 </html>

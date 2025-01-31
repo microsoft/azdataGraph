@@ -1,3 +1,5 @@
+import { mxCellState } from "mxgraph";
+
 export interface ISchema {
     entities: IEntity[];
     relationships: IRelationship[];
@@ -95,13 +97,13 @@ export interface SchemaDesignerConfig {
         zoomFitIcon: string;
         deleteIcon: string;
         entityIcon: string;
-        dataTypeIcons: { [key: string]: string };
-        customDataTypeIcon: string;
         connectorIcon: string;
         exportIcon: string;
         autoarrangeIcon: string;
         editIcon: string;
         cancelIcon: string;
+        primaryKeyIcon: string;
+        foreignKeyIcon: string;
     }
     colors: {
 
@@ -131,4 +133,5 @@ export interface SchemaDesignerConfig {
     isEditable: boolean;
     schemas: string[];
     dataTypes: string[];
+    editEntity: (cellState: mxCellState) => IEntity;
 }

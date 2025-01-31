@@ -10,8 +10,6 @@ import { getRowY } from './utils';
 import { SchemaDesignerEntity } from './schemaDesignerEntity';
 import { SchemaDesignerLayout } from './schemaDesignerLayout';
 
-const ENTITY_COLUMNS_CONTAINER_CLASS = 'sd-table-columns';
-const ENTITY_COLUMN_DIV_CLASS = 'sd-table-column';
 
 export class SchemaDesigner {
     private _editor!: mxEditor;
@@ -153,13 +151,18 @@ export class SchemaDesigner {
                 return;
             }
 
-            const div = start.text.node.getElementsByClassName(ENTITY_COLUMNS_CONTAINER_CLASS)[0];
+            const div = start.text.node.getElementsByClassName("sd-table-columns")[0];
 
             let x = start.x;
             let y = start.getCenterY();
             // Checks on which side of the terminal to leave
             if (next.x > x + start.width / 2) {
                 x += start.width;
+            }
+            if (source) {
+                x = start.x + start.width;
+            } else {
+                x = start.x;
             }
 
             if (div !== null && div !== undefined) {
@@ -170,7 +173,7 @@ export class SchemaDesigner {
                 ) {
                     const edgeCellValue = edge.cell.value as EdgeCellValue;
                     const row = source ? edgeCellValue.sourceRow : edgeCellValue.targetRow;
-                    const columns = div.getElementsByClassName(ENTITY_COLUMN_DIV_CLASS);
+                    const columns = div.getElementsByClassName("sd-table-column");
                     const column = columns[Math.min(columns.length - 1, row - 1)] as HTMLElement;
                     // Gets vertical center of source or target row
                     if (column !== undefined || column !== null) {
@@ -189,57 +192,57 @@ export class SchemaDesigner {
 
             edge.setAbsoluteTerminalPoint(new mx.mxPoint(x, y), source);
 
-            /**
-             * Routes multiple incoming edges along common waypoints if the edges
-             * have the common target row
-             */
+            // /**
+            //  * Routes multiple incoming edges along common waypoints if the edges
+            //  * have the common target row
+            //  */
 
-            if (source && edge.cell.value !== undefined && start !== null && end !== null) {
-                let edges = this.graph.getEdgesBetween(start.cell, end.cell, true);
-                const tmp = [];
+            // if (source && edge.cell.value !== undefined && start !== null && end !== null) {
+            //     let edges = this.graph.getEdgesBetween(start.cell, end.cell, true);
+            //     const tmp = [];
 
-                // Filters the edges with the same source row
-                const row = (edge.cell.value as EdgeCellValue).targetRow;
+            //     // Filters the edges with the same source row
+            //     const row = (edge.cell.value as EdgeCellValue).targetRow;
 
-                for (let i = 0; i < edges.length; i++) {
-                    if (
-                        edges[i].value !== undefined &&
-                        (edges[i].value as EdgeCellValue).targetRow === row
-                    ) {
-                        tmp.push(edges[i]);
-                    }
-                }
+            //     for (let i = 0; i < edges.length; i++) {
+            //         if (
+            //             edges[i].value !== undefined &&
+            //             (edges[i].value as EdgeCellValue).targetRow === row
+            //         ) {
+            //             tmp.push(edges[i]);
+            //         }
+            //     }
 
-                edges = tmp;
+            //     edges = tmp;
 
-                if (edges.length > 1 && edge.cell === edges[edges.length - 1]) {
-                    // Finds the vertical center
-                    const states = [];
-                    let y = 0;
+            //     if (edges.length > 1 && edge.cell === edges[edges.length - 1]) {
+            //         // Finds the vertical center
+            //         const states = [];
+            //         let y = 0;
 
-                    for (let i = 0; i < edges.length; i++) {
-                        states[i] = this.getState(edges[i]);
-                        y += states[i].absolutePoints[0].y;
-                    }
+            //         for (let i = 0; i < edges.length; i++) {
+            //             states[i] = this.getState(edges[i]);
+            //             y += states[i].absolutePoints[0].y;
+            //         }
 
-                    y /= edges.length;
+            //         y /= edges.length;
 
-                    for (let i = 0; i < states.length; i++) {
-                        const x = states[i].absolutePoints[1].x;
+            //         for (let i = 0; i < states.length; i++) {
+            //             const x = states[i].absolutePoints[1].x;
 
-                        if (states[i].absolutePoints.length < 5) {
-                            states[i].absolutePoints.splice(2, 0, new mx.mxPoint(x, y));
-                        } else {
-                            states[i].absolutePoints[2] = new mx.mxPoint(x, y);
-                        }
+            //             if (states[i].absolutePoints.length < 5) {
+            //                 states[i].absolutePoints.splice(2, 0, new mx.mxPoint(x, y));
+            //             } else {
+            //                 states[i].absolutePoints[2] = new mx.mxPoint(x, y);
+            //             }
 
-                        // Must redraw the previous edges with the changed point
-                        if (i < states.length - 1) {
-                            this.graph.cellRenderer.redraw(states[i]);
-                        }
-                    }
-                }
-            }
+            //             // Must redraw the previous edges with the changed point
+            //             if (i < states.length - 1) {
+            //                 this.graph.cellRenderer.redraw(states[i]);
+            //             }
+            //         }
+            //     }
+            // }
 
             if (start.cell.value.scrollTop) {
                 div.scrollTop = start.cell.value.scrollTop;
@@ -290,47 +293,45 @@ export class SchemaDesigner {
             }
         };
 
-
-
         (this._graph.connectionHandler as extendedConnectionHandler).updateRow = function (target) {
-            while (
-                target !== null &&
-                target.className.includes !== null &&
-                typeof target.className === 'string' &&
-                target?.className?.includes("sd-table-column-")
-            ) {
-                target = target.parentNode as HTMLElement;
+            if (target === null) {
+                return target;
             }
 
-            this.currentRow = undefined;
-            if (target !== null && target?.className === "sd-table-column") {
-                this.currentRow = parseInt(target.getAttribute("column-id")!) + 1;
-            } else {
-                target = null!;
+            const column = target.closest(".sd-table-column");
+            if (column !== null) {
+                this.currentRow = parseInt(column.getAttribute("column-id")!) + 1;
+                return column as HTMLElement;
             }
-            return target;
+
+            return null;
         };
 
         // Adds placement of the connect icon based on the mouse event target (row)
         (this._graph.connectionHandler as extendedConnectionHandler).updateIcons = function (state, icons: any, me) {
-            let target = me.getSource() as HTMLElement;
-            target = this.updateRow(target) as HTMLElement;
-            if (target !== undefined && this.currentRow !== undefined) {
-                const div = target.parentNode as HTMLElement;
+            const targetNode = me.getSource() as HTMLElement;
+
+            const columnDiv = this.updateRow(targetNode) as HTMLElement;
+            if (columnDiv !== null && this.currentRow !== undefined) {
                 const s = state.view.scale;
                 icons[0].node.style.userSelect = "none";
                 icons[0].node.style.visibility = "visible";
                 icons[0].bounds.width = s * 24;
                 icons[0].bounds.height = s * 24;
-                icons[0].bounds.x = state.x + target.offsetWidth * s;
+                icons[0].bounds.x = state.x + columnDiv.offsetWidth * s;
                 icons[0].bounds.y =
                     state.y +
-                    target.offsetTop * s +
-                    - div.scrollTop +
-                    (target.offsetHeight * s) / 2 -
-                    icons[0].bounds.height / 2; // 1.2 makes the icon completely centered to the target row. Ideally it should be 2 but it is not working as expected.
+                    columnDiv.offsetTop * s +
+                    - columnDiv.scrollTop +
+                    (columnDiv.offsetHeight * s) / 2 -
+                    icons[0].bounds.height / 2;
+                if (icons[0].node.getAttribute("cell-id") === state.cell.id && icons[0].node.getAttribute("row-id") === this.currentRow.toString()) {
+                    return;
+                }
+                icons[0].node.setAttribute("cell-id", state.cell.id);
+                icons[0].node.setAttribute("row-id", this.currentRow.toString());
                 icons[0].redraw();
-                this.currentRowNode = target;
+                this.currentRowNode = columnDiv;
             } else {
                 icons[0].node.style.visibility = "hidden";
             }
@@ -444,6 +445,16 @@ export class SchemaDesigner {
             const source = this._graph.getModel().getTerminal(edge, true);
             this._graph.view.invalidate(source, false, false);
             this._graph.view.validate(source);
+            this.autoArrange();
+        });
+
+        this._graph.addListener(mx.mxEvent.REMOVE_CELLS, (_sender, evt) => {
+            const removedCell = evt.properties.cells[0];
+            if (removedCell !== undefined && removedCell.edge) {
+                const source = this._graph.getModel().getTerminal(removedCell, true);
+                this._graph.view.invalidate(source, false, false);
+                this._graph.view.validate(source);
+            }
         });
 
         this._graph.addListener(mx.mxEvent.DOUBLE_CLICK, (_sender, _evt) => {

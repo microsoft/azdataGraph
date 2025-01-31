@@ -158,7 +158,8 @@
 }
 
 .sd-table-column-icon {
-  width: 26px;
+  width: 18px;
+  height: 18px;
   height: 100%;
   background-size: 16px 16px;
   background-repeat: no-repeat;
@@ -181,7 +182,7 @@
   text-overflow: ellipsis;
 }
 
-.sd-table-column-constraints {
+.sd-table-column-datatype-text {
   font-size: 13px;
   line-height: 18px;
   font-weight: 400;
@@ -207,12 +208,12 @@
     inset 0px 0px 0.5px rgba(255, 255, 255, 0.3);
 }
 
-.sd-entity-edit-button {
+.sd-entity-button {
   border: none;
   background-color: var(--sd-graph-background-color);
 }
 
-.sd-entity-edit-button:hover {
+.sd-entity-button:hover {
   background-color: var(--sd-cell-html-hover-column-background);
 }
 
