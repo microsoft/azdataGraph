@@ -63,7 +63,6 @@ export class SchemaDesigner {
         this._graph.getStylesheet().getDefaultVertexStyle()['cellHighlightColor'] = this._config.colors.cellHighlight;
         this._graph.getStylesheet().getDefaultVertexStyle()['cellHightlightStrokeWidth'] = 3;
 
-
         this._graph.getStylesheet().getDefaultEdgeStyle()['cellHighlightColor'] = this._config.colors.cellHighlight;
         mx.mxConstants.OUTLINE_HANDLE_FILLCOLOR = this._config.colors.cellHighlight
         mx.mxConstants.OUTLINE_HANDLE_STROKECOLOR = this._config.colors.cellHighlight;
@@ -159,11 +158,6 @@ export class SchemaDesigner {
             if (next.x > x + start.width / 2) {
                 x += start.width;
             }
-            if (source) {
-                x = start.x + start.width;
-            } else {
-                x = start.x;
-            }
 
             if (div !== null && div !== undefined) {
                 y = start.getCenterY() - div.scrollTop;
@@ -191,6 +185,10 @@ export class SchemaDesigner {
             }
 
             edge.setAbsoluteTerminalPoint(new mx.mxPoint(x, y), source);
+
+            if (start.cell.value.scrollTop) {
+                div.scrollTop = start.cell.value.scrollTop;
+            }
 
             // /**
             //  * Routes multiple incoming edges along common waypoints if the edges
@@ -244,9 +242,6 @@ export class SchemaDesigner {
             //     }
             // }
 
-            if (start.cell.value.scrollTop) {
-                div.scrollTop = start.cell.value.scrollTop;
-            }
         };
 
         this._graph.getLabel = (cell) => {
@@ -445,7 +440,6 @@ export class SchemaDesigner {
             const source = this._graph.getModel().getTerminal(edge, true);
             this._graph.view.invalidate(source, false, false);
             this._graph.view.validate(source);
-            this.autoArrange();
         });
 
         this._graph.addListener(mx.mxEvent.REMOVE_CELLS, (_sender, evt) => {
@@ -461,6 +455,10 @@ export class SchemaDesigner {
             const cell = this._graph.getSelectionCell();
             if (cell !== undefined) {
                 this.cellClickListeners.forEach((listener) => listener(cell));
+                if(cell.edge) {
+                    this._currentCellUnderEdit = this._graph.view.getCellStates([cell])[0];
+                    this._config.editRelationship(cell, this._currentCellUnderEdit.x, this._currentCellUnderEdit.y, this._graph.view.scale);
+                }
             }
         });
         this._graph.getStylesheet().getDefaultEdgeStyle()['edgeStyle'] = mx.mxEdgeStyle.ElbowConnector;
@@ -545,6 +543,7 @@ export class SchemaDesigner {
             () => {
                 this._editor.execute("zoomIn");
                 this.redrawEdges();
+                this.updateEditorLocation();
             }
         );
 
@@ -554,6 +553,7 @@ export class SchemaDesigner {
             () => {
                 this._editor.execute("zoomOut");
                 this.redrawEdges();
+                this.updateEditorLocation();
             }
         );
 
@@ -562,13 +562,14 @@ export class SchemaDesigner {
             "Fit",
             () => {
                 this._graph.fit(undefined!);
+                this.updateEditorLocation();
             }
-        )
+        );
 
         this._toolbar.addDivider();
 
         this._toolbar.addButton(
-            this._config.icons.autoarrangeIcon,
+            this._config.icons.autoArrangeCellsIcon,
             "Auto Arrange",
             () => {
                 this.autoArrange();
@@ -612,23 +613,6 @@ export class SchemaDesigner {
     public renderModel(schema: ISchema, cleanUndoManager: boolean = false) {
         const parent = this._graph.getDefaultParent();
         this._model.beginUpdate();
-
-        // If no schemas are provided, we will use the schemas from the entities
-        if (this._config.schemas === undefined || this._config.schemas.length === 0) {
-            this._config.schemas = Array.from(new Set(schema.entities.map(entity => entity.schema)));
-        }
-
-        // If no data types are provided, we will use the data types from the entities
-        if (this._config.dataTypes === undefined || this._config.dataTypes.length === 0) {
-            const dataTypes = new Set<string>();
-            schema.entities.forEach(entity => {
-                entity.columns.forEach(column => {
-                    dataTypes.add(column.dataType);
-                });
-            });
-            this._config.dataTypes = Array.from(dataTypes);
-        }
-
         try {
             this._graph.removeCells(this._model.getChildCells(parent));
             const entities = schema.entities;
@@ -744,6 +728,14 @@ export class SchemaDesigner {
 
     public addCellClickListener(listener: (cell: mxCell) => void) {
         this.cellClickListeners.push(listener);
+    }
+
+    public scrollToCell(cell: mxCell) {
+        this._graph.scrollCellToVisible(cell, true);
+    }
+
+    public updateEditorLocation() {
+        this._config.updateEditorPosition(this._currentCellUnderEdit.x, this._currentCellUnderEdit.y, this._graph.view.scale);
     }
 }
 

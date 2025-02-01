@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Big Schema Designer</title>
     <link rel="stylesheet" href="../dist/index.css" />
-    <script type="module">
+     <script type="module">
       import { SchemaDesigner } from "../dist/index.js";
       import { schemaDesignerConfig } from "./schemas/schema_designer_config.js";
       import { ecommerceDemoSchema } from "./schemas/schema_ecommerce_demo.js";
@@ -13,23 +13,22 @@
         const targetDiv1 = document.getElementById("graphContainer");
         const floatingDiv = document.createElement("div");
         floatingDiv.id = "floating-div";
-        floatingDiv.innerHTML = `<p>I'm at (<span id="pos-x"></span>, <span id="pos-y"></span>)</p>
+        floatingDiv.innerHTML = `<p>I'm at (<span id="title"></span>)</p>
                                 <button id="done-btn">Done</button>`;
         targetDiv1.appendChild(floatingDiv);
         if (targetDiv1) {
           const schemaDesigner = new SchemaDesigner(targetDiv1, {
             ...schemaDesignerConfig,
-            editEntity: (entity) => {
+            editEntity: (cell, x, y, scale) => {
               // Update displayed coordinates
-              
-              console.log("Edit Entity", entity);
-              floatingDiv.style.left = `${entity.x}px`;
-              floatingDiv.style.top = `${entity.y}px`;
+              floatingDiv.style.left = `${x}px`;
+              floatingDiv.style.top = `${y}px`;
               floatingDiv.style.display = "block";
-              document.getElementById("pos-x").innerText = entity.x;
-              document.getElementById("pos-y").innerText = entity.y;
-              overlay.style.display = "block";
-              graphContainer.style.overflow = "hidden";
+              floatingDiv.style.height = scale * floatingDiv.clientHeight;
+              floatingDiv.style.width = scale * floatingDiv.clientWidth;
+              floatingDiv.style.fontSize = `${scale * 16}px`;
+              floatingDiv.setAttribute("cell-id", cell.id);
+              document.getElementById("title").innerText = cell.value.name;
               return {
                 name: "Customers",
                 schema: "Demo",
@@ -43,6 +42,23 @@
                 ],
               };
             },
+            updateEditorPosition: (x, y, scale) => {
+              floatingDiv.style.left = `${x}px`;
+              floatingDiv.style.top = `${y}px`;
+              floatingDiv.style.height = scale * floatingDiv.clientHeight;
+              floatingDiv.style.width = scale * floatingDiv.clientWidth;
+              floatingDiv.style.fontSize = `${scale * 16}px`;
+            },
+            editRelationship: (cell, x, y, scale) => {
+              floatingDiv.style.left = `${x}px`;
+              floatingDiv.style.top = `${y}px`;
+              floatingDiv.style.display = "block";
+              floatingDiv.style.height = scale * floatingDiv.clientHeight;
+              floatingDiv.style.width = scale * floatingDiv.clientWidth;
+              floatingDiv.style.fontSize = `${scale * 16}px`;
+              floatingDiv.setAttribute("cell-id", cell.id);
+              document.getElementById("title").innerText = cell.value.name;
+            }
           });
           schemaDesigner.renderModel(ecommerceDemoSchema);
           schemaDesigner.addCellClickListener((cell) => {
@@ -50,13 +66,7 @@
           });
         }
         document.getElementById("done-btn").addEventListener("click", function () {
-            const randomNumber = Math.floor(Math.random() * 100);
-            console.log("Returning:", randomNumber);
-
-            // Hide floating div and overlay after clicking "Done"
             floatingDiv.style.display = "none";
-            overlay.style.display = "none";
-            graphContainer.style.overflow = "auto";
         });
       };
     </script>
@@ -96,24 +106,10 @@
         display: none; /* Initially hidden */
         z-index: 100;
       }
-
-      #overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
-            display: none;
-            z-index: 10;
-        }
-
     </style>
   </head>
   <body>
     <div id="graphContainer">
-
-      <div id="overlay"></div>
     </div>
   </body>
 </html>

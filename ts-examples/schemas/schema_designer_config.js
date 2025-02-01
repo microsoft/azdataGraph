@@ -92,7 +92,7 @@ export const schemaDesignerConfig = {
     zoomFitIcon: zoomFitIcon,
     deleteIcon: deleteIcon,
     entityIcon: entityIcon,
-    autoarrangeIcon: autoarrangeIcon,
+    autoArrangeCellsIcon: autoarrangeIcon,
     exportIcon: exportIcon,
     editIcon: editIcon,
     connectorIcon: "./resources/connector.svg",
