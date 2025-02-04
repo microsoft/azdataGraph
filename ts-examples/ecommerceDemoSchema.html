@@ -19,8 +19,8 @@
         if (targetDiv1) {
           const schemaDesigner = new SchemaDesigner(targetDiv1, {
             ...schemaDesignerConfig,
-            editEntity: (cell, x, y, scale) => {
-              console.log(cell);
+            editEntity: (cell, x, y, scale, incomingEdges, outgoingEdges) => {
+              console.log(cell, incomingEdges, outgoingEdges);
               // Update displayed coordinates
               floatingDiv.style.left = `${x}px`;
               floatingDiv.style.top = `${y}px`;

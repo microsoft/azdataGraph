@@ -348,6 +348,7 @@ export class SchemaDesigner {
                             cellValue.referencedColumn = targetColumnName;
                             cellValue.referencedSchema = targetCellValue.schema;
                             cellValue.referencedEntity = targetCellValue.name;
+                            cellValue.foreignKeyName = `FK_${cellValue.entity}_${cellValue.column}_${cellValue.referencedEntity}_${cellValue.referencedColumn}`;
                         }
                     }
                 } else {
@@ -768,6 +769,29 @@ export class SchemaDesigner {
 
     public updateEditorLocation() {
         this._config.updateEditorPosition(this._currentCellUnderEdit.x, this._currentCellUnderEdit.y, this._graph.view.scale);
+    }
+
+    public getRelationships(stateCell: mxCellState): {
+        outgoing: mxCell[];
+        incoming: mxCell[];
+    } {
+        const outgoing: mxCell[] = [];
+        const incoming: mxCell[] = [];
+        const cells = this._model.getChildCells(this._graph.getDefaultParent());
+        for (let i = 0; i < cells.length; i++) {
+            const cell = cells[i];
+            if (cell.edge) {
+                if (cell.source.id === stateCell.cell.id) {
+                    outgoing.push(cell);
+                } else if (cell.target.id === stateCell.cell.id) {
+                    incoming.push(cell);
+                }
+            }
+        }
+        return {
+            outgoing,
+            incoming
+        };
     }
 }
 
