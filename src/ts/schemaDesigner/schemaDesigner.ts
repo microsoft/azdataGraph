@@ -337,19 +337,42 @@ export class SchemaDesigner {
         (this._graph.connectionHandler as extendedConnectionHandler).mouseMove = function (_sender, me) {
             if (this.edgeState !== null) {
                 this.currentRowNode = this.updateRow(me.getSource() as HTMLElement) as HTMLElement;
-                if (this.currentRow !== null) {
-                    this.edgeState.cell.value.targetRow = this.currentRow;
+                const cellValue = this.edgeState.cell.value as EdgeCellValue;
+                if (this.currentRow !== null && this.currentRow !== undefined) {
+                    const targetCellState = (this as any).currentState as mxCellState;
+                    if (targetCellState?.cell?.value) {
+                        const targetCellValue = targetCellState.cell.value as SchemaDesignerEntity;
+                        if (cellValue) {
+                            const targetColumnName = targetCellValue.columns[this.currentRow - 1].name;
+                            cellValue.targetRow = this.currentRow;
+                            cellValue.referencedColumn = targetColumnName;
+                            cellValue.referencedSchema = targetCellValue.schema;
+                            cellValue.referencedEntity = targetCellValue.name;
+                        }
+                    }
                 } else {
-                    this.edgeState.cell.value.targetRow = 0;
+                    cellValue.targetRow = 0;
                 }
             }
             oldMouseMove.apply(this, arguments as any);
         };
 
         (this._graph.connectionHandler as extendedConnectionHandler).createEdgeState = function (_me) {
+            const sourceCellState = (this as any).currentState as mxCellState;
+            const sourceCellValue = sourceCellState.cell.value as SchemaDesignerEntity;
+            const targetColumnName = sourceCellValue.columns[this.currentRow ? this.currentRow - 1 : 0].name;
             const relation: EdgeCellValue = {
                 sourceRow: this.currentRow || 0,
                 targetRow: 0,
+                foreignKeyName: '',
+                schemaName: sourceCellValue.schema,
+                entity: sourceCellValue.name,
+                column: targetColumnName,
+                referencedSchema: '',
+                referencedEntity: '',
+                referencedColumn: '',
+                onDeleteAction: OnAction.NO_ACTION,
+                onUpdateAction: OnAction.NO_ACTION
             };
             const edge = this.createEdge(relation);
             const style = this.graph.getCellStyle(edge);
@@ -455,7 +478,7 @@ export class SchemaDesigner {
             const cell = this._graph.getSelectionCell();
             if (cell !== undefined) {
                 this.cellClickListeners.forEach((listener) => listener(cell));
-                if(cell.edge) {
+                if (cell.edge) {
                     this._currentCellUnderEdit = this._graph.view.getCellStates([cell])[0];
                     this._config.editRelationship(cell, this._currentCellUnderEdit.x, this._currentCellUnderEdit.y, this._graph.view.scale);
                 }
@@ -677,7 +700,16 @@ export class SchemaDesigner {
         }
         const edgeValue: EdgeCellValue = {
             sourceRow: source.value.columns.findIndex((column: IColumn) => column.name === relationship.column) + 1,
-            targetRow: target.value.columns.findIndex((column: IColumn) => column.name === relationship.referencedColumn) + 1
+            targetRow: target.value.columns.findIndex((column: IColumn) => column.name === relationship.referencedColumn) + 1,
+            column: relationship.column,
+            entity: relationship.entity,
+            foreignKeyName: relationship.foreignKeyName,
+            onDeleteAction: relationship.onDeleteAction,
+            onUpdateAction: relationship.onUpdateAction,
+            referencedEntity: relationship.referencedEntity,
+            referencedSchema: relationship.referencedSchema,
+            referencedColumn: relationship.referencedColumn,
+            schemaName: relationship.schemaName
         };
         this._graph.insertEdge(this._graph.getDefaultParent(), null!, edgeValue, source, target);
         this._graph.view.invalidate(source, false, false);
@@ -703,15 +735,15 @@ export class SchemaDesigner {
                 schema.entities.push(entity);
             } else if (cell.edge) {
                 const relationship: IRelationship = {
-                    foreignKeyName: "",
+                    foreignKeyName: cell.value.foreignKeyName,
                     onDeleteAction: OnAction.CASCADE,
                     onUpdateAction: OnAction.CASCADE,
-                    column: cell.target.value.columns[cell.value.sourceRow - 1].name,
-                    entity: cell.target.value.name,
-                    schemaName: cell.target.value.schema,
-                    referencedEntity: cell.source.value.name,
-                    referencedColumn: cell.source.value.columns[cell.value.targetRow - 1].name,
-                    referencedSchema: cell.source.value.schema,
+                    column: cell.source.value.columns[cell.value.sourceRow - 1].name,
+                    entity: cell.source.value.name,
+                    schemaName: cell.source.value.schema,
+                    referencedEntity: cell.target.value.name,
+                    referencedColumn: cell.target.value.columns[cell.value.targetRow - 1].name,
+                    referencedSchema: cell.target.value.schema,
                 };
                 schema.relationships.push(relationship);
             }
@@ -740,7 +772,7 @@ export class SchemaDesigner {
 }
 
 
-export interface EdgeCellValue {
+export interface EdgeCellValue extends IRelationship {
     sourceRow: number;
     targetRow: number;
 }

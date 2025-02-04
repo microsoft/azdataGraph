@@ -20,6 +20,7 @@
           const schemaDesigner = new SchemaDesigner(targetDiv1, {
             ...schemaDesignerConfig,
             editEntity: (cell, x, y, scale) => {
+              console.log(cell);
               // Update displayed coordinates
               floatingDiv.style.left = `${x}px`;
               floatingDiv.style.top = `${y}px`;
@@ -50,6 +51,7 @@
               floatingDiv.style.fontSize = `${scale * 16}px`;
             },
             editRelationship: (cell, x, y, scale) => {
+              console.log(cell);
               floatingDiv.style.left = `${x}px`;
               floatingDiv.style.top = `${y}px`;
               floatingDiv.style.display = "block";
