@@ -1,27 +1,124 @@
-import { mxGraph } from "mxgraph";
+import { mxCellState, mxGraph, mxGraphModel } from "mxgraph";
 import { IColumn, IEntity, SchemaDesignerConfig } from "./schemaDesignerInterfaces";
 import createColor from "create-color";
+import { mxGraphFactory as mx } from '../mx';
+import { SchemaDesigner } from "./schemaDesigner";
 
 export class SchemaDesignerEntity implements IEntity {
-    public div!: HTMLElement;
     public name: string;
     public schema: string;
     public columns: IColumn[];
+    public editor!: boolean;
 
-    constructor(entity: IEntity, private _config: SchemaDesignerConfig, private _graph: mxGraph) {
+    private listeners: { target: HTMLElement, eventName: string, callback?: any }[] = [];
+
+    constructor(entity: IEntity, private _config: SchemaDesignerConfig, private _graph: mxGraph, private _schemaDesigner: SchemaDesigner) {
         this.name = entity.name;
         this.schema = entity.schema;
         this.columns = entity.columns;
     }
 
     render(): HTMLElement {
-        const color = createColor(this.schema, { format: "hex" });
+        this.removeListeners();
+        return this.renderTable();
+    }
+
+    public setupValueAndListeners(parentNode: HTMLElement, state: mxCellState): void {
+        this.removeListeners();
+
+        const columnsDiv = parentNode.getElementsByClassName("sd-table-columns")[0];
+        if (columnsDiv !== undefined && columnsDiv !== null) {
+            if (columnsDiv.getAttribute('scrollHandler') === null) {
+                columnsDiv.setAttribute('scrollHandler', 'true');
+                const updateEdges = mx.mxUtils.bind(this, () => {
+                    this._graph.clearSelection();
+                    const edgeCount = this.model.getEdgeCount(state.cell);
+                    // Only updates edges to avoid update in DOM order
+                    // for text label which would reset the scrollbar
+                    for (let i = 0; i < edgeCount; i++) {
+                        const edge = this.model.getEdgeAt(state.cell, i);
+                        this.graph.view.invalidate(edge, true, false);
+                        this.graph.view.validate(edge);
+                    }
+                });
+                mx.mxEvent.addListener(columnsDiv, "scroll", () => {
+                    state.cell.value.scrollTop = columnsDiv.scrollTop;
+                    updateEdges();
+                });
+                mx.mxEvent.addListener(columnsDiv, "mouseup", updateEdges);
+            }
+        }
+        const editButton = parentNode.getElementsByClassName("sd-entity-edit-button")[0];
+        if (editButton !== undefined && editButton !== null) {
+            this.addListeners(editButton as HTMLElement, "click", async () => {
+                const previouslyEditedCell = this._schemaDesigner.currentCellUnderEdit;
+                if (previouslyEditedCell) {
+                    previouslyEditedCell.cell.value.editing = false;
+                }
+                this.editor = true;
+                this._schemaDesigner.currentCellUnderEdit = state;
+                this._schemaDesigner.scrollToCell(state.cell);
+                const relationships = this._schemaDesigner.getRelationships(state);
+                const { editedEntity, editedOutgoingEdges } = await this._config.editEntity(state.cell, state.x, state.y, this._graph.view.scale, relationships.incoming, relationships.outgoing, this._schemaDesigner.schema);
+                state.cell.value = editedEntity;
+                this.editor = false;
+                this.graph.cellRenderer.redraw(state, true);
+
+                // Delete all outgoing edges
+                const edges = this._graph.getEdges(state.cell);
+                const outgoingEdges = edges.filter(edge => edge.source === state.cell);
+                outgoingEdges.forEach(edge => {
+                    this._graph.getModel().remove(edge);
+                });
+
+                // Add new outgoing edges
+                editedOutgoingEdges.forEach((edge) => {
+                    this._schemaDesigner.renderRelationship(edge);
+                });
+
+                this._schemaDesigner.autoArrange();
+
+
+            });
+        }
+
+    }
+
+    public addListeners(div: HTMLElement, type: string, callback: (event: Event) => void): void {
+        this.listeners.push({
+            target: div,
+            eventName: type,
+            callback: callback
+        });
+        div.addEventListener(type, callback);
+    }
+
+    public removeListeners(): void {
+        this.listeners.forEach(listener => {
+            listener.target.removeEventListener(listener.eventName, listener.callback);
+        });
+    }
+
+    public get model(): mxGraphModel {
+        return this._graph.getModel();
+    }
+
+    public get graph(): mxGraph {
+        return this._graph;
+    }
+
+    private renderTable(): HTMLElement {
         const parent = document.createElement("div");
         parent.classList.add("sd-table");
+
+        // Tables are colored based on the schema
+        const tableColor = createColor(this.schema, { format: "hex" });
         const colorIndicator = document.createElement("div");
         colorIndicator.classList.add("sd-table-color-indicator");
+        colorIndicator.style.backgroundColor = tableColor;
         parent.appendChild(colorIndicator);
-        colorIndicator.style.backgroundColor = color;
+
+        // Table header
         const header = document.createElement("div");
         header.classList.add("sd-table-header");
         const headerIcon = document.createElement("div");
@@ -35,45 +132,70 @@ export class SchemaDesignerEntity implements IEntity {
         headerText.innerText = tableTitle;
         headerText.title = tableTitle;
         header.appendChild(headerText);
+
+        // Add edit button if the schema designer is editable
+        if (this._config.isEditable) {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.classList.add("sd-entity-button", "sd-entity-edit-button");
+            button.title = "Edit";
+            button.innerHTML = this._config.icons.editIcon;
+            header.appendChild(button);
+        }
+
+        // Adding header to the parent
         parent.appendChild(header);
 
+
+
+        // Adding columns
+        // TODO: Make this keyboard accessible
         const columns = document.createElement("div");
         columns.classList.add("sd-table-columns");
         this.columns.forEach((column, index) => {
             const columnDiv = document.createElement("div");
             columnDiv.classList.add("sd-table-column");
-            const columnIcon = document.createElement("div");
-            columnIcon.classList.add("sd-table-column-icon");
-            if(this._config.icons.dataTypeIcons[column.dataType] !== undefined) {
-                columnIcon.innerHTML = this._config.icons.dataTypeIcons[column.dataType];
-            } else {
-                columnIcon.innerHTML = this._config.icons.customDataTypeIcon;
+
+            // Add column constraint icon
+            const keyIcon = document.createElement("div");
+            keyIcon.classList.add("sd-table-column-icon");
+            if (column.isPrimaryKey) {
+                keyIcon.innerHTML = this._config.icons.primaryKeyIcon;
+                keyIcon.title = "Primary key";
             }
-            columnIcon.title = column.dataType;
-            columnDiv.appendChild(columnIcon);
-            const columnText = document.createElement("div");
-            columnText.classList.add("sd-table-column-text");
-            columnText.title = column.name;
-            columnText.innerText = column.name;
-            columnText.title = this.getColumnTitle(column, index);
-            columnDiv.appendChild(columnText);
-            const columnConstraints = document.createElement("div");
-            columnConstraints.classList.add("sd-table-column-constraints");
-            columnConstraints.innerText = this.getConstraintText(column, index);
-            columnDiv.appendChild(columnConstraints);
+            if (this.isForeignKey(index)) {
+                keyIcon.innerHTML = this._config.icons.foreignKeyIcon;
+                keyIcon.title = "Foreign key";
+            }
+            columnDiv.appendChild(keyIcon);
+
+            // Add column name
+            const columnNameDiv = document.createElement("div");
+            columnNameDiv.classList.add("sd-table-column-text");
+            columnNameDiv.title = column.name;
+            columnNameDiv.innerText = column.name;
+            columnNameDiv.title = this.getColumnTitle(index);
+            columnDiv.appendChild(columnNameDiv);
+
+            // Add column data type
+            const columnDataTypeDiv = document.createElement("div");
+            columnDataTypeDiv.classList.add("sd-table-column-datatype-text");
+            columnDataTypeDiv.innerText = column.dataType;
+            columnDiv.appendChild(columnDataTypeDiv);
             columnDiv.setAttribute("column-id", index.toString());
+
             columns.appendChild(columnDiv);
         });
         parent.appendChild(columns);
-        this.div = parent;
         return parent;
     }
 
-    private getConstraintText(col: IColumn, index: number): string {
-        const constraints = [];
-        if (col.isPrimaryKey) {
-            constraints.push("PK");
-        }
+    /**
+     * Checks if the columns has a foreign key dependency
+     * @param index index of the column
+     * @returns true if the column has a foreign key dependency
+     */
+    private isForeignKey(index: number): boolean {
         const cells = this._graph.getChildCells(this._graph.getDefaultParent());
         const vertex = cells.find(cell => cell.vertex && cell.value.name === this.name && cell.value.schema === this.schema);
         if (vertex) {
@@ -81,15 +203,20 @@ export class SchemaDesignerEntity implements IEntity {
             const outgoingEdges = edges.filter(edge => edge.source === vertex);
             for (const edge of outgoingEdges) {
                 if (edge.value.sourceRow - 1 === index) {
-                    constraints.push("FK");
-                    break;
+                    return true;
                 }
             }
         }
-        return constraints.join(", ");
+        return false;
     }
 
-    private getColumnTitle(column: IColumn, index: number): string {
+    /**
+     * Gets the column title for the tooltip
+     * @param index index of the column
+     * @returns column title
+     */
+    private getColumnTitle(index: number): string {
+        const column = this.columns[index];
         let columnTitle = `${column.name}`;
         if (column.isPrimaryKey) {
             columnTitle += ` Primary key`;

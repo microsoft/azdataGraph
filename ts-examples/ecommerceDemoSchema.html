@@ -5,19 +5,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Big Schema Designer</title>
     <link rel="stylesheet" href="../dist/index.css" />
-    <script type="module">
+     <script type="module">
       import { SchemaDesigner } from "../dist/index.js";
       import { schemaDesignerConfig } from "./schemas/schema_designer_config.js";
       import { ecommerceDemoSchema } from "./schemas/schema_ecommerce_demo.js";
       window.onload = () => {
+        let donePromise;
+        let currentEntity = undefined;
+        let currentRelationships = undefined;
         const targetDiv1 = document.getElementById("graphContainer");
+        const floatingDiv = document.createElement("div");
+        floatingDiv.id = "floating-div";
+        floatingDiv.innerHTML = `<p>I'm at (<span id="title"></span>)</p>
+                                <button id="done-btn">Done</button>`;
+        targetDiv1.appendChild(floatingDiv);
         if (targetDiv1) {
-          const schemaDesigner = new SchemaDesigner(targetDiv1, schemaDesignerConfig);
+          const schemaDesigner = new SchemaDesigner(targetDiv1, {
+            ...schemaDesignerConfig,
+            editEntity: async (cell, x, y, scale, incomingEdges, outgoingEdges) => {
+              console.log(cell, incomingEdges, outgoingEdges);
+              // Update displayed coordinates
+              floatingDiv.style.left = `${x}px`;
+              floatingDiv.style.top = `${y}px`;
+              floatingDiv.style.display = "block";
+              floatingDiv.style.height = scale * floatingDiv.clientHeight;
+              floatingDiv.style.width = scale * floatingDiv.clientWidth;
+              floatingDiv.style.fontSize = `${scale * 16}px`;
+              floatingDiv.setAttribute("cell-id", cell.id);
+              document.getElementById("title").innerText = cell.value.name;
+              currentEntity = cell.value;
+              currentRelationships = outgoingEdges.map((edge) => edge.value);
+              const callback = await new Promise(resolve => donePromise = {resolve});
+              return callback;
+            },
+            updateEditorPosition: (x, y, scale) => {
+              floatingDiv.style.left = `${x}px`;
+              floatingDiv.style.top = `${y}px`;
+              floatingDiv.style.height = scale * floatingDiv.clientHeight;
+              floatingDiv.style.width = scale * floatingDiv.clientWidth;
+              floatingDiv.style.fontSize = `${scale * 16}px`;
+            },
+            editRelationship: (cell, x, y, scale) => {
+              console.log(cell);
+              floatingDiv.style.left = `${x}px`;
+              floatingDiv.style.top = `${y}px`;
+              floatingDiv.style.display = "block";
+              floatingDiv.style.height = scale * floatingDiv.clientHeight;
+              floatingDiv.style.width = scale * floatingDiv.clientWidth;
+              floatingDiv.style.fontSize = `${scale * 16}px`;
+              floatingDiv.setAttribute("cell-id", cell.id);
+              document.getElementById("title").innerText = cell.value.name;
+            }
+          });
           schemaDesigner.renderModel(ecommerceDemoSchema);
           schemaDesigner.addCellClickListener((cell) => {
             console.log(cell);
-          })
+          });
         }
+        document.getElementById("done-btn").addEventListener("click", () => {
+            floatingDiv.style.display = "none";
+            if (donePromise) {
+              donePromise.resolve(
+                {
+                  editedEntity: currentEntity,
+                  editedOutgoingEdges: currentRelationships,
+                }
+              );
+            }
+        });
       };
     </script>
     <style>
@@ -48,9 +103,18 @@
         min-height: calc(100vh - 20px);
         user-select: none;
       }
+      #floating-div {
+        position: absolute;
+        background: lightblue;
+        padding: 10px;
+        border-radius: 5px;
+        display: none; /* Initially hidden */
+        z-index: 100;
+      }
     </style>
   </head>
   <body>
-    <div id="graphContainer"></div>
+    <div id="graphContainer">
+    </div>
   </body>
 </html>
