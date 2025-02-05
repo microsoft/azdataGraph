@@ -5,6 +5,10 @@ const mx_1 = require("../mx");
 class SchemaDesignerLayout extends mx_1.mxGraphFactory.mxHierarchicalLayout {
     constructor(graph) {
         super(graph, mx_1.mxGraphFactory.mxConstants.DIRECTION_EAST, true);
+        this.isEdgeIgnored = (_edge) => {
+            console.log('edge ignored', _edge.value);
+            return true;
+        };
     }
     execute(parent) {
         this.graph.getModel().beginUpdate();

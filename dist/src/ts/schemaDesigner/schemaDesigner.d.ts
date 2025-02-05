@@ -1,8 +1,7 @@
 import './schemaDesigner.css';
 import '../../css/common.css';
-import { ISchema, SchemaDesignerConfig } from './schemaDesignerInterfaces';
-import { mxCell, mxGraph } from 'mxgraph';
-import { mxGraphFactory as mx } from '../mx';
+import { IRelationship, ISchema, SchemaDesignerConfig } from './schemaDesignerInterfaces';
+import { mxCell, mxCellState, mxGraph } from 'mxgraph';
 export declare class SchemaDesigner {
     private _container;
     private _config;
@@ -11,6 +10,7 @@ export declare class SchemaDesigner {
     private _model;
     private _toolbar;
     private _layout;
+    private _currentCellUnderEdit;
     private cellClickListeners;
     constructor(_container: HTMLElement, _config: SchemaDesignerConfig);
     private initializeGraph;
@@ -19,23 +19,20 @@ export declare class SchemaDesigner {
     private addCustomEdgeTerminals;
     private setupEditorOptions;
     private setupGraphOptions;
+    set currentCellUnderEdit(value: mxCellState);
     private setupGraphOutlineOptions;
     private setupToolbar;
     private redrawEdges;
     renderModel(schema: ISchema, cleanUndoManager?: boolean): void;
     private renderEntity;
-    private renderRelationship;
+    renderRelationship(relationship: IRelationship): void;
     get schema(): ISchema;
     autoArrange(): void;
     addCellClickListener(listener: (cell: mxCell) => void): void;
-}
-export interface EdgeCellValue {
-    sourceRow: number;
-    targetRow: number;
-}
-export declare class extendedConnectionHandler extends mx.mxConnectionHandler {
-    currentRow?: number;
-    sourceRowNode: HTMLElement;
-    currentRowNode: HTMLElement;
-    updateRow: (targetNode: HTMLElement) => HTMLElement | null;
+    scrollToCell(cell: mxCell): void;
+    updateEditorLocation(): void;
+    getRelationships(stateCell: mxCellState): {
+        outgoing: mxCell[];
+        incoming: mxCell[];
+    };
 }

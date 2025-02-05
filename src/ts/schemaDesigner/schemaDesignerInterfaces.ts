@@ -1,3 +1,6 @@
+import { mxCell } from "mxgraph";
+import { mxGraphFactory as mx } from '../mx';
+
 export interface ISchema {
     entities: IEntity[];
     relationships: IRelationship[];
@@ -84,8 +87,10 @@ export enum OnAction {
     SET_DEFAULT = "3"
 }
 
-
 export interface SchemaDesignerConfig {
+    /**
+     * Icons for the schema designer
+     */
     icons: {
         addTableIcon: string;
         undoIcon: string;
@@ -95,36 +100,115 @@ export interface SchemaDesignerConfig {
         zoomFitIcon: string;
         deleteIcon: string;
         entityIcon: string;
-        dataTypeIcons: { [key: string]: string };
-        customDataTypeIcon: string;
         connectorIcon: string;
         exportIcon: string;
-        autoarrangeIcon: string;
+        autoArrangeCellsIcon: string;
+        editIcon: string;
+        cancelIcon: string;
+        primaryKeyIcon: string;
+        foreignKeyIcon: string;
     }
+    /**
+     * Colors for the schema designer
+     */
     colors: {
-
+        /**
+         * Cell highlight color
+         */
         cellHighlight: string;
         cellForeground: string;
         cellBackground: string;
         cellBorder: string;
         cellColumnHover: string;
         cellDivider: string;
-        
+        /**
+         * Toolbar colors
+         */
         toolbarBackground: string;
         toolbarForeground: string;
         toolbarHoverBackground: string;
         toolbarDividerBackground: string;
-
+        /**
+         * Graph background colors
+         */
         graphBackground: string;
         graphGrid: string;
-
+        /**
+         * Edge colors
+         */
         edge: string;
-
+        /**
+         * Background color for the outline
+         */
         outlineCellBackground: string;
+        /**
+         * Border color for the outline
+         */
         outlineBorder: string;
+        /**
+         * Size of the outline
+         */
         outlineSize: string;
+        /**
+         * Rectangle color for the outline
+         */
         outlineSizerRectangle: string;
     }
+    /**
+     * Font family for the graph
+     */
     graphFontFamily: string;
+    /**
+     * If the schema designer is editable
+     */
     isEditable: boolean;
+    /**
+     * Callback to show the editor to edit the entity
+     * @param cell cell to edit
+     * @param x x coordinate of the editor
+     * @param y y coordinate of the editor
+     * @param scale scale of the graph
+     * @returns entity edited
+     */
+    editEntity: (cell: mxCell, x: number, y: number, scale: number, incomingEdges: mxCell[], outgoingEdges: mxCell[], model: ISchema) => {
+        editedEntity: IEntity;
+        editedOutgoingEdges: IRelationship[];
+    };
+    /**
+     * Callback to show the editor to edit the relationship
+     * @param cell cell to edit
+     * @param x x coordinate of the editor
+     * @param y y coordinate of the editor
+     * @param scale scale of the graph
+     * @returns relationship edited
+     */
+    editRelationship: (cell: mxCell, x: number, y: number, scale: number) => IRelationship;
+    /**
+     * Update the position of the editor based on changed in the graph
+     * @param x x coordinate of the editor
+     * @param y y coordinate of the editor
+     * @param scale scale of the graph
+     */
+    updateEditorPosition: (x: number, y: number, scale: number) => void;
+}
+
+/**
+ * Interface for edge cells in schema designer
+ */
+export interface EdgeCellValue extends IRelationship {
+    /**
+     * Source row of the edge
+     */
+    sourceRow: number;
+    /**
+     * Target row of the edge
+     */
+    targetRow: number;
+}
+
+export class extendedConnectionHandler extends mx.mxConnectionHandler {
+    public currentRow?: number = 0;
+    public sourceRowNode!: HTMLElement;
+    public currentRowNode!: HTMLElement;
+    public updateRow!: (targetNode: HTMLElement) => HTMLElement | null;
 }
