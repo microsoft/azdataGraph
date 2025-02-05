@@ -1,7 +1,7 @@
 import './schemaDesigner.css';
 import '../../css/common.css';
 
-import { IColumn, IEntity, IRelationship, ISchema, OnAction, SchemaDesignerConfig } from './schemaDesignerInterfaces';
+import { EdgeCellValue, extendedConnectionHandler, IColumn, IEntity, IRelationship, ISchema, OnAction, SchemaDesignerConfig } from './schemaDesignerInterfaces';
 import { mxCell, mxCellState, mxEditor, mxGraph, mxGraphLayout, mxGraphModel } from 'mxgraph';
 
 import { mxGraphFactory as mx } from '../mx';
@@ -692,7 +692,7 @@ export class SchemaDesigner {
         this._graph.setSelectionCell(entityCell);
     }
 
-    private renderRelationship(relationship: IRelationship) {
+    public renderRelationship(relationship: IRelationship) {
         const cells = this._model.getChildCells(this._graph.getDefaultParent());
         const source = cells.find((cell) => cell.value.name === relationship.entity && cell.value.schema === relationship.schemaName);
         const target = cells.find((cell) => cell.value.name === relationship.referencedEntity && cell.value.schema === relationship.referencedSchema);
@@ -796,14 +796,4 @@ export class SchemaDesigner {
 }
 
 
-export interface EdgeCellValue extends IRelationship {
-    sourceRow: number;
-    targetRow: number;
-}
 
-export class extendedConnectionHandler extends mx.mxConnectionHandler {
-    public currentRow?: number = 0;
-    public sourceRowNode!: HTMLElement;
-    public currentRowNode!: HTMLElement;
-    public updateRow!: (targetNode: HTMLElement) => HTMLElement | null;
-}

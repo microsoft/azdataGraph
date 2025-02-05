@@ -10,6 +10,9 @@
       import { schemaDesignerConfig } from "./schemas/schema_designer_config.js";
       import { ecommerceDemoSchema } from "./schemas/schema_ecommerce_demo.js";
       window.onload = () => {
+        let donePromise;
+        let currentEntity = undefined;
+        let currentRelationships = undefined;
         const targetDiv1 = document.getElementById("graphContainer");
         const floatingDiv = document.createElement("div");
         floatingDiv.id = "floating-div";
@@ -19,7 +22,7 @@
         if (targetDiv1) {
           const schemaDesigner = new SchemaDesigner(targetDiv1, {
             ...schemaDesignerConfig,
-            editEntity: (cell, x, y, scale, incomingEdges, outgoingEdges) => {
+            editEntity: async (cell, x, y, scale, incomingEdges, outgoingEdges) => {
               console.log(cell, incomingEdges, outgoingEdges);
               // Update displayed coordinates
               floatingDiv.style.left = `${x}px`;
@@ -30,18 +33,10 @@
               floatingDiv.style.fontSize = `${scale * 16}px`;
               floatingDiv.setAttribute("cell-id", cell.id);
               document.getElementById("title").innerText = cell.value.name;
-              return {
-                name: "Customers",
-                schema: "Demo",
-                columns: [
-                  {
-                    name: "CustomerID",
-                    dataType: "int",
-                    isPrimaryKey: true,
-                    isIdentity: true,
-                  },
-                ],
-              };
+              currentEntity = cell.value;
+              currentRelationships = outgoingEdges.map((edge) => edge.value);
+              const callback = await new Promise(resolve => donePromise = {resolve});
+              return callback;
             },
             updateEditorPosition: (x, y, scale) => {
               floatingDiv.style.left = `${x}px`;
@@ -67,8 +62,16 @@
             console.log(cell);
           });
         }
-        document.getElementById("done-btn").addEventListener("click", function () {
+        document.getElementById("done-btn").addEventListener("click", () => {
             floatingDiv.style.display = "none";
+            if (donePromise) {
+              donePromise.resolve(
+                {
+                  editedEntity: currentEntity,
+                  editedOutgoingEdges: currentRelationships,
+                }
+              );
+            }
         });
       };
     </script>

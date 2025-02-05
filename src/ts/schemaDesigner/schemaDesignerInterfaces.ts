@@ -1,4 +1,5 @@
 import { mxCell } from "mxgraph";
+import { mxGraphFactory as mx } from '../mx';
 
 export interface ISchema {
     entities: IEntity[];
@@ -169,7 +170,10 @@ export interface SchemaDesignerConfig {
      * @param scale scale of the graph
      * @returns entity edited
      */
-    editEntity: (cell: mxCell, x: number, y: number, scale: number, incomingEdges: mxCell[], outgoingEdges: mxCell[], model: ISchema) => IEntity;
+    editEntity: (cell: mxCell, x: number, y: number, scale: number, incomingEdges: mxCell[], outgoingEdges: mxCell[], model: ISchema) => {
+        editedEntity: IEntity;
+        editedOutgoingEdges: IRelationship[];
+    };
     /**
      * Callback to show the editor to edit the relationship
      * @param cell cell to edit
@@ -186,4 +190,25 @@ export interface SchemaDesignerConfig {
      * @param scale scale of the graph
      */
     updateEditorPosition: (x: number, y: number, scale: number) => void;
+}
+
+/**
+ * Interface for edge cells in schema designer
+ */
+export interface EdgeCellValue extends IRelationship {
+    /**
+     * Source row of the edge
+     */
+    sourceRow: number;
+    /**
+     * Target row of the edge
+     */
+    targetRow: number;
+}
+
+export class extendedConnectionHandler extends mx.mxConnectionHandler {
+    public currentRow?: number = 0;
+    public sourceRowNode!: HTMLElement;
+    public currentRowNode!: HTMLElement;
+    public updateRow!: (targetNode: HTMLElement) => HTMLElement | null;
 }

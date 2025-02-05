@@ -59,8 +59,26 @@ export class SchemaDesignerEntity implements IEntity {
                 this._schemaDesigner.currentCellUnderEdit = state;
                 this._schemaDesigner.scrollToCell(state.cell);
                 const relationships = this._schemaDesigner.getRelationships(state);
-                await this._config.editEntity(state.cell, state.x, state.y, this._graph.view.scale, relationships.incoming, relationships.outgoing, this._schemaDesigner.schema);
+                const { editedEntity, editedOutgoingEdges } = await this._config.editEntity(state.cell, state.x, state.y, this._graph.view.scale, relationships.incoming, relationships.outgoing, this._schemaDesigner.schema);
+                state.cell.value = editedEntity;
+                this.editor = false;
                 this.graph.cellRenderer.redraw(state, true);
+
+                // Delete all outgoing edges
+                const edges = this._graph.getEdges(state.cell);
+                const outgoingEdges = edges.filter(edge => edge.source === state.cell);
+                outgoingEdges.forEach(edge => {
+                    this._graph.getModel().remove(edge);
+                });
+
+                // Add new outgoing edges
+                editedOutgoingEdges.forEach((edge) => {
+                    this._schemaDesigner.renderRelationship(edge);
+                });
+
+                this._schemaDesigner.autoArrange();
+
+
             });
         }
 
