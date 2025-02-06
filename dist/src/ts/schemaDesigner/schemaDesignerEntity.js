@@ -62,7 +62,7 @@ class SchemaDesignerEntity {
                 }
                 this.editor = true;
                 this._schemaDesigner.currentCellUnderEdit = state;
-                this._schemaDesigner.scrollToCell(state.cell);
+                // this._schemaDesigner.scrollToCell(state.cell);
                 const relationships = this._schemaDesigner.getRelationships(state);
                 const { editedEntity, editedOutgoingEdges } = yield this._config.editEntity(state.cell, state.x, state.y, this._graph.view.scale, relationships.incoming, relationships.outgoing, this._schemaDesigner.schema);
                 state.cell.value = editedEntity;
