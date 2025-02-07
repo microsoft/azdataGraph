@@ -30,17 +30,18 @@ class SchemaDesigner {
         this.setupToolbar();
     }
     setupColors() {
-        this._container.style.setProperty("--sd-toolbar-background-color", this._config.colors.toolbarBackground);
-        this._container.style.setProperty("--sd-toolbar-foreground-color", this._config.colors.toolbarForeground);
-        this._container.style.setProperty("--sd-toolbar-hover-background-color", this._config.colors.toolbarHoverBackground);
-        this._container.style.setProperty("--sd-toolbar-divider-background-color", this._config.colors.toolbarDividerBackground);
-        this._container.style.setProperty("--sd-graph-background-color", this._config.colors.graphBackground);
-        this._container.style.setProperty("--sd-graph-grid-color", this._config.colors.graphGrid);
-        this._container.style.setProperty("--sd-border-color", this._config.colors.cellBorder);
-        this._container.style.setProperty("--sd-cell-html-foreground", this._config.colors.cellForeground);
-        this._container.style.setProperty("--sd-cell-html-hover-column-background", this._config.colors.cellColumnHover);
-        this._container.style.setProperty("--sd-cell-divider-color", this._config.colors.cellDivider);
-        this._container.style.setProperty("--sd-graph-background-color", this._config.colors.cellBackground);
+        const body = document.getElementsByTagName("body")[0];
+        body.style.setProperty("--sd-toolbar-background-color", this._config.colors.toolbarBackground);
+        body.style.setProperty("--sd-toolbar-foreground-color", this._config.colors.toolbarForeground);
+        body.style.setProperty("--sd-toolbar-hover-background-color", this._config.colors.toolbarHoverBackground);
+        body.style.setProperty("--sd-toolbar-divider-background-color", this._config.colors.toolbarDividerBackground);
+        body.style.setProperty("--sd-graph-background-color", this._config.colors.graphBackground);
+        body.style.setProperty("--sd-graph-grid-color", this._config.colors.graphGrid);
+        body.style.setProperty("--sd-border-color", this._config.colors.cellBorder);
+        body.style.setProperty("--sd-cell-html-foreground", this._config.colors.cellForeground);
+        body.style.setProperty("--sd-cell-html-hover-column-background", this._config.colors.cellColumnHover);
+        body.style.setProperty("--sd-cell-divider-color", this._config.colors.cellDivider);
+        body.style.setProperty("--sd-graph-background-color", this._config.colors.cellBackground);
         this._graph.getStylesheet().getDefaultVertexStyle()["fillColor"] = this._config.colors.cellBackground;
         this._graph.getStylesheet().getDefaultEdgeStyle()["strokeColor"] = this._config.colors.edge;
         this._graph.getStylesheet().getDefaultVertexStyle()['cellHighlightColor'] = this._config.colors.cellHighlight;
@@ -431,7 +432,7 @@ class SchemaDesigner {
     setupToolbar() {
         const toolbarBelt = document.createElement("div");
         toolbarBelt.classList.add("sd-toolbar-belt");
-        this._container.appendChild(toolbarBelt);
+        this._container.parentElement.appendChild(toolbarBelt);
         this._toolbar = new schemaDesignerToolbar_1.SchemaDesignerToolbar(toolbarBelt, this._graph, this._config);
         if (this._config.isEditable) {
             this._toolbar.addButton(this._config.icons.addTableIcon, "Add Table", () => {
