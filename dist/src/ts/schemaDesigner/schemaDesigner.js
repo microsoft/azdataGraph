@@ -547,7 +547,7 @@ class SchemaDesigner {
     }
     renderEntity(entity, x, y) {
         const entityValue = new schemaDesignerEntity_1.SchemaDesignerEntity(entity, this._config, this._graph, this);
-        const entityCell = new mx_1.mxGraphFactory.mxCell(entityValue, new mx_1.mxGraphFactory.mxGeometry(0, 0, 400, Math.min(330, 52 + entityValue.columns.length * 28) + 4));
+        const entityCell = new mx_1.mxGraphFactory.mxCell(entityValue, new mx_1.mxGraphFactory.mxGeometry(0, 0, entityValue.getWidth(), entityValue.getHeight()));
         entityCell.setVertex(true);
         this._model.beginUpdate();
         try {

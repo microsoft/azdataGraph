@@ -676,8 +676,8 @@ export class SchemaDesigner {
             new mx.mxGeometry(
                 0,
                 0,
-                400,
-                Math.min(330, 52 + entityValue.columns.length * 28) + 4,
+                entityValue.getWidth(),
+                entityValue.getHeight()
             )
         );
         entityCell.setVertex(true);

@@ -43429,15 +43429,25 @@ var SchemaDesignerEntity = class {
         this._schemaDesigner.currentCellUnderEdit = state;
         const relationships = this._schemaDesigner.getRelationships(state);
         const { editedEntity, editedOutgoingEdges } = await this._config.editEntity(state.cell, state.x, state.y, this._graph.view.scale, relationships.incoming, relationships.outgoing, this._schemaDesigner.schema);
-        state.cell.value = editedEntity;
+        this.name = editedEntity.name;
+        this.schema = editedEntity.schema;
+        this.columns = editedEntity.columns;
         this.editor = false;
         this.graph.cellRenderer.redraw(state, true);
+        this.graph.resizeCell(state.cell, new mxGraphFactory.mxRectangle(state.x, state.y, this.getWidth(), this.getHeight()), true);
+        this.graph.refresh(state.cell);
         const edges = this._graph.getEdges(state.cell);
-        const outgoingEdges = edges.filter((edge) => edge.source === state.cell);
-        outgoingEdges.forEach((edge) => {
-          this._graph.getModel().remove(edge);
+        edges.forEach((e) => {
+          this._graph.getModel().remove(e);
+        });
+        relationships.incoming.forEach((edge) => {
+          edge.value.referencedEntity = editedEntity.name;
+          edge.value.referencedSchema = editedEntity.schema;
+          this._schemaDesigner.renderRelationship(edge.value);
         });
         editedOutgoingEdges.forEach((edge) => {
+          edge.entity = editedEntity.name;
+          edge.schemaName = editedEntity.schema;
           this._schemaDesigner.renderRelationship(edge);
         });
         this._schemaDesigner.autoArrange();
@@ -43567,6 +43577,12 @@ var SchemaDesignerEntity = class {
       }
     }
     return columnTitle;
+  }
+  getWidth() {
+    return 400;
+  }
+  getHeight() {
+    return Math.min(330, 52 + this.columns.length * 28) + 4;
   }
 };
 
@@ -44180,8 +44196,8 @@ var SchemaDesigner = class {
       new mxGraphFactory.mxGeometry(
         0,
         0,
-        400,
-        Math.min(330, 52 + entityValue.columns.length * 28) + 4
+        entityValue.getWidth(),
+        entityValue.getHeight()
       )
     );
     entityCell.setVertex(true);

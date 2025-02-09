@@ -30,4 +30,6 @@ export declare class SchemaDesignerEntity implements IEntity {
      * @returns column title
      */
     private getColumnTitle;
+    getWidth(): number;
+    getHeight(): number;
 }

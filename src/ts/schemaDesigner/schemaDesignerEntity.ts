@@ -1,5 +1,5 @@
 import { mxCellState, mxGraph, mxGraphModel } from "mxgraph";
-import { IColumn, IEntity, SchemaDesignerConfig } from "./schemaDesignerInterfaces";
+import { EdgeCellValue, IColumn, IEntity, SchemaDesignerConfig } from "./schemaDesignerInterfaces";
 import createColor from "create-color";
 import { mxGraphFactory as mx } from '../mx';
 import { SchemaDesigner } from "./schemaDesigner";
@@ -57,28 +57,45 @@ export class SchemaDesignerEntity implements IEntity {
                 }
                 this.editor = true;
                 this._schemaDesigner.currentCellUnderEdit = state;
-                // this._schemaDesigner.scrollToCell(state.cell);
                 const relationships = this._schemaDesigner.getRelationships(state);
+
+                // Callback to edit the entity
                 const { editedEntity, editedOutgoingEdges } = await this._config.editEntity(state.cell, state.x, state.y, this._graph.view.scale, relationships.incoming, relationships.outgoing, this._schemaDesigner.schema);
-                state.cell.value = editedEntity;
+
+                // Update the entity
+                this.name = editedEntity.name;
+                this.schema = editedEntity.schema;
+                this.columns = editedEntity.columns;
+
+                // Update the entity cell in the graph
                 this.editor = false;
                 this.graph.cellRenderer.redraw(state, true);
+                this.graph.resizeCell(state.cell, new mx.mxRectangle(state.x, state.y, this.getWidth(), this.getHeight()), true);
+                this.graph.refresh(state.cell);
 
-                // Delete all outgoing edges
+                // Delete all edges;
                 const edges = this._graph.getEdges(state.cell);
-                const outgoingEdges = edges.filter(edge => edge.source === state.cell);
-                outgoingEdges.forEach(edge => {
-                    this._graph.getModel().remove(edge);
+                edges.forEach(e => {
+                    this._graph.getModel().remove(e);
+                });
+
+                // Add new incoming edges
+                relationships.incoming.forEach((edge) => {
+                    // update the name and schema of the entity
+                    (edge.value as EdgeCellValue).referencedEntity = editedEntity.name;
+                    (edge.value as EdgeCellValue).referencedSchema = editedEntity.schema;
+                    this._schemaDesigner.renderRelationship(edge.value);
                 });
 
                 // Add new outgoing edges
                 editedOutgoingEdges.forEach((edge) => {
+                    (edge as EdgeCellValue).entity = editedEntity.name;
+                    (edge as EdgeCellValue).schemaName = editedEntity.schema;
                     this._schemaDesigner.renderRelationship(edge);
                 });
 
+                // Update the cell position
                 this._schemaDesigner.autoArrange();
-
-
             });
         }
 
@@ -233,5 +250,13 @@ export class SchemaDesignerEntity implements IEntity {
             }
         }
         return columnTitle;
+    }
+
+    public getWidth(): number {
+        return 400;
+    }
+
+    public getHeight(): number {
+        return Math.min(330, 52 + this.columns.length * 28) + 4;
     }
 }
