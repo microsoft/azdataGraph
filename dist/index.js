@@ -43428,6 +43428,7 @@ var SchemaDesignerEntity = class {
         this.editor = true;
         this._schemaDesigner.currentCellUnderEdit = state;
         const relationships = this._schemaDesigner.getRelationships(state);
+        this.graph.model.beginUpdate();
         const { editedEntity, editedOutgoingEdges } = await this._config.editEntity(state.cell, state.x, state.y, this._graph.view.scale, relationships.incoming, relationships.outgoing, this._schemaDesigner.schema);
         this.name = editedEntity.name;
         this.schema = editedEntity.schema;
@@ -43451,6 +43452,7 @@ var SchemaDesignerEntity = class {
           this._schemaDesigner.renderRelationship(edge);
         });
         this._schemaDesigner.autoArrange();
+        this.graph.model.endUpdate();
       });
     }
   }

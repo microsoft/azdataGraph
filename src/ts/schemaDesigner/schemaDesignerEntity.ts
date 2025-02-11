@@ -51,6 +51,7 @@ export class SchemaDesignerEntity implements IEntity {
         const editButton = parentNode.getElementsByClassName("sd-entity-edit-button")[0];
         if (editButton !== undefined && editButton !== null) {
             this.addListeners(editButton as HTMLElement, "click", async () => {
+                
                 const previouslyEditedCell = this._schemaDesigner.currentCellUnderEdit;
                 if (previouslyEditedCell) {
                     previouslyEditedCell.cell.value.editing = false;
@@ -58,6 +59,8 @@ export class SchemaDesignerEntity implements IEntity {
                 this.editor = true;
                 this._schemaDesigner.currentCellUnderEdit = state;
                 const relationships = this._schemaDesigner.getRelationships(state);
+
+                this.graph.model.beginUpdate();
 
                 // Callback to edit the entity
                 const { editedEntity, editedOutgoingEdges } = await this._config.editEntity(state.cell, state.x, state.y, this._graph.view.scale, relationships.incoming, relationships.outgoing, this._schemaDesigner.schema);
@@ -96,6 +99,8 @@ export class SchemaDesignerEntity implements IEntity {
 
                 // Update the cell position
                 this._schemaDesigner.autoArrange();
+
+                this.graph.model.endUpdate();
             });
         }
 
