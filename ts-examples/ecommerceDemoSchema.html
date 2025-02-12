@@ -60,14 +60,14 @@
               document.getElementById("title").innerText = cell.value.name;
             },
           });
-          schemaDesigner.renderModel(ecommerceDemoSchema);
+          schemaDesigner.renderSchema(ecommerceDemoSchema);
           schemaDesigner.addCellClickListener((cell) => {
             console.log(cell);
           });
           document.getElementById("done-btn").addEventListener("click", () => {
             floatingDiv.style.display = "none";
             if (schemaDesigner) {
-              schemaDesigner.editedEntity(
+              schemaDesigner.updateActiveCellStateEntity(
                 {
                   ...currentEntity,
                   name: currentEntity.name + " (edited)",
