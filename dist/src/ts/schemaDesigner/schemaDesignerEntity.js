@@ -59,55 +59,60 @@ class SchemaDesignerEntity {
             }
             editButton.setAttribute('clickHandler', 'true');
             this.addListeners(editButton, "click", () => __awaiter(this, void 0, void 0, function* () {
-                const previouslyEditedCell = this._schemaDesigner.currentCellUnderEdit;
-                if (previouslyEditedCell) {
-                    previouslyEditedCell.cell.value.editing = false;
-                }
-                this.editor = true;
-                this._schemaDesigner.currentCellUnderEdit = state;
-                const relationships = this._schemaDesigner.getRelationships(state);
-                this.graph.model.beginUpdate();
-                // Callback to edit the entity
-                const { editedEntity, editedOutgoingEdges } = yield this._config.editEntity(state.cell, state.x, state.y, this._graph.view.scale, relationships.incoming, relationships.outgoing, this._schemaDesigner.schema);
-                // Using this.graph.cellLabelChanged to update the cell label with undo/redo support
-                this.graph.cellLabelChanged(state.cell, {
-                    name: editedEntity.name,
-                    schema: editedEntity.schema,
-                    columns: editedEntity.columns
-                }, true);
-                // Update the entity
-                // this.name = editedEntity.name;
-                // this.schema = editedEntity.schema;
-                // this.columns = editedEntity.columns;
-                // Update the entity cell in the graph
-                this.editor = false;
-                // this.graph.cellRenderer.redraw(state, true); Not need because the refresh takes care of it
-                this.graph.resizeCell(state.cell, new mx_1.mxGraphFactory.mxRectangle(state.x, state.y, this.getWidth(), this.getHeight()), true);
-                this.graph.refresh(state.cell);
-                //this.graph.refresh(this.graph.getDefaultParent());
-                // Delete all edges;
-                const edges = this._graph.getEdges(state.cell);
-                edges.forEach(e => {
-                    this._graph.getModel().remove(e);
-                });
-                // Add new incoming edges
-                relationships.incoming.forEach((edge) => {
-                    // update the name and schema of the entity
-                    edge.value.referencedEntity = editedEntity.name;
-                    edge.value.referencedSchema = editedEntity.schema;
-                    this._schemaDesigner.renderRelationship(edge.value);
-                });
-                // Add new outgoing edges
-                editedOutgoingEdges.forEach((edge) => {
-                    edge.entity = editedEntity.name;
-                    edge.schemaName = editedEntity.schema;
-                    this._schemaDesigner.renderRelationship(edge);
-                });
-                // Update the cell position
-                this._schemaDesigner.autoArrange();
-                this.graph.model.endUpdate();
+                this.edit(state);
             }));
         }
+    }
+    edit(state) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const previouslyEditedCell = this._schemaDesigner.currentCellUnderEdit;
+            if (previouslyEditedCell) {
+                previouslyEditedCell.cell.value.editing = false;
+            }
+            this.editor = true;
+            this._schemaDesigner.currentCellUnderEdit = state;
+            const relationships = this._schemaDesigner.getRelationships(state);
+            this.graph.model.beginUpdate();
+            // Callback to edit the entity
+            const { editedEntity, editedOutgoingEdges } = yield this._config.editEntity(state.cell, state.x, state.y, this._graph.view.scale, relationships.incoming, relationships.outgoing, this._schemaDesigner.schema);
+            // Using this.graph.cellLabelChanged to update the cell label with undo/redo support
+            this.graph.cellLabelChanged(state.cell, {
+                name: editedEntity.name,
+                schema: editedEntity.schema,
+                columns: editedEntity.columns
+            }, true);
+            // Update the entity
+            // this.name = editedEntity.name;
+            // this.schema = editedEntity.schema;
+            // this.columns = editedEntity.columns;
+            // Update the entity cell in the graph
+            this.editor = false;
+            // this.graph.cellRenderer.redraw(state, true); Not need because the refresh takes care of it
+            this.graph.resizeCell(state.cell, new mx_1.mxGraphFactory.mxRectangle(state.x, state.y, this.getWidth(), this.getHeight()), true);
+            this.graph.refresh(state.cell);
+            //this.graph.refresh(this.graph.getDefaultParent());
+            // Delete all edges;
+            const edges = this._graph.getEdges(state.cell);
+            edges.forEach(e => {
+                this._graph.getModel().remove(e);
+            });
+            // Add new incoming edges
+            relationships.incoming.forEach((edge) => {
+                // update the name and schema of the entity
+                edge.value.referencedEntity = editedEntity.name;
+                edge.value.referencedSchema = editedEntity.schema;
+                this._schemaDesigner.renderRelationship(edge.value);
+            });
+            // Add new outgoing edges
+            editedOutgoingEdges.forEach((edge) => {
+                edge.entity = editedEntity.name;
+                edge.schemaName = editedEntity.schema;
+                this._schemaDesigner.renderRelationship(edge);
+            });
+            // Update the cell position
+            this._schemaDesigner.autoArrange();
+            this.graph.model.endUpdate();
+        });
     }
     addListeners(div, type, callback) {
         this.listeners.push({

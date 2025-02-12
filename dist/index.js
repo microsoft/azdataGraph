@@ -43424,41 +43424,44 @@ var SchemaDesignerEntity = class {
       }
       editButton.setAttribute("clickHandler", "true");
       this.addListeners(editButton, "click", async () => {
-        const previouslyEditedCell = this._schemaDesigner.currentCellUnderEdit;
-        if (previouslyEditedCell) {
-          previouslyEditedCell.cell.value.editing = false;
-        }
-        this.editor = true;
-        this._schemaDesigner.currentCellUnderEdit = state;
-        const relationships = this._schemaDesigner.getRelationships(state);
-        this.graph.model.beginUpdate();
-        const { editedEntity, editedOutgoingEdges } = await this._config.editEntity(state.cell, state.x, state.y, this._graph.view.scale, relationships.incoming, relationships.outgoing, this._schemaDesigner.schema);
-        this.graph.cellLabelChanged(state.cell, {
-          name: editedEntity.name,
-          schema: editedEntity.schema,
-          columns: editedEntity.columns
-        }, true);
-        this.editor = false;
-        this.graph.resizeCell(state.cell, new mxGraphFactory.mxRectangle(state.x, state.y, this.getWidth(), this.getHeight()), true);
-        this.graph.refresh(state.cell);
-        const edges = this._graph.getEdges(state.cell);
-        edges.forEach((e) => {
-          this._graph.getModel().remove(e);
-        });
-        relationships.incoming.forEach((edge) => {
-          edge.value.referencedEntity = editedEntity.name;
-          edge.value.referencedSchema = editedEntity.schema;
-          this._schemaDesigner.renderRelationship(edge.value);
-        });
-        editedOutgoingEdges.forEach((edge) => {
-          edge.entity = editedEntity.name;
-          edge.schemaName = editedEntity.schema;
-          this._schemaDesigner.renderRelationship(edge);
-        });
-        this._schemaDesigner.autoArrange();
-        this.graph.model.endUpdate();
+        this.edit(state);
       });
     }
+  }
+  async edit(state) {
+    const previouslyEditedCell = this._schemaDesigner.currentCellUnderEdit;
+    if (previouslyEditedCell) {
+      previouslyEditedCell.cell.value.editing = false;
+    }
+    this.editor = true;
+    this._schemaDesigner.currentCellUnderEdit = state;
+    const relationships = this._schemaDesigner.getRelationships(state);
+    this.graph.model.beginUpdate();
+    const { editedEntity, editedOutgoingEdges } = await this._config.editEntity(state.cell, state.x, state.y, this._graph.view.scale, relationships.incoming, relationships.outgoing, this._schemaDesigner.schema);
+    this.graph.cellLabelChanged(state.cell, {
+      name: editedEntity.name,
+      schema: editedEntity.schema,
+      columns: editedEntity.columns
+    }, true);
+    this.editor = false;
+    this.graph.resizeCell(state.cell, new mxGraphFactory.mxRectangle(state.x, state.y, this.getWidth(), this.getHeight()), true);
+    this.graph.refresh(state.cell);
+    const edges = this._graph.getEdges(state.cell);
+    edges.forEach((e) => {
+      this._graph.getModel().remove(e);
+    });
+    relationships.incoming.forEach((edge) => {
+      edge.value.referencedEntity = editedEntity.name;
+      edge.value.referencedSchema = editedEntity.schema;
+      this._schemaDesigner.renderRelationship(edge.value);
+    });
+    editedOutgoingEdges.forEach((edge) => {
+      edge.entity = editedEntity.name;
+      edge.schemaName = editedEntity.schema;
+      this._schemaDesigner.renderRelationship(edge);
+    });
+    this._schemaDesigner.autoArrange();
+    this.graph.model.endUpdate();
   }
   addListeners(div, type, callback) {
     this.listeners.push({
@@ -44063,27 +44066,12 @@ var SchemaDesigner = class {
         (_graph, evt, _cell) => {
           this._graph.stopEditing(false);
           const pt = this._graph.getPointForEvent(evt, true);
-          const entity = {
-            name: "New Table",
-            schema: "dbo",
-            columns: [{
-              name: "Column1",
-              dataType: "int",
-              isPrimaryKey: true,
-              isIdentity: true
-            }, {
-              name: "Column2",
-              dataType: "int",
-              isPrimaryKey: false,
-              isIdentity: false
-            }, {
-              name: "Column2",
-              dataType: "int",
-              isPrimaryKey: false,
-              isIdentity: false
-            }]
-          };
-          this.renderEntity(entity, pt.x, pt.y);
+          const entity = this.createNewTable();
+          const cell2 = this.renderEntity(entity, pt.x, pt.y);
+          const state = this._graph.view.getState(cell2);
+          if (state !== null) {
+            cell2.value.edit(state);
+          }
         }
       );
       this._toolbar.addDivider();
@@ -44215,6 +44203,7 @@ var SchemaDesigner = class {
       this._model.endUpdate();
     }
     this._graph.setSelectionCell(entityCell);
+    return entityCell;
   }
   renderRelationship(relationship) {
     const cells = this._model.getChildCells(this._graph.getDefaultParent());
@@ -44305,6 +44294,26 @@ var SchemaDesigner = class {
     return {
       outgoing,
       incoming
+    };
+  }
+  createNewTable() {
+    let index = 1;
+    let name2 = `Table${index}`;
+    for (this.schema.entities.length; this.schema.entities.find((entity) => entity.name === name2); index++) {
+      name2 = `Table${index}`;
+    }
+    const schemas = new Set(this.schema.entities.map((entity) => entity.schema));
+    return {
+      name: name2,
+      schema: schemas.size > 0 ? Array.from(schemas)[0] : "dbo",
+      columns: [
+        {
+          name: "column_1",
+          dataType: "int",
+          isPrimaryKey: true,
+          isIdentity: true
+        }
+      ]
     };
   }
 };

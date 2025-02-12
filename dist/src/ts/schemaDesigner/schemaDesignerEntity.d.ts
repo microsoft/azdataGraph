@@ -14,6 +14,7 @@ export declare class SchemaDesignerEntity implements IEntity {
     constructor(entity: IEntity, _config: SchemaDesignerConfig, _graph: mxGraph, _schemaDesigner: SchemaDesigner);
     render(): HTMLElement;
     setupValueAndListeners(parentNode: HTMLElement, state: mxCellState): void;
+    edit(state: mxCellState): Promise<void>;
     addListeners(div: HTMLElement, type: string, callback: (event: Event) => void): void;
     removeListeners(): void;
     get model(): mxGraphModel;

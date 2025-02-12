@@ -35,4 +35,5 @@ export declare class SchemaDesigner {
         outgoing: mxCell[];
         incoming: mxCell[];
     };
+    private createNewTable;
 }
