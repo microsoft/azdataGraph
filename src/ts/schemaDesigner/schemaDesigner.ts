@@ -273,8 +273,14 @@ export class SchemaDesigner {
             return mx.mxGraph.prototype.convertValueToString.apply(this, [cell]);
         }
         this._graph.model.valueForCellChanged = function (cell, value) {
-            const old = cell.value.name;
-            cell.value.name = value;
+            const old = {
+                name: cell.value.name,
+                schema: cell.value.schema,
+                columns: cell.value.columns
+            };
+            cell.value.name = value.name;
+            cell.value.schema = value.schema;
+            cell.value.columns = value.columns;
             return old;
         }
         const oldRedrawLabel = this._graph.cellRenderer.redrawLabel;
@@ -480,10 +486,6 @@ export class SchemaDesigner {
             const cell = this._graph.getSelectionCell();
             if (cell !== undefined) {
                 this.cellClickListeners.forEach((listener) => listener(cell));
-                if (cell.edge) {
-                    this._currentCellUnderEdit = this._graph.view.getCellStates([cell])[0];
-                    this._config.editRelationship(cell, this._currentCellUnderEdit.x, this._currentCellUnderEdit.y, this._graph.view.scale);
-                }
             }
         });
         this._graph.getStylesheet().getDefaultEdgeStyle()['edgeStyle'] = mx.mxEdgeStyle.ElbowConnector;
@@ -493,7 +495,6 @@ export class SchemaDesigner {
         if (this._currentCellUnderEdit !== undefined && value.cell.id !== this._currentCellUnderEdit.cell.id
         ) {
             this._currentCellUnderEdit.cell.value.editor = false;
-            this._graph.cellRenderer.redraw(this._currentCellUnderEdit);
         }
         this._currentCellUnderEdit = value;
     }
@@ -600,14 +601,7 @@ export class SchemaDesigner {
                 this.autoArrange();
             }
         );
-        this._toolbar.addButton(
-            this._config.icons.exportIcon,
-            "Export",
-            () => {
-                const schema = this.schema;
-                console.log(schema);
-            }
-        );
+
         if (this._config.isEditable) {
             this._toolbar.addDivider();
             this._toolbar.addButton(

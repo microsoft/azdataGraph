@@ -43397,7 +43397,6 @@ var SchemaDesignerEntity = class {
     return this.renderTable();
   }
   setupValueAndListeners(parentNode, state) {
-    this.removeListeners();
     const columnsDiv = parentNode.getElementsByClassName("sd-table-columns")[0];
     if (columnsDiv !== void 0 && columnsDiv !== null) {
       if (columnsDiv.getAttribute("scrollHandler") === null) {
@@ -43420,6 +43419,10 @@ var SchemaDesignerEntity = class {
     }
     const editButton = parentNode.getElementsByClassName("sd-entity-edit-button")[0];
     if (editButton !== void 0 && editButton !== null) {
+      if (editButton.getAttribute("clickHandler") !== null) {
+        return;
+      }
+      editButton.setAttribute("clickHandler", "true");
       this.addListeners(editButton, "click", async () => {
         const previouslyEditedCell = this._schemaDesigner.currentCellUnderEdit;
         if (previouslyEditedCell) {
@@ -43430,11 +43433,12 @@ var SchemaDesignerEntity = class {
         const relationships = this._schemaDesigner.getRelationships(state);
         this.graph.model.beginUpdate();
         const { editedEntity, editedOutgoingEdges } = await this._config.editEntity(state.cell, state.x, state.y, this._graph.view.scale, relationships.incoming, relationships.outgoing, this._schemaDesigner.schema);
-        this.name = editedEntity.name;
-        this.schema = editedEntity.schema;
-        this.columns = editedEntity.columns;
+        this.graph.cellLabelChanged(state.cell, {
+          name: editedEntity.name,
+          schema: editedEntity.schema,
+          columns: editedEntity.columns
+        }, true);
         this.editor = false;
-        this.graph.cellRenderer.redraw(state, true);
         this.graph.resizeCell(state.cell, new mxGraphFactory.mxRectangle(state.x, state.y, this.getWidth(), this.getHeight()), true);
         this.graph.refresh(state.cell);
         const edges = this._graph.getEdges(state.cell);
@@ -43476,7 +43480,12 @@ var SchemaDesignerEntity = class {
     return this._graph;
   }
   renderTable() {
+    if (this.parentDiv) {
+      this.removeListeners();
+      this.parentDiv.remove();
+    }
     const parent = document.createElement("div");
+    this.parentDiv = parent;
     parent.classList.add("sd-table");
     const tableColor = src_default(this.schema, { format: "hex" });
     const colorIndicator = document.createElement("div");
@@ -43848,8 +43857,14 @@ var SchemaDesigner = class {
       return mxGraphFactory.mxGraph.prototype.convertValueToString.apply(this, [cell2]);
     };
     this._graph.model.valueForCellChanged = function(cell2, value) {
-      const old = cell2.value.name;
-      cell2.value.name = value;
+      const old = {
+        name: cell2.value.name,
+        schema: cell2.value.schema,
+        columns: cell2.value.columns
+      };
+      cell2.value.name = value.name;
+      cell2.value.schema = value.schema;
+      cell2.value.columns = value.columns;
       return old;
     };
     const oldRedrawLabel = this._graph.cellRenderer.redrawLabel;
@@ -44018,10 +44033,6 @@ var SchemaDesigner = class {
       const cell2 = this._graph.getSelectionCell();
       if (cell2 !== void 0) {
         this.cellClickListeners.forEach((listener) => listener(cell2));
-        if (cell2.edge) {
-          this._currentCellUnderEdit = this._graph.view.getCellStates([cell2])[0];
-          this._config.editRelationship(cell2, this._currentCellUnderEdit.x, this._currentCellUnderEdit.y, this._graph.view.scale);
-        }
       }
     });
     this._graph.getStylesheet().getDefaultEdgeStyle()["edgeStyle"] = mxGraphFactory.mxEdgeStyle.ElbowConnector;
@@ -44029,7 +44040,6 @@ var SchemaDesigner = class {
   set currentCellUnderEdit(value) {
     if (this._currentCellUnderEdit !== void 0 && value.cell.id !== this._currentCellUnderEdit.cell.id) {
       this._currentCellUnderEdit.cell.value.editor = false;
-      this._graph.cellRenderer.redraw(this._currentCellUnderEdit);
     }
     this._currentCellUnderEdit = value;
   }
@@ -44125,14 +44135,6 @@ var SchemaDesigner = class {
       "Auto Arrange",
       () => {
         this.autoArrange();
-      }
-    );
-    this._toolbar.addButton(
-      this._config.icons.exportIcon,
-      "Export",
-      () => {
-        const schema = this.schema;
-        console.log(schema);
       }
     );
     if (this._config.isEditable) {

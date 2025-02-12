@@ -9,6 +9,7 @@ export declare class SchemaDesignerEntity implements IEntity {
     schema: string;
     columns: IColumn[];
     editor: boolean;
+    parentDiv: HTMLElement;
     private listeners;
     constructor(entity: IEntity, _config: SchemaDesignerConfig, _graph: mxGraph, _schemaDesigner: SchemaDesigner);
     render(): HTMLElement;

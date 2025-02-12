@@ -30,7 +30,6 @@ class SchemaDesignerEntity {
         return this.renderTable();
     }
     setupValueAndListeners(parentNode, state) {
-        this.removeListeners();
         const columnsDiv = parentNode.getElementsByClassName("sd-table-columns")[0];
         if (columnsDiv !== undefined && columnsDiv !== null) {
             if (columnsDiv.getAttribute('scrollHandler') === null) {
@@ -55,6 +54,10 @@ class SchemaDesignerEntity {
         }
         const editButton = parentNode.getElementsByClassName("sd-entity-edit-button")[0];
         if (editButton !== undefined && editButton !== null) {
+            if (editButton.getAttribute('clickHandler') !== null) {
+                return;
+            }
+            editButton.setAttribute('clickHandler', 'true');
             this.addListeners(editButton, "click", () => __awaiter(this, void 0, void 0, function* () {
                 const previouslyEditedCell = this._schemaDesigner.currentCellUnderEdit;
                 if (previouslyEditedCell) {
@@ -66,15 +69,22 @@ class SchemaDesignerEntity {
                 this.graph.model.beginUpdate();
                 // Callback to edit the entity
                 const { editedEntity, editedOutgoingEdges } = yield this._config.editEntity(state.cell, state.x, state.y, this._graph.view.scale, relationships.incoming, relationships.outgoing, this._schemaDesigner.schema);
+                // Using this.graph.cellLabelChanged to update the cell label with undo/redo support
+                this.graph.cellLabelChanged(state.cell, {
+                    name: editedEntity.name,
+                    schema: editedEntity.schema,
+                    columns: editedEntity.columns
+                }, true);
                 // Update the entity
-                this.name = editedEntity.name;
-                this.schema = editedEntity.schema;
-                this.columns = editedEntity.columns;
+                // this.name = editedEntity.name;
+                // this.schema = editedEntity.schema;
+                // this.columns = editedEntity.columns;
                 // Update the entity cell in the graph
                 this.editor = false;
-                this.graph.cellRenderer.redraw(state, true);
+                // this.graph.cellRenderer.redraw(state, true); Not need because the refresh takes care of it
                 this.graph.resizeCell(state.cell, new mx_1.mxGraphFactory.mxRectangle(state.x, state.y, this.getWidth(), this.getHeight()), true);
                 this.graph.refresh(state.cell);
+                //this.graph.refresh(this.graph.getDefaultParent());
                 // Delete all edges;
                 const edges = this._graph.getEdges(state.cell);
                 edges.forEach(e => {
@@ -119,7 +129,12 @@ class SchemaDesignerEntity {
         return this._graph;
     }
     renderTable() {
+        if (this.parentDiv) {
+            this.removeListeners();
+            this.parentDiv.remove();
+        }
         const parent = document.createElement("div");
+        this.parentDiv = parent;
         parent.classList.add("sd-table");
         // Tables are colored based on the schema
         const tableColor = (0, create_color_1.default)(this.schema, { format: "hex" });
