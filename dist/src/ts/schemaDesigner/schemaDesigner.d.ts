@@ -1,40 +1,142 @@
 import './schemaDesigner.css';
 import '../../css/common.css';
 import { IEntity, IRelationship, ISchema, SchemaDesignerConfig } from './schemaDesignerInterfaces';
-import { mxCell, mxCellState, mxGraph } from 'mxgraph';
+import { mxCell, mxCellState, mxEditor, mxGraph, mxGraphLayout, mxGraphModel } from 'mxgraph';
+import { SchemaDesignerToolbar } from './schemaDesignerToolbar';
 export declare class SchemaDesigner {
-    private _container;
-    private _config;
-    private _editor;
-    _graph: mxGraph;
-    private _model;
-    private _toolbar;
-    private _layout;
-    private _currentCellUnderEdit;
+    private container;
+    config: SchemaDesignerConfig;
+    /**
+     * Array of registered listeners for cell clicks
+     */
     private cellClickListeners;
-    constructor(_container: HTMLElement, _config: SchemaDesignerConfig);
+    /**
+     * mxCellState for the currently edited cell
+     */
+    private _activeCellState;
+    /**
+     * mxEditor instance for the schema designer
+     */
+    mxEditor: mxEditor;
+    /**
+     * mxGraph instance for the schema designer
+     */
+    mxGraph: mxGraph;
+    /**
+     * mxModel instance for the schema designer
+     */
+    mxModel: mxGraphModel;
+    /**
+     * mxLayout instance for the schema designer
+     */
+    mxLayout: mxGraphLayout;
+    /**
+     * Toolbar for the schema designer
+     */
+    toolbar: SchemaDesignerToolbar;
+    constructor(container: HTMLElement, config: SchemaDesignerConfig);
+    /**
+     * Sets up the mxGraph instance for the schema designer
+     */
     private initializeGraph;
-    private setupColors;
+    /**
+     * Applies the colors from the config to the schema designer
+     */
+    private applyColors;
+    /**
+     * Overwrites the default mxGraph settings
+     */
     private overwriteMxGraphDefaults;
-    private addCustomEdgeTerminals;
-    private setupEditorOptions;
-    private setupGraphOptions;
-    set currentCellUnderEdit(value: mxCellState);
-    private setupGraphOutlineOptions;
-    private setupToolbar;
+    /**
+     * Configures the edge terminals for the schema designer for different cardinalities
+     */
+    private configureEdgeTerminals;
+    /**
+     * Configures the mxEditor instance for the schema designer
+     */
+    private configureMxEditor;
+    /**
+     * Configures the mxGraph instance for the schema designer
+     */
+    private configureMxGraph;
+    /**
+     * Configures the mxGraph outline for the schema designer
+     */
+    private configureMxOutline;
+    /**
+     * Initializes the toolbar for the schema designer
+     */
+    private initializeToolbar;
+    /**
+     * Redraws the edges in the schema designer
+     */
     private redrawEdges;
-    renderModel(schema: ISchema, cleanUndoManager?: boolean): void;
-    private renderEntity;
+    /**
+     * Sets the current cell under edit
+     */
+    set activeCellState(value: mxCellState);
+    /**
+     * Renders the schema in the schema designer
+     * @param schema The schema to render
+     * @param cleanUndoManager Whether to clean the undo manager so that the user can't undo the rendering
+     */
+    renderSchema(schema: ISchema, cleanUndoManager?: boolean): void;
+    /**
+     * Renders an entity in the schema designer
+     * @param entity The entity to render
+     * @param x the x position to render the entity at
+     * @param y the y position to render the entity at
+     * @returns The cell that was rendered
+     */
+    renderEntity(entity: IEntity, x: number, y: number): mxCell;
+    /**
+     * Renders a relationship in the schema designer
+     * @param relationship The relationship to render
+     * @returns The edge that was rendered
+     */
     renderRelationship(relationship: IRelationship): void;
+    /**
+     * Gets the current schema from the schema designer
+     */
     get schema(): ISchema;
-    autoArrange(): void;
+    /**
+     * Automatically arranges the cells in the schema designer
+     */
+    autoLayout(): void;
+    /**
+     * Registers a listener for cell clicks
+     * @param listener The listener to register
+     */
     addCellClickListener(listener: (cell: mxCell) => void): void;
+    /**
+     * Scrolls to a cell in the schema designer
+     * @param cell The cell to scroll to
+     */
     scrollToCell(cell: mxCell): void;
-    updateEditorLocation(): void;
-    getRelationships(stateCell: mxCellState): {
+    /**
+     * Updates the position of the editor in the schema designer. This is called
+     * when the graph scales or when the graph is moved
+     */
+    updateEditorPosition(): void;
+    /**
+     * Gets the relationships of an entity
+     * @param entityCellState The cell state of the entity
+     * @returns The relationships of the entity
+     */
+    getEntityRelationships(entityCellState: mxCellState): {
         outgoing: mxCell[];
         incoming: mxCell[];
     };
-    private createNewTable;
-    editedEntity(editedEntity: IEntity, editedOutgoingEdges: IRelationship[]): void;
+    /**
+     * Creates a new entity
+     * @returns The new entity
+     */
+    private createEntity;
+    /**
+     * Updates the active cell state entity
+     * @param editedEntity describes the new entity
+     * @param editedOutgoingEdges describes the new relationships
+     * @returns void
+     */
+    updateActiveCellStateEntity(editedEntity: IEntity, editedOutgoingEdges: IRelationship[]): void;
 }

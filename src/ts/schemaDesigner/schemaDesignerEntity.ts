@@ -5,40 +5,71 @@ import { mxGraphFactory as mx } from '../mx';
 import { SchemaDesigner } from "./schemaDesigner";
 
 export class SchemaDesignerEntity implements IEntity {
+    private eventListeners: { target: HTMLElement, eventName: string, callback?: any }[] = [];
+
+    /**
+     * The name of the entity
+     */
     public name: string;
+    /**
+     * The schema of the entity
+     */
     public schema: string;
+    /**
+     * The columns of the entity
+     */
     public columns: IColumn[];
-    public editor!: boolean;
+    /**
+     * Indicates if the entity is being edited
+     */
+    public editor: boolean;
+    /**
+     * The parent div of the entity
+     */
     public parentDiv!: HTMLElement;
-    public editPromise!: Promise<void>;
 
-    private listeners: { target: HTMLElement, eventName: string, callback?: any }[] = [];
-
-    constructor(entity: IEntity, private _config: SchemaDesignerConfig, private _graph: mxGraph, private _schemaDesigner: SchemaDesigner) {
+    /**
+     * Creates a new instance of the SchemaDesignerEntity class
+     * @param entity entity to be rendered
+     * @param config schema designer configuration
+     * @param mxGraph mxGraph instance
+     * @param schemaDesigner schema designer instance
+     */
+    constructor(entity: IEntity, private schemaDesigner: SchemaDesigner) {
         this.name = entity.name;
         this.schema = entity.schema;
         this.columns = entity.columns;
+        this.editor = false;
+    }
+    
+    /**
+     * Renders the entity
+     * @returns the rendered entity
+     */
+    public render(): HTMLElement {
+        this.removeEventListeners();
+        return this.renderTableDiv();
     }
 
-    render(): HTMLElement {
-        this.removeListeners();
-        return this.renderTable();
-    }
-
-    public setupValueAndListeners(parentNode: HTMLElement, state: mxCellState): void {
+    /**
+     * Sets up the entity DOM
+     * @param parentNode node to be set up
+     * @param state state of the node
+     */
+    public setupEntityDOM(parentNode: HTMLElement, state: mxCellState): void {
         const columnsDiv = parentNode.getElementsByClassName("sd-table-columns")[0];
         if (columnsDiv !== undefined && columnsDiv !== null) {
             if (columnsDiv.getAttribute('scrollHandler') === null) {
                 columnsDiv.setAttribute('scrollHandler', 'true');
                 const updateEdges = mx.mxUtils.bind(this, () => {
-                    this._graph.clearSelection();
-                    const edgeCount = this.model.getEdgeCount(state.cell);
+                    this.mxGraph.clearSelection();
+                    const edgeCount = this.mxModel.getEdgeCount(state.cell);
                     // Only updates edges to avoid update in DOM order
                     // for text label which would reset the scrollbar
                     for (let i = 0; i < edgeCount; i++) {
-                        const edge = this.model.getEdgeAt(state.cell, i);
-                        this.graph.view.invalidate(edge, true, false);
-                        this.graph.view.validate(edge);
+                        const edge = this.mxModel.getEdgeAt(state.cell, i);
+                        this.mxGraph.view.invalidate(edge, true, false);
+                        this.mxGraph.view.validate(edge);
                     }
                 });
                 mx.mxEvent.addListener(columnsDiv, "scroll", () => {
@@ -54,22 +85,28 @@ export class SchemaDesignerEntity implements IEntity {
                 return;
             }
             editButton.setAttribute('clickHandler', 'true');
-            this.addListeners(editButton as HTMLElement, "click", async () => {
-                this.edit(state);
+            this.addEventListeners(editButton as HTMLElement, "click", async () => {
+                this.editEntity(state);
             });
         }
-
     }
 
-    public async edit(state: mxCellState): Promise<void> {
-        this._schemaDesigner.currentCellUnderEdit = state;
+    /**
+     * Edits the entity
+     * @param state state of the entity
+     */
+    public async editEntity(state: mxCellState): Promise<void> {
+        this.schemaDesigner.activeCellState = state;
         this.editor = true;
-        const relationships = this._schemaDesigner.getRelationships(state);
-        await this._config.editEntity(state.cell, state.x, state.y, this._graph.view.scale, relationships.incoming, relationships.outgoing, this._schemaDesigner.schema);
+        const relationships = this.schemaDesigner.getEntityRelationships(state);
+        await this.schemaDesigner.config.editEntity(state.cell, state.x, state.y, this.mxGraph.view.scale, relationships.incoming, relationships.outgoing, this.schemaDesigner.schema);
     }
 
-    public addListeners(div: HTMLElement, type: string, callback: (event: Event) => void): void {
-        this.listeners.push({
+    /**
+     * Adds event listeners to the entity
+     */
+    public addEventListeners(div: HTMLElement, type: string, callback: (event: Event) => void): void {
+        this.eventListeners.push({
             target: div,
             eventName: type,
             callback: callback
@@ -77,23 +114,43 @@ export class SchemaDesignerEntity implements IEntity {
         div.addEventListener(type, callback);
     }
 
-    public removeListeners(): void {
-        this.listeners.forEach(listener => {
+    /**
+     * Removes event listeners from the entity
+     */
+    public removeEventListeners(): void {
+        this.eventListeners.forEach(listener => {
             listener.target.removeEventListener(listener.eventName, listener.callback);
         });
     }
 
-    public get model(): mxGraphModel {
-        return this._graph.getModel();
+    /**
+     * Gets the mxGraph model
+     */
+    public get mxModel(): mxGraphModel {
+        return this.schemaDesigner.mxGraph.getModel();
     }
 
-    public get graph(): mxGraph {
-        return this._graph;
+    /**
+     * Gets the mxGraph instance
+     */
+    public get mxGraph(): mxGraph {
+        return this.schemaDesigner.mxGraph;
     }
 
-    private renderTable(): HTMLElement {
+    /**
+     * Gets the schema designer configuration
+     */
+    public get schemaDesignerConfig(): SchemaDesignerConfig {
+        return this.schemaDesigner.config;
+    }
+
+    /**
+     * Renders the table div
+     * @returns the table div
+     */
+    private renderTableDiv(): HTMLElement {
         if (this.parentDiv) {
-            this.removeListeners();
+            this.removeEventListeners();
             this.parentDiv.remove();
         }
         const parent = document.createElement("div");
@@ -111,9 +168,9 @@ export class SchemaDesignerEntity implements IEntity {
         const header = document.createElement("div");
         header.classList.add("sd-table-header");
         const headerIcon = document.createElement("div");
-        headerIcon.innerHTML = this._config.icons.entityIcon;
+        headerIcon.innerHTML = this.schemaDesignerConfig.icons.entityIcon;
         headerIcon.classList.add("sd-table-header-icon");
-        headerIcon.innerHTML = this._config.icons.entityIcon;
+        headerIcon.innerHTML = this.schemaDesignerConfig.icons.entityIcon;
         header.appendChild(headerIcon);
         const headerText = document.createElement("div");
         headerText.classList.add("sd-table-header-text");
@@ -123,19 +180,17 @@ export class SchemaDesignerEntity implements IEntity {
         header.appendChild(headerText);
 
         // Add edit button if the schema designer is editable
-        if (this._config.isEditable) {
+        if (this.schemaDesignerConfig.isEditable) {
             const button = document.createElement("button");
             button.type = "button";
             button.classList.add("sd-entity-button", "sd-entity-edit-button");
             button.title = "Edit";
-            button.innerHTML = this._config.icons.editIcon;
+            button.innerHTML = this.schemaDesignerConfig.icons.editIcon;
             header.appendChild(button);
         }
 
         // Adding header to the parent
         parent.appendChild(header);
-
-
 
         // Adding columns
         // TODO: Make this keyboard accessible
@@ -149,11 +204,11 @@ export class SchemaDesignerEntity implements IEntity {
             const keyIcon = document.createElement("div");
             keyIcon.classList.add("sd-table-column-icon");
             if (column.isPrimaryKey) {
-                keyIcon.innerHTML = this._config.icons.primaryKeyIcon;
+                keyIcon.innerHTML = this.schemaDesignerConfig.icons.primaryKeyIcon;
                 keyIcon.title = "Primary key";
             }
-            if (this.isForeignKey(index)) {
-                keyIcon.innerHTML = this._config.icons.foreignKeyIcon;
+            if (this.hasForeignKey(index)) {
+                keyIcon.innerHTML = this.schemaDesignerConfig.icons.foreignKeyIcon;
                 keyIcon.title = "Foreign key";
             }
             columnDiv.appendChild(keyIcon);
@@ -163,7 +218,7 @@ export class SchemaDesignerEntity implements IEntity {
             columnNameDiv.classList.add("sd-table-column-text");
             columnNameDiv.title = column.name;
             columnNameDiv.innerText = column.name;
-            columnNameDiv.title = this.getColumnTitle(index);
+            columnNameDiv.title = this.getColumnTooltip(index);
             columnDiv.appendChild(columnNameDiv);
 
             // Add column data type
@@ -184,11 +239,11 @@ export class SchemaDesignerEntity implements IEntity {
      * @param index index of the column
      * @returns true if the column has a foreign key dependency
      */
-    private isForeignKey(index: number): boolean {
-        const cells = this._graph.getChildCells(this._graph.getDefaultParent());
+    private hasForeignKey(index: number): boolean {
+        const cells = this.mxGraph.getChildCells(this.mxGraph.getDefaultParent());
         const vertex = cells.find(cell => cell.vertex && cell.value.name === this.name && cell.value.schema === this.schema);
         if (vertex) {
-            const edges = this._graph.getEdges(vertex);
+            const edges = this.mxGraph.getEdges(vertex);
             const outgoingEdges = edges.filter(edge => edge.source === vertex);
             for (const edge of outgoingEdges) {
                 if (edge.value.sourceRow - 1 === index) {
@@ -204,16 +259,16 @@ export class SchemaDesignerEntity implements IEntity {
      * @param index index of the column
      * @returns column title
      */
-    private getColumnTitle(index: number): string {
+    private getColumnTooltip(index: number): string {
         const column = this.columns[index];
         let columnTitle = `${column.name}`;
         if (column.isPrimaryKey) {
             columnTitle += ` Primary key`;
         }
-        const cells = this._graph.getChildCells(this._graph.getDefaultParent());
+        const cells = this.mxGraph.getChildCells(this.mxGraph.getDefaultParent());
         const vertex = cells.find(cell => cell.vertex && cell.value.name === this.name && cell.value.schema === this.schema);
         if (vertex) {
-            const edges = this._graph.getEdges(vertex);
+            const edges = this.mxGraph.getEdges(vertex);
             const outgoingEdges = edges.filter(edge => edge.source === vertex);
             for (const edge of outgoingEdges) {
                 if (edge.value.sourceRow - 1 === index) {
@@ -224,11 +279,11 @@ export class SchemaDesignerEntity implements IEntity {
         return columnTitle;
     }
 
-    public getWidth(): number {
+    public get width(): number {
         return 400;
     }
 
-    public getHeight(): number {
+    public get height(): number {
         return Math.min(330, 52 + this.columns.length * 28) + 4;
     }
 }

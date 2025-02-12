@@ -16,33 +16,48 @@ exports.SchemaDesignerEntity = void 0;
 const create_color_1 = __importDefault(require("create-color"));
 const mx_1 = require("../mx");
 class SchemaDesignerEntity {
-    constructor(entity, _config, _graph, _schemaDesigner) {
-        this._config = _config;
-        this._graph = _graph;
-        this._schemaDesigner = _schemaDesigner;
-        this.listeners = [];
+    /**
+     * Creates a new instance of the SchemaDesignerEntity class
+     * @param entity entity to be rendered
+     * @param config schema designer configuration
+     * @param mxGraph mxGraph instance
+     * @param schemaDesigner schema designer instance
+     */
+    constructor(entity, schemaDesigner) {
+        this.schemaDesigner = schemaDesigner;
+        this.eventListeners = [];
         this.name = entity.name;
         this.schema = entity.schema;
         this.columns = entity.columns;
+        this.editor = false;
     }
+    /**
+     * Renders the entity
+     * @returns the rendered entity
+     */
     render() {
-        this.removeListeners();
-        return this.renderTable();
+        this.removeEventListeners();
+        return this.renderTableDiv();
     }
-    setupValueAndListeners(parentNode, state) {
+    /**
+     * Sets up the entity DOM
+     * @param parentNode node to be set up
+     * @param state state of the node
+     */
+    setupEntityDOM(parentNode, state) {
         const columnsDiv = parentNode.getElementsByClassName("sd-table-columns")[0];
         if (columnsDiv !== undefined && columnsDiv !== null) {
             if (columnsDiv.getAttribute('scrollHandler') === null) {
                 columnsDiv.setAttribute('scrollHandler', 'true');
                 const updateEdges = mx_1.mxGraphFactory.mxUtils.bind(this, () => {
-                    this._graph.clearSelection();
-                    const edgeCount = this.model.getEdgeCount(state.cell);
+                    this.mxGraph.clearSelection();
+                    const edgeCount = this.mxModel.getEdgeCount(state.cell);
                     // Only updates edges to avoid update in DOM order
                     // for text label which would reset the scrollbar
                     for (let i = 0; i < edgeCount; i++) {
-                        const edge = this.model.getEdgeAt(state.cell, i);
-                        this.graph.view.invalidate(edge, true, false);
-                        this.graph.view.validate(edge);
+                        const edge = this.mxModel.getEdgeAt(state.cell, i);
+                        this.mxGraph.view.invalidate(edge, true, false);
+                        this.mxGraph.view.validate(edge);
                     }
                 });
                 mx_1.mxGraphFactory.mxEvent.addListener(columnsDiv, "scroll", () => {
@@ -58,41 +73,67 @@ class SchemaDesignerEntity {
                 return;
             }
             editButton.setAttribute('clickHandler', 'true');
-            this.addListeners(editButton, "click", () => __awaiter(this, void 0, void 0, function* () {
-                this.edit(state);
+            this.addEventListeners(editButton, "click", () => __awaiter(this, void 0, void 0, function* () {
+                this.editEntity(state);
             }));
         }
     }
-    edit(state) {
+    /**
+     * Edits the entity
+     * @param state state of the entity
+     */
+    editEntity(state) {
         return __awaiter(this, void 0, void 0, function* () {
-            this._schemaDesigner.currentCellUnderEdit = state;
+            this.schemaDesigner.activeCellState = state;
             this.editor = true;
-            const relationships = this._schemaDesigner.getRelationships(state);
-            yield this._config.editEntity(state.cell, state.x, state.y, this._graph.view.scale, relationships.incoming, relationships.outgoing, this._schemaDesigner.schema);
+            const relationships = this.schemaDesigner.getEntityRelationships(state);
+            yield this.schemaDesigner.config.editEntity(state.cell, state.x, state.y, this.mxGraph.view.scale, relationships.incoming, relationships.outgoing, this.schemaDesigner.schema);
         });
     }
-    addListeners(div, type, callback) {
-        this.listeners.push({
+    /**
+     * Adds event listeners to the entity
+     */
+    addEventListeners(div, type, callback) {
+        this.eventListeners.push({
             target: div,
             eventName: type,
             callback: callback
         });
         div.addEventListener(type, callback);
     }
-    removeListeners() {
-        this.listeners.forEach(listener => {
+    /**
+     * Removes event listeners from the entity
+     */
+    removeEventListeners() {
+        this.eventListeners.forEach(listener => {
             listener.target.removeEventListener(listener.eventName, listener.callback);
         });
     }
-    get model() {
-        return this._graph.getModel();
+    /**
+     * Gets the mxGraph model
+     */
+    get mxModel() {
+        return this.schemaDesigner.mxGraph.getModel();
     }
-    get graph() {
-        return this._graph;
+    /**
+     * Gets the mxGraph instance
+     */
+    get mxGraph() {
+        return this.schemaDesigner.mxGraph;
     }
-    renderTable() {
+    /**
+     * Gets the schema designer configuration
+     */
+    get schemaDesignerConfig() {
+        return this.schemaDesigner.config;
+    }
+    /**
+     * Renders the table div
+     * @returns the table div
+     */
+    renderTableDiv() {
         if (this.parentDiv) {
-            this.removeListeners();
+            this.removeEventListeners();
             this.parentDiv.remove();
         }
         const parent = document.createElement("div");
@@ -108,9 +149,9 @@ class SchemaDesignerEntity {
         const header = document.createElement("div");
         header.classList.add("sd-table-header");
         const headerIcon = document.createElement("div");
-        headerIcon.innerHTML = this._config.icons.entityIcon;
+        headerIcon.innerHTML = this.schemaDesignerConfig.icons.entityIcon;
         headerIcon.classList.add("sd-table-header-icon");
-        headerIcon.innerHTML = this._config.icons.entityIcon;
+        headerIcon.innerHTML = this.schemaDesignerConfig.icons.entityIcon;
         header.appendChild(headerIcon);
         const headerText = document.createElement("div");
         headerText.classList.add("sd-table-header-text");
@@ -119,12 +160,12 @@ class SchemaDesignerEntity {
         headerText.title = tableTitle;
         header.appendChild(headerText);
         // Add edit button if the schema designer is editable
-        if (this._config.isEditable) {
+        if (this.schemaDesignerConfig.isEditable) {
             const button = document.createElement("button");
             button.type = "button";
             button.classList.add("sd-entity-button", "sd-entity-edit-button");
             button.title = "Edit";
-            button.innerHTML = this._config.icons.editIcon;
+            button.innerHTML = this.schemaDesignerConfig.icons.editIcon;
             header.appendChild(button);
         }
         // Adding header to the parent
@@ -140,11 +181,11 @@ class SchemaDesignerEntity {
             const keyIcon = document.createElement("div");
             keyIcon.classList.add("sd-table-column-icon");
             if (column.isPrimaryKey) {
-                keyIcon.innerHTML = this._config.icons.primaryKeyIcon;
+                keyIcon.innerHTML = this.schemaDesignerConfig.icons.primaryKeyIcon;
                 keyIcon.title = "Primary key";
             }
-            if (this.isForeignKey(index)) {
-                keyIcon.innerHTML = this._config.icons.foreignKeyIcon;
+            if (this.hasForeignKey(index)) {
+                keyIcon.innerHTML = this.schemaDesignerConfig.icons.foreignKeyIcon;
                 keyIcon.title = "Foreign key";
             }
             columnDiv.appendChild(keyIcon);
@@ -153,7 +194,7 @@ class SchemaDesignerEntity {
             columnNameDiv.classList.add("sd-table-column-text");
             columnNameDiv.title = column.name;
             columnNameDiv.innerText = column.name;
-            columnNameDiv.title = this.getColumnTitle(index);
+            columnNameDiv.title = this.getColumnTooltip(index);
             columnDiv.appendChild(columnNameDiv);
             // Add column data type
             const columnDataTypeDiv = document.createElement("div");
@@ -171,11 +212,11 @@ class SchemaDesignerEntity {
      * @param index index of the column
      * @returns true if the column has a foreign key dependency
      */
-    isForeignKey(index) {
-        const cells = this._graph.getChildCells(this._graph.getDefaultParent());
+    hasForeignKey(index) {
+        const cells = this.mxGraph.getChildCells(this.mxGraph.getDefaultParent());
         const vertex = cells.find(cell => cell.vertex && cell.value.name === this.name && cell.value.schema === this.schema);
         if (vertex) {
-            const edges = this._graph.getEdges(vertex);
+            const edges = this.mxGraph.getEdges(vertex);
             const outgoingEdges = edges.filter(edge => edge.source === vertex);
             for (const edge of outgoingEdges) {
                 if (edge.value.sourceRow - 1 === index) {
@@ -190,16 +231,16 @@ class SchemaDesignerEntity {
      * @param index index of the column
      * @returns column title
      */
-    getColumnTitle(index) {
+    getColumnTooltip(index) {
         const column = this.columns[index];
         let columnTitle = `${column.name}`;
         if (column.isPrimaryKey) {
             columnTitle += ` Primary key`;
         }
-        const cells = this._graph.getChildCells(this._graph.getDefaultParent());
+        const cells = this.mxGraph.getChildCells(this.mxGraph.getDefaultParent());
         const vertex = cells.find(cell => cell.vertex && cell.value.name === this.name && cell.value.schema === this.schema);
         if (vertex) {
-            const edges = this._graph.getEdges(vertex);
+            const edges = this.mxGraph.getEdges(vertex);
             const outgoingEdges = edges.filter(edge => edge.source === vertex);
             for (const edge of outgoingEdges) {
                 if (edge.value.sourceRow - 1 === index) {
@@ -209,10 +250,10 @@ class SchemaDesignerEntity {
         }
         return columnTitle;
     }
-    getWidth() {
+    get width() {
         return 400;
     }
-    getHeight() {
+    get height() {
         return Math.min(330, 52 + this.columns.length * 28) + 4;
     }
 }

@@ -10,52 +10,67 @@ const utils_1 = require("./utils");
 const schemaDesignerEntity_1 = require("./schemaDesignerEntity");
 const schemaDesignerLayout_1 = require("./schemaDesignerLayout");
 class SchemaDesigner {
-    constructor(_container, _config) {
-        this._container = _container;
-        this._config = _config;
+    constructor(container, config) {
+        this.container = container;
+        this.config = config;
+        /**
+         * Array of registered listeners for cell clicks
+         */
         this.cellClickListeners = [];
         this.initializeGraph();
     }
+    /**
+     * Sets up the mxGraph instance for the schema designer
+     */
     initializeGraph() {
         this.overwriteMxGraphDefaults();
-        this.addCustomEdgeTerminals();
-        this._editor = new mx_1.mxGraphFactory.mxEditor();
-        this._editor.setGraphContainer(this._container);
-        this._graph = this._editor.graph;
-        this._model = this._graph.getModel();
-        this.setupEditorOptions();
-        this.setupGraphOptions();
-        this.setupColors();
-        this.setupGraphOutlineOptions();
-        this.setupToolbar();
+        this.configureEdgeTerminals();
+        this.mxEditor = new mx_1.mxGraphFactory.mxEditor();
+        this.mxEditor.setGraphContainer(this.container);
+        this.mxGraph = this.mxEditor.graph;
+        this.mxModel = this.mxGraph.getModel();
+        this.configureMxEditor();
+        this.configureMxGraph();
+        this.applyColors();
+        this.configureMxOutline();
+        this.initializeToolbar();
     }
-    setupColors() {
+    /**
+     * Applies the colors from the config to the schema designer
+     */
+    applyColors() {
         const body = document.getElementsByTagName("body")[0];
-        body.style.setProperty("--sd-toolbar-background-color", this._config.colors.toolbarBackground);
-        body.style.setProperty("--sd-toolbar-foreground-color", this._config.colors.toolbarForeground);
-        body.style.setProperty("--sd-toolbar-hover-background-color", this._config.colors.toolbarHoverBackground);
-        body.style.setProperty("--sd-toolbar-divider-background-color", this._config.colors.toolbarDividerBackground);
-        body.style.setProperty("--sd-graph-background-color", this._config.colors.graphBackground);
-        body.style.setProperty("--sd-graph-grid-color", this._config.colors.graphGrid);
-        body.style.setProperty("--sd-border-color", this._config.colors.cellBorder);
-        body.style.setProperty("--sd-cell-html-foreground", this._config.colors.cellForeground);
-        body.style.setProperty("--sd-cell-html-hover-column-background", this._config.colors.cellColumnHover);
-        body.style.setProperty("--sd-cell-divider-color", this._config.colors.cellDivider);
-        body.style.setProperty("--sd-graph-background-color", this._config.colors.cellBackground);
-        this._graph.getStylesheet().getDefaultVertexStyle()["fillColor"] = this._config.colors.cellBackground;
-        this._graph.getStylesheet().getDefaultEdgeStyle()["strokeColor"] = this._config.colors.edge;
-        this._graph.getStylesheet().getDefaultVertexStyle()['cellHighlightColor'] = this._config.colors.cellHighlight;
-        this._graph.getStylesheet().getDefaultVertexStyle()['cellHightlightStrokeWidth'] = 3;
-        this._graph.getStylesheet().getDefaultEdgeStyle()['cellHighlightColor'] = this._config.colors.cellHighlight;
-        mx_1.mxGraphFactory.mxConstants.OUTLINE_HANDLE_FILLCOLOR = this._config.colors.cellHighlight;
-        mx_1.mxGraphFactory.mxConstants.OUTLINE_HANDLE_STROKECOLOR = this._config.colors.cellHighlight;
-        mx_1.mxGraphFactory.mxConstants.OUTLINE_COLOR = this._config.colors.cellHighlight;
+        body.style.setProperty("--sd-toolbar-background-color", this.config.colors.toolbarBackground);
+        body.style.setProperty("--sd-toolbar-foreground-color", this.config.colors.toolbarForeground);
+        body.style.setProperty("--sd-toolbar-hover-background-color", this.config.colors.toolbarHoverBackground);
+        body.style.setProperty("--sd-toolbar-divider-background-color", this.config.colors.toolbarDividerBackground);
+        body.style.setProperty("--sd-graph-background-color", this.config.colors.graphBackground);
+        body.style.setProperty("--sd-graph-grid-color", this.config.colors.graphGrid);
+        body.style.setProperty("--sd-border-color", this.config.colors.cellBorder);
+        body.style.setProperty("--sd-cell-html-foreground", this.config.colors.cellForeground);
+        body.style.setProperty("--sd-cell-html-hover-column-background", this.config.colors.cellColumnHover);
+        body.style.setProperty("--sd-cell-divider-color", this.config.colors.cellDivider);
+        body.style.setProperty("--sd-graph-background-color", this.config.colors.cellBackground);
+        this.mxGraph.getStylesheet().getDefaultVertexStyle()["fillColor"] = this.config.colors.cellBackground;
+        this.mxGraph.getStylesheet().getDefaultEdgeStyle()["strokeColor"] = this.config.colors.edge;
+        this.mxGraph.getStylesheet().getDefaultVertexStyle()['cellHighlightColor'] = this.config.colors.cellHighlight;
+        this.mxGraph.getStylesheet().getDefaultVertexStyle()['cellHightlightStrokeWidth'] = 3;
+        this.mxGraph.getStylesheet().getDefaultEdgeStyle()['cellHighlightColor'] = this.config.colors.cellHighlight;
+        mx_1.mxGraphFactory.mxConstants.OUTLINE_HANDLE_FILLCOLOR = this.config.colors.cellHighlight;
+        mx_1.mxGraphFactory.mxConstants.OUTLINE_HANDLE_STROKECOLOR = this.config.colors.cellHighlight;
+        mx_1.mxGraphFactory.mxConstants.OUTLINE_COLOR = this.config.colors.cellHighlight;
     }
+    /**
+     * Overwrites the default mxGraph settings
+     */
     overwriteMxGraphDefaults() {
         mx_1.mxGraphFactory.mxClient.NO_FO = true;
-        mx_1.mxGraphFactory.mxEvent.disableContextMenu(this._container);
+        mx_1.mxGraphFactory.mxEvent.disableContextMenu(this.container);
     }
-    addCustomEdgeTerminals() {
+    /**
+     * Configures the edge terminals for the schema designer for different cardinalities
+     */
+    configureEdgeTerminals() {
         mx_1.mxGraphFactory.mxMarker.addMarker("one", (canvas, _shape, _type, pe, unitX, unitY, size, _source, _sw, _filled) => {
             return () => {
                 const endX = pe.x - unitX * size;
@@ -90,26 +105,32 @@ class SchemaDesigner {
             };
         });
     }
-    setupEditorOptions() {
-        this._editor.layoutSwimlanes = true;
+    /**
+     * Configures the mxEditor instance for the schema designer
+     */
+    configureMxEditor() {
+        this.mxEditor.layoutSwimlanes = true;
     }
-    setupGraphOptions() {
-        this._graph.tooltipHandler.setEnabled(false);
-        this._graph.setConnectable(this._config.isEditable);
-        this._graph.setAllowDanglingEdges(false);
-        this._graph.setHtmlLabels(true);
-        this._graph.connectionHandler.enabled = this._config.isEditable;
-        this._graph.connectionHandler.movePreviewAway = false;
-        this._graph.connectionHandler.moveIconFront = true;
-        this._graph.connectionHandler.connectImage = new mx_1.mxGraphFactory.mxImage(this._config.icons.connectorIcon, 24, 24);
-        this._graph.connectionHandler.factoryMethod = null;
-        this._layout = new schemaDesignerLayout_1.SchemaDesignerLayout(this._graph);
-        this._graph.setCellsDisconnectable(false);
-        this._graph.autoSizeCellsOnAdd = true;
-        this._graph.getSelectionModel().setSingleSelection(true);
-        this._graph.setPanning(true);
-        this._graph.panningHandler.useLeftButtonForPanning = true;
-        this._graph.view.updateFloatingTerminalPoint = function (edge, start, end, source) {
+    /**
+     * Configures the mxGraph instance for the schema designer
+     */
+    configureMxGraph() {
+        this.mxGraph.tooltipHandler.setEnabled(false);
+        this.mxGraph.setConnectable(this.config.isEditable);
+        this.mxGraph.setAllowDanglingEdges(false);
+        this.mxGraph.setHtmlLabels(true);
+        this.mxGraph.connectionHandler.enabled = this.config.isEditable;
+        this.mxGraph.connectionHandler.movePreviewAway = false;
+        this.mxGraph.connectionHandler.moveIconFront = true;
+        this.mxGraph.connectionHandler.connectImage = new mx_1.mxGraphFactory.mxImage(this.config.icons.connectorIcon, 24, 24);
+        this.mxGraph.connectionHandler.factoryMethod = null;
+        this.mxLayout = new schemaDesignerLayout_1.SchemaDesignerLayout(this.mxGraph);
+        this.mxGraph.setCellsDisconnectable(false);
+        this.mxGraph.autoSizeCellsOnAdd = true;
+        this.mxGraph.getSelectionModel().setSingleSelection(true);
+        this.mxGraph.setPanning(true);
+        this.mxGraph.panningHandler.useLeftButtonForPanning = true;
+        this.mxGraph.view.updateFloatingTerminalPoint = function (edge, start, end, source) {
             var _a;
             const next = this.getNextPoint(edge, end, source);
             if (((_a = start === null || start === void 0 ? void 0 : start.text) === null || _a === void 0 ? void 0 : _a.node) === undefined) {
@@ -192,36 +213,36 @@ class SchemaDesigner {
             //     }
             // }
         };
-        this._graph.getLabel = (cell) => {
+        this.mxGraph.getLabel = (cell) => {
             var _a;
             if (((_a = cell === null || cell === void 0 ? void 0 : cell.value) === null || _a === void 0 ? void 0 : _a.render) !== undefined) {
                 return cell.value.render();
             }
             return document.createElement("div");
         };
-        this._graph.isHtmlLabel = (cell) => {
-            return !this._model.isEdge(cell);
+        this.mxGraph.isHtmlLabel = (cell) => {
+            return !this.mxModel.isEdge(cell);
         };
-        this._graph.isCellEditable = (_cell) => {
+        this.mxGraph.isCellEditable = (_cell) => {
             return false; //this._config.isEditable && !this._model.isEdge(cell);
         };
-        this._graph.isCellMovable = (cell) => {
-            return this._config.isEditable && !this._model.isEdge(cell) && cell.value.editor !== true;
+        this.mxGraph.isCellMovable = (cell) => {
+            return this.config.isEditable && !this.mxModel.isEdge(cell) && cell.value.editor !== true;
         };
-        this._graph.isCellResizable = (_cell) => {
+        this.mxGraph.isCellResizable = (_cell) => {
             return false;
         };
-        this._graph.isCellFoldable = (_cell) => {
+        this.mxGraph.isCellFoldable = (_cell) => {
             return false;
         };
-        this._graph.convertValueToString = function (cell) {
+        this.mxGraph.convertValueToString = function (cell) {
             var _a, _b;
             if (((_b = (_a = cell === null || cell === void 0 ? void 0 : cell.value) === null || _a === void 0 ? void 0 : _a.entity) === null || _b === void 0 ? void 0 : _b.name) !== undefined) {
                 return cell.value.entity.name;
             }
             return mx_1.mxGraphFactory.mxGraph.prototype.convertValueToString.apply(this, [cell]);
         };
-        this._graph.model.valueForCellChanged = function (cell, value) {
+        this.mxGraph.model.valueForCellChanged = function (cell, value) {
             const old = {
                 name: cell.value.name,
                 schema: cell.value.schema,
@@ -232,18 +253,19 @@ class SchemaDesigner {
             cell.value.columns = value.columns;
             return old;
         };
-        const oldRedrawLabel = this._graph.cellRenderer.redrawLabel;
-        this._graph.cellRenderer.redrawLabel = function (state) {
+        const oldRedrawLabel = this.mxGraph.cellRenderer.redrawLabel;
+        this.mxGraph.cellRenderer.redrawLabel = function (state) {
             oldRedrawLabel.apply(this, arguments); // super call;
             const graph = state.view.graph;
             const model = graph.model;
             if (model.isVertex(state.cell) && state.text !== null) {
-                if (state.cell.value.setupValueAndListeners !== undefined) {
-                    state.cell.value.setupValueAndListeners(state.text.node, state);
+                const value = state.cell.value;
+                if (value.setupEntityDOM !== undefined) {
+                    value.setupEntityDOM(state.text.node, state);
                 }
             }
         };
-        this._graph.connectionHandler.updateRow = function (target) {
+        this.mxGraph.connectionHandler.updateRow = function (target) {
             if (target === null) {
                 return target;
             }
@@ -255,7 +277,7 @@ class SchemaDesigner {
             return null;
         };
         // Adds placement of the connect icon based on the mouse event target (row)
-        this._graph.connectionHandler.updateIcons = function (state, icons, me) {
+        this.mxGraph.connectionHandler.updateIcons = function (state, icons, me) {
             const targetNode = me.getSource();
             const columnDiv = this.updateRow(targetNode);
             if (columnDiv !== null && this.currentRow !== undefined) {
@@ -283,8 +305,8 @@ class SchemaDesigner {
                 icons[0].node.style.visibility = "hidden";
             }
         };
-        const oldMouseMove = this._graph.connectionHandler.mouseMove;
-        this._graph.connectionHandler.mouseMove = function (_sender, me) {
+        const oldMouseMove = this.mxGraph.connectionHandler.mouseMove;
+        this.mxGraph.connectionHandler.mouseMove = function (_sender, me) {
             var _a;
             if (this.edgeState !== null) {
                 this.currentRowNode = this.updateRow(me.getSource());
@@ -309,7 +331,7 @@ class SchemaDesigner {
             }
             oldMouseMove.apply(this, arguments);
         };
-        this._graph.connectionHandler.createEdgeState = function (_me) {
+        this.mxGraph.connectionHandler.createEdgeState = function (_me) {
             const sourceCellState = this.currentState;
             const sourceCellValue = sourceCellState.cell.value;
             const targetColumnName = sourceCellValue.columns[this.currentRow ? this.currentRow - 1 : 0].name;
@@ -332,10 +354,10 @@ class SchemaDesigner {
             this.sourceRowNode = this.currentRowNode;
             return state;
         };
-        this._graph.connectionHandler.isValidTarget = function (_cell) {
+        this.mxGraph.connectionHandler.isValidTarget = function (_cell) {
             return this.currentRowNode !== null;
         };
-        this._graph.connectionHandler.validateConnection = function (source, target) {
+        this.mxGraph.connectionHandler.validateConnection = function (source, target) {
             if (this.edgeState === null) {
                 return null;
             }
@@ -373,7 +395,7 @@ class SchemaDesigner {
             }
             return null;
         };
-        this._graph.connectionHandler.getTargetPerimeterPoint = function (state, me) {
+        this.mxGraph.connectionHandler.getTargetPerimeterPoint = function (state, me) {
             let y = me.getY();
             if (this.currentRowNode !== null) {
                 y = (0, utils_1.getRowY)(state, this.currentRowNode);
@@ -384,7 +406,7 @@ class SchemaDesigner {
             }
             return new mx_1.mxGraphFactory.mxPoint(x, y);
         };
-        this._graph.connectionHandler.getSourcePerimeterPoint = function (state, next, me) {
+        this.mxGraph.connectionHandler.getSourcePerimeterPoint = function (state, next, me) {
             let y = me.getY();
             if (this.sourceRowNode !== null) {
                 y = (0, utils_1.getRowY)(state, this.sourceRowNode);
@@ -396,111 +418,128 @@ class SchemaDesigner {
             }
             return new mx_1.mxGraphFactory.mxPoint(x, y);
         };
-        this._graph.connectionHandler.addListener(mx_1.mxGraphFactory.mxEvent.CONNECT, (_sender, evt) => {
+        this.mxGraph.connectionHandler.addListener(mx_1.mxGraphFactory.mxEvent.CONNECT, (_sender, evt) => {
             const edge = evt.getProperty('cell');
-            const source = this._graph.getModel().getTerminal(edge, true);
-            this._graph.view.invalidate(source, false, false);
-            this._graph.view.validate(source);
+            const source = this.mxGraph.getModel().getTerminal(edge, true);
+            this.mxGraph.view.invalidate(source, false, false);
+            this.mxGraph.view.validate(source);
         });
-        this._graph.addListener(mx_1.mxGraphFactory.mxEvent.REMOVE_CELLS, (_sender, evt) => {
+        this.mxGraph.addListener(mx_1.mxGraphFactory.mxEvent.REMOVE_CELLS, (_sender, evt) => {
             const removedCell = evt.properties.cells[0];
             if (removedCell !== undefined && removedCell.edge) {
-                const source = this._graph.getModel().getTerminal(removedCell, true);
-                this._graph.view.invalidate(source, false, false);
-                this._graph.view.validate(source);
+                const source = this.mxGraph.getModel().getTerminal(removedCell, true);
+                this.mxGraph.view.invalidate(source, false, false);
+                this.mxGraph.view.validate(source);
             }
         });
-        this._graph.addListener(mx_1.mxGraphFactory.mxEvent.DOUBLE_CLICK, (_sender, _evt) => {
-            const cell = this._graph.getSelectionCell();
+        this.mxGraph.addListener(mx_1.mxGraphFactory.mxEvent.DOUBLE_CLICK, (_sender, _evt) => {
+            const cell = this.mxGraph.getSelectionCell();
             if (cell !== undefined) {
                 this.cellClickListeners.forEach((listener) => listener(cell));
             }
         });
-        this._graph.getStylesheet().getDefaultEdgeStyle()['edgeStyle'] = mx_1.mxGraphFactory.mxEdgeStyle.ElbowConnector;
+        this.mxGraph.getStylesheet().getDefaultEdgeStyle()['edgeStyle'] = mx_1.mxGraphFactory.mxEdgeStyle.ElbowConnector;
     }
-    set currentCellUnderEdit(value) {
-        if (this._currentCellUnderEdit !== undefined && value.cell.id !== this._currentCellUnderEdit.cell.id) {
-            this._currentCellUnderEdit.cell.value.editor = false;
-        }
-        this._currentCellUnderEdit = value;
-    }
-    setupGraphOutlineOptions() {
+    /**
+     * Configures the mxGraph outline for the schema designer
+     */
+    configureMxOutline() {
         const outlineContainer = document.createElement("div");
         outlineContainer.classList.add("sd-outline");
-        this._container.appendChild(outlineContainer);
-        new mx_1.mxGraphFactory.mxOutline(this._graph, outlineContainer);
+        this.container.appendChild(outlineContainer);
+        new mx_1.mxGraphFactory.mxOutline(this.mxGraph, outlineContainer);
     }
-    setupToolbar() {
+    /**
+     * Initializes the toolbar for the schema designer
+     */
+    initializeToolbar() {
         const toolbarBelt = document.createElement("div");
         toolbarBelt.classList.add("sd-toolbar-belt");
-        this._container.parentElement.appendChild(toolbarBelt);
-        this._toolbar = new schemaDesignerToolbar_1.SchemaDesignerToolbar(toolbarBelt, this._graph, this._config);
-        if (this._config.isEditable) {
-            this._toolbar.addButton(this._config.icons.addTableIcon, "Add Table", () => {
+        this.container.parentElement.appendChild(toolbarBelt);
+        this.toolbar = new schemaDesignerToolbar_1.SchemaDesignerToolbar(toolbarBelt, this.mxGraph, this.config);
+        if (this.config.isEditable) {
+            this.toolbar.addButton(this.config.icons.addTableIcon, "Add Table", () => {
             }, (_graph, evt, _cell) => {
-                this._graph.stopEditing(false);
-                const pt = this._graph.getPointForEvent(evt, true);
-                const entity = this.createNewTable();
+                this.mxGraph.stopEditing(false);
+                const pt = this.mxGraph.getPointForEvent(evt, true);
+                const entity = this.createEntity();
                 const cell = this.renderEntity(entity, pt.x, pt.y);
                 // Get cell state
-                const state = this._graph.view.getState(cell);
+                const state = this.mxGraph.view.getState(cell);
                 if (state !== undefined) {
-                    cell.value.edit(state);
+                    cell.value.editEntity(state);
                 }
             });
-            this._toolbar.addDivider();
-            this._toolbar.addButton(this._config.icons.undoIcon, "Undo", () => {
-                this._editor.execute("undo");
+            this.toolbar.addDivider();
+            this.toolbar.addButton(this.config.icons.undoIcon, "Undo", () => {
+                this.mxEditor.execute("undo");
             });
-            this._toolbar.addButton(this._config.icons.redoIcon, "Redo", () => {
-                this._editor.execute("redo");
+            this.toolbar.addButton(this.config.icons.redoIcon, "Redo", () => {
+                this.mxEditor.execute("redo");
             });
-            this._toolbar.addDivider();
+            this.toolbar.addDivider();
         }
-        this._toolbar.addButton(this._config.icons.zoomInIcon, "Zoom In", () => {
-            this._editor.execute("zoomIn");
+        this.toolbar.addButton(this.config.icons.zoomInIcon, "Zoom In", () => {
+            this.mxEditor.execute("zoomIn");
             this.redrawEdges();
-            this.updateEditorLocation();
+            this.updateEditorPosition();
         });
-        this._toolbar.addButton(this._config.icons.zoomOutIcon, "Zoom Out", () => {
-            this._editor.execute("zoomOut");
+        this.toolbar.addButton(this.config.icons.zoomOutIcon, "Zoom Out", () => {
+            this.mxEditor.execute("zoomOut");
             this.redrawEdges();
-            this.updateEditorLocation();
+            this.updateEditorPosition();
         });
-        this._toolbar.addButton(this._config.icons.zoomFitIcon, "Fit", () => {
-            this._graph.fit(undefined);
-            this.updateEditorLocation();
+        this.toolbar.addButton(this.config.icons.zoomFitIcon, "Fit", () => {
+            this.mxGraph.fit(undefined);
+            this.updateEditorPosition();
         });
-        this._toolbar.addDivider();
-        this._toolbar.addButton(this._config.icons.autoArrangeCellsIcon, "Auto Arrange", () => {
-            this.autoArrange();
+        this.toolbar.addDivider();
+        this.toolbar.addButton(this.config.icons.autoArrangeCellsIcon, "Auto Arrange", () => {
+            this.autoLayout();
         });
-        if (this._config.isEditable) {
-            this._toolbar.addDivider();
-            this._toolbar.addButton(this._config.icons.deleteIcon, "Delete", () => {
-                const cell = this._graph.getSelectionCell();
+        if (this.config.isEditable) {
+            this.toolbar.addDivider();
+            this.toolbar.addButton(this.config.icons.deleteIcon, "Delete", () => {
+                const cell = this.mxGraph.getSelectionCell();
                 if (cell !== undefined) {
-                    this._editor.execute("delete", cell);
+                    this.mxEditor.execute("delete", cell);
                 }
             });
         }
     }
+    /**
+     * Redraws the edges in the schema designer
+     */
     redrawEdges() {
-        const cells = this._model.getChildCells(this._graph.getDefaultParent());
+        const cells = this.mxModel.getChildCells(this.mxGraph.getDefaultParent());
         for (let i = 0; i < cells.length; i++) {
             if (!cells[i].edge) {
                 continue;
             }
             const edge = cells[i];
-            this._graph.view.invalidate(edge, true, false);
-            this._graph.view.validate(edge);
+            this.mxGraph.view.invalidate(edge, true, false);
+            this.mxGraph.view.validate(edge);
         }
     }
-    renderModel(schema, cleanUndoManager = false) {
-        const parent = this._graph.getDefaultParent();
-        this._model.beginUpdate();
+    /**
+     * Sets the current cell under edit
+     */
+    set activeCellState(value) {
+        if (this._activeCellState !== undefined && value.cell.id !== this._activeCellState.cell.id) {
+            this._activeCellState.cell.value.editor = false;
+        }
+        this._activeCellState = value;
+    }
+    /**
+     * Renders the schema in the schema designer
+     * @param schema The schema to render
+     * @param cleanUndoManager Whether to clean the undo manager so that the user can't undo the rendering
+     */
+    renderSchema(schema, cleanUndoManager = false) {
+        const parent = this.mxGraph.getDefaultParent();
+        this.mxModel.beginUpdate();
         try {
-            this._graph.removeCells(this._model.getChildCells(parent));
+            this.mxGraph.removeCells(this.mxModel.getChildCells(parent));
             const entities = schema.entities;
             for (let i = 0; i < entities.length; i++) {
                 const entity = entities[i];
@@ -512,41 +551,53 @@ class SchemaDesigner {
             }
         }
         finally {
-            this._model.endUpdate();
-            this._graph.view.refresh();
+            this.mxModel.endUpdate();
+            this.mxGraph.view.refresh();
             const parentCells = [];
-            for (let i = 0; i < this._model.cells.length; i++) {
-                if (this._model.cells[i].vertex) {
-                    if (this._model.getIncomingEdges(this._model.cells[i]).length === 0) {
-                        parentCells.push(this._model.cells[i]);
+            for (let i = 0; i < this.mxModel.cells.length; i++) {
+                if (this.mxModel.cells[i].vertex) {
+                    if (this.mxModel.getIncomingEdges(this.mxModel.cells[i]).length === 0) {
+                        parentCells.push(this.mxModel.cells[i]);
                     }
                 }
             }
-            this.autoArrange();
+            this.autoLayout();
             if (cleanUndoManager) {
-                this._editor.undoManager.clear();
+                this.mxEditor.undoManager.clear();
             }
         }
     }
+    /**
+     * Renders an entity in the schema designer
+     * @param entity The entity to render
+     * @param x the x position to render the entity at
+     * @param y the y position to render the entity at
+     * @returns The cell that was rendered
+     */
     renderEntity(entity, x, y) {
-        const entityValue = new schemaDesignerEntity_1.SchemaDesignerEntity(entity, this._config, this._graph, this);
-        const entityCell = new mx_1.mxGraphFactory.mxCell(entityValue, new mx_1.mxGraphFactory.mxGeometry(0, 0, entityValue.getWidth(), entityValue.getHeight()));
+        const entityValue = new schemaDesignerEntity_1.SchemaDesignerEntity(entity, this);
+        const entityCell = new mx_1.mxGraphFactory.mxCell(entityValue, new mx_1.mxGraphFactory.mxGeometry(0, 0, entityValue.width, entityValue.height));
         entityCell.setVertex(true);
-        this._model.beginUpdate();
+        this.mxModel.beginUpdate();
         try {
             entityCell.geometry.x = x;
             entityCell.geometry.y = y;
             entityCell.geometry.alternateBounds = new mx_1.mxGraphFactory.mxRectangle(0, 0, entityCell.geometry.width, entityCell.geometry.height);
-            this._graph.addCell(entityCell, this._graph.getDefaultParent());
+            this.mxGraph.addCell(entityCell, this.mxGraph.getDefaultParent());
         }
         finally {
-            this._model.endUpdate();
+            this.mxModel.endUpdate();
         }
-        this._graph.setSelectionCell(entityCell);
+        this.mxGraph.setSelectionCell(entityCell);
         return entityCell;
     }
+    /**
+     * Renders a relationship in the schema designer
+     * @param relationship The relationship to render
+     * @returns The edge that was rendered
+     */
     renderRelationship(relationship) {
-        const cells = this._model.getChildCells(this._graph.getDefaultParent());
+        const cells = this.mxModel.getChildCells(this.mxGraph.getDefaultParent());
         const source = cells.find((cell) => cell.value.name === relationship.entity && cell.value.schema === relationship.schemaName);
         const target = cells.find((cell) => cell.value.name === relationship.referencedEntity && cell.value.schema === relationship.referencedSchema);
         if (source === undefined || target === undefined) {
@@ -565,18 +616,21 @@ class SchemaDesigner {
             referencedColumn: relationship.referencedColumn,
             schemaName: relationship.schemaName
         };
-        this._graph.insertEdge(this._graph.getDefaultParent(), null, edgeValue, source, target);
-        this._graph.view.invalidate(source, false, false);
-        this._graph.view.validate(source);
-        this._graph.view.invalidate(target, false, false);
-        this._graph.view.validate(target);
+        this.mxGraph.insertEdge(this.mxGraph.getDefaultParent(), null, edgeValue, source, target);
+        this.mxGraph.view.invalidate(source, false, false);
+        this.mxGraph.view.validate(source);
+        this.mxGraph.view.invalidate(target, false, false);
+        this.mxGraph.view.validate(target);
     }
+    /**
+     * Gets the current schema from the schema designer
+     */
     get schema() {
         const schema = {
             entities: [],
             relationships: []
         };
-        const cells = this._model.getChildCells(this._graph.getDefaultParent());
+        const cells = this.mxModel.getChildCells(this.mxGraph.getDefaultParent());
         for (let i = 0; i < cells.length; i++) {
             const cell = cells[i];
             if (cell.vertex) {
@@ -604,31 +658,51 @@ class SchemaDesigner {
         }
         return schema;
     }
-    autoArrange() {
-        this._model.beginUpdate();
-        this._layout.execute(this._graph.getDefaultParent());
-        this._model.endUpdate();
+    /**
+     * Automatically arranges the cells in the schema designer
+     */
+    autoLayout() {
+        this.mxModel.beginUpdate();
+        this.mxLayout.execute(this.mxGraph.getDefaultParent());
+        this.mxModel.endUpdate();
     }
+    /**
+     * Registers a listener for cell clicks
+     * @param listener The listener to register
+     */
     addCellClickListener(listener) {
         this.cellClickListeners.push(listener);
     }
+    /**
+     * Scrolls to a cell in the schema designer
+     * @param cell The cell to scroll to
+     */
     scrollToCell(cell) {
-        this._graph.scrollCellToVisible(cell, true);
+        this.mxGraph.scrollCellToVisible(cell, true);
     }
-    updateEditorLocation() {
-        this._config.updateEditorPosition(this._currentCellUnderEdit.x, this._currentCellUnderEdit.y, this._graph.view.scale);
+    /**
+     * Updates the position of the editor in the schema designer. This is called
+     * when the graph scales or when the graph is moved
+     */
+    updateEditorPosition() {
+        this.config.updateEditorPosition(this._activeCellState.x, this._activeCellState.y, this.mxGraph.view.scale);
     }
-    getRelationships(stateCell) {
+    /**
+     * Gets the relationships of an entity
+     * @param entityCellState The cell state of the entity
+     * @returns The relationships of the entity
+     */
+    getEntityRelationships(entityCellState) {
         const outgoing = [];
         const incoming = [];
-        const cells = this._model.getChildCells(this._graph.getDefaultParent());
+        const cells = this.mxModel.getChildCells(this.mxGraph.getDefaultParent());
         for (let i = 0; i < cells.length; i++) {
             const cell = cells[i];
             if (cell.edge) {
-                if (cell.source.id === stateCell.cell.id) {
+                if (cell.source.id === entityCellState.cell.id) {
                     outgoing.push(cell);
                 }
-                else if (cell.target.id === stateCell.cell.id) {
+                else if (cell.target.id === entityCellState.cell.id) {
                     incoming.push(cell);
                 }
             }
@@ -638,7 +712,11 @@ class SchemaDesigner {
             incoming
         };
     }
-    createNewTable() {
+    /**
+     * Creates a new entity
+     * @returns The new entity
+     */
+    createEntity() {
         let index = 1;
         let name = `Table${index}`;
         for (this.schema.entities.length; this.schema.entities.find((entity) => entity.name === name); index++) {
@@ -658,26 +736,32 @@ class SchemaDesigner {
             ]
         };
     }
-    editedEntity(editedEntity, editedOutgoingEdges) {
-        this._graph.model.beginUpdate();
-        const state = this._currentCellUnderEdit;
+    /**
+     * Updates the active cell state entity
+     * @param editedEntity describes the new entity
+     * @param editedOutgoingEdges describes the new relationships
+     * @returns void
+     */
+    updateActiveCellStateEntity(editedEntity, editedOutgoingEdges) {
+        this.mxGraph.model.beginUpdate();
+        const state = this._activeCellState;
         if (state === undefined) {
             return;
         }
-        const relationships = this.getRelationships(state);
-        this._graph.labelChanged(state.cell, {
+        const relationships = this.getEntityRelationships(state);
+        this.mxGraph.labelChanged(state.cell, {
             name: editedEntity.name,
             schema: editedEntity.schema,
             columns: editedEntity.columns
         });
         state.cell.value.editor = false;
         const cellValue = state.cell.value;
-        this._graph.resizeCell(state.cell, new mx_1.mxGraphFactory.mxRectangle(state.x, state.y, cellValue.getWidth(), cellValue.getHeight()), true);
-        this._graph.refresh(state.cell);
+        this.mxGraph.resizeCell(state.cell, new mx_1.mxGraphFactory.mxRectangle(state.x, state.y, cellValue.width, cellValue.height), true);
+        this.mxGraph.refresh(state.cell);
         // Delete all edges;
-        const edges = this._graph.getEdges(state.cell);
+        const edges = this.mxGraph.getEdges(state.cell);
         edges.forEach(e => {
-            this._graph.getModel().remove(e);
+            this.mxGraph.getModel().remove(e);
         });
         // Add new incoming edges
         relationships.incoming.forEach((edge) => {
@@ -693,8 +777,8 @@ class SchemaDesigner {
             this.renderRelationship(edge);
         });
         // Update the cell position
-        this.autoArrange();
-        this._graph.model.endUpdate();
+        this.autoLayout();
+        this.mxGraph.model.endUpdate();
     }
 }
 exports.SchemaDesigner = SchemaDesigner;

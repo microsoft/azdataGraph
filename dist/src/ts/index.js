@@ -23,3 +23,6 @@ const mxgraph_1 = __importDefault(require("mxgraph"));
 exports.mx = mxgraph_1.default;
 __exportStar(require("mxgraph"), exports);
 __exportStar(require("./schemaDesigner/schemaDesigner"), exports);
+__exportStar(require("./schemaDesigner/schemaDesignerInterfaces"), exports);
+__exportStar(require("./schemaDesigner/schemaDesignerEntity"), exports);
+__exportStar(require("./schemaDesigner/schemaDesignerToolbar"), exports);
