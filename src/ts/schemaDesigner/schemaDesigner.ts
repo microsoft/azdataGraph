@@ -520,28 +520,13 @@ export class SchemaDesigner {
                 (_graph, evt, _cell) => {
                     this._graph.stopEditing(false);
                     const pt = this._graph.getPointForEvent(evt, true);
-                    const entity: IEntity = {
-                        name: "New Table",
-                        schema: "dbo",
-                        columns: [{
-                            name: "Column1",
-                            dataType: "int",
-                            isPrimaryKey: true,
-                            isIdentity: true
-                        }, {
-                            name: "Column2",
-                            dataType: "int",
-                            isPrimaryKey: false,
-                            isIdentity: false
-                        }, {
-                            name: "Column2",
-                            dataType: "int",
-                            isPrimaryKey: false,
-                            isIdentity: false
-                        }]
-                    };
-
-                    this.renderEntity(entity, pt.x, pt.y);
+                    const entity: IEntity = this.createNewTable();
+                    const cell = this.renderEntity(entity, pt.x, pt.y);
+                    // Get cell state
+                    const state = this._graph.view.getState(cell);
+                    if(state !== null) {
+                        (cell.value as SchemaDesignerEntity).edit(state);
+                    }
                 }
             );
             this._toolbar.addDivider();
@@ -663,7 +648,7 @@ export class SchemaDesigner {
         }
     }
 
-    private renderEntity(entity: IEntity, x: number, y: number) {
+    private renderEntity(entity: IEntity, x: number, y: number): mxCell {
         const entityValue = new SchemaDesignerEntity(entity, this._config, this._graph, this);
         const entityCell = new mx.mxCell(
             entityValue,
@@ -685,6 +670,7 @@ export class SchemaDesigner {
             this._model.endUpdate();
         }
         this._graph.setSelectionCell(entityCell);
+        return entityCell;
     }
 
     public renderRelationship(relationship: IRelationship) {
@@ -787,6 +773,29 @@ export class SchemaDesigner {
             outgoing,
             incoming
         };
+    }
+
+    private createNewTable(): IEntity {
+        let index = 1;
+        let name = `Table${index}`;
+        for (this.schema.entities.length; this.schema.entities.find((entity) => entity.name === name); index++) {
+            name = `Table${index}`;
+        }
+        const schemas = new Set(this.schema.entities.map((entity) => entity.schema));
+
+        return {
+            name: name,
+            schema: schemas.size > 0 ? Array.from(schemas)[0] : 'dbo',
+            columns: [
+                {
+                    name: "column_1",
+                    dataType: "int",
+                    isPrimaryKey: true,
+                    isIdentity: true,
+                }
+            ]
+        }
+
     }
 }
 
