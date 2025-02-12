@@ -10,7 +10,6 @@
       import { schemaDesignerConfig } from "./schemas/schema_designer_config.js";
       import { ecommerceDemoSchema } from "./schemas/schema_ecommerce_demo.js";
       window.onload = () => {
-        let donePromise;
         let currentEntity = undefined;
         let currentRelationships = undefined;
         const targetDiv1 = document.getElementById("graphContainer");
@@ -22,7 +21,7 @@
         if (targetDiv1) {
           const schemaDesigner = new SchemaDesigner(targetDiv1, {
             ...schemaDesignerConfig,
-            editEntity: async (
+            editEntity: (
               cell,
               x,
               y,
@@ -41,10 +40,6 @@
               document.getElementById("title").innerText = cell.value.name;
               currentEntity = cell.value;
               currentRelationships = outgoingEdges.map((edge) => edge.value);
-              const callback = await new Promise(
-                (resolve) => (donePromise = { resolve })
-              );
-              return callback;
             },
             updateEditorPosition: (x, y, scale) => {
               floatingDiv.style.left = `${x}px`;
@@ -69,19 +64,19 @@
           schemaDesigner.addCellClickListener((cell) => {
             console.log(cell);
           });
+          document.getElementById("done-btn").addEventListener("click", () => {
+            floatingDiv.style.display = "none";
+            if (schemaDesigner) {
+              schemaDesigner.editedEntity(
+                {
+                  ...currentEntity,
+                  name: currentEntity.name + " (edited)",
+                },
+                currentRelationships
+              )
+            }
+          });
         }
-        document.getElementById("done-btn").addEventListener("click", () => {
-          floatingDiv.style.display = "none";
-          if (donePromise) {
-            donePromise.resolve({
-              editedEntity: {
-                ...currentEntity,
-                name: currentEntity.name + " (edited)",
-              },
-              editedOutgoingEdges: currentRelationships,
-            });
-          }
-        });
       };
     </script>
     <style>
