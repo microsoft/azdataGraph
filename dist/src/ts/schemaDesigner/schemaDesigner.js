@@ -444,7 +444,7 @@ class SchemaDesigner {
                 const cell = this.renderEntity(entity, pt.x, pt.y);
                 // Get cell state
                 const state = this._graph.view.getState(cell);
-                if (state !== null) {
+                if (state !== undefined) {
                     cell.value.edit(state);
                 }
             });
@@ -657,6 +657,44 @@ class SchemaDesigner {
                 }
             ]
         };
+    }
+    editedEntity(editedEntity, editedOutgoingEdges) {
+        this._graph.model.beginUpdate();
+        const state = this._currentCellUnderEdit;
+        if (state === undefined) {
+            return;
+        }
+        const relationships = this.getRelationships(state);
+        this._graph.labelChanged(state.cell, {
+            name: editedEntity.name,
+            schema: editedEntity.schema,
+            columns: editedEntity.columns
+        });
+        state.cell.value.editor = false;
+        const cellValue = state.cell.value;
+        this._graph.resizeCell(state.cell, new mx_1.mxGraphFactory.mxRectangle(state.x, state.y, cellValue.getWidth(), cellValue.getHeight()), true);
+        this._graph.refresh(state.cell);
+        // Delete all edges;
+        const edges = this._graph.getEdges(state.cell);
+        edges.forEach(e => {
+            this._graph.getModel().remove(e);
+        });
+        // Add new incoming edges
+        relationships.incoming.forEach((edge) => {
+            // update the name and schema of the entity
+            edge.value.referencedEntity = editedEntity.name;
+            edge.value.referencedSchema = editedEntity.schema;
+            this.renderRelationship(edge.value);
+        });
+        // Add new outgoing edges
+        editedOutgoingEdges.forEach((edge) => {
+            edge.entity = editedEntity.name;
+            edge.schemaName = editedEntity.schema;
+            this.renderRelationship(edge);
+        });
+        // Update the cell position
+        this.autoArrange();
+        this._graph.model.endUpdate();
     }
 }
 exports.SchemaDesigner = SchemaDesigner;

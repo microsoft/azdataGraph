@@ -494,7 +494,7 @@ export class SchemaDesigner {
     public set currentCellUnderEdit(value: mxCellState) {
         if (this._currentCellUnderEdit !== undefined && value.cell.id !== this._currentCellUnderEdit.cell.id
         ) {
-            this._currentCellUnderEdit.cell.value.editor = false;
+            this._currentCellUnderEdit.cell.value.editor = false;  
         }
         this._currentCellUnderEdit = value;
     }
@@ -524,7 +524,7 @@ export class SchemaDesigner {
                     const cell = this.renderEntity(entity, pt.x, pt.y);
                     // Get cell state
                     const state = this._graph.view.getState(cell);
-                    if(state !== null) {
+                    if(state !== undefined) {
                         (cell.value as SchemaDesignerEntity).edit(state);
                     }
                 }
@@ -795,6 +795,54 @@ export class SchemaDesigner {
                 }
             ]
         }
+
+    }
+
+    public editedEntity(editedEntity: IEntity, editedOutgoingEdges: IRelationship[]) {
+        this._graph.model.beginUpdate();
+        const state = this._currentCellUnderEdit;
+        if(state === undefined) {
+            return;
+        }
+        
+        const relationships = this.getRelationships(state);
+        this._graph.labelChanged(state.cell, {
+            name: editedEntity.name,
+            schema: editedEntity.schema,
+            columns: editedEntity.columns
+        });
+        state.cell.value.editor = false;
+
+        const cellValue = state.cell.value as SchemaDesignerEntity;
+
+        this._graph.resizeCell(state.cell, new mx.mxRectangle(state.x, state.y, cellValue.getWidth(), cellValue.getHeight()), true);
+        this._graph.refresh(state.cell);
+        
+        // Delete all edges;
+        const edges = this._graph.getEdges(state.cell);
+        edges.forEach(e => {
+            this._graph.getModel().remove(e);
+        });
+
+        // Add new incoming edges
+        relationships.incoming.forEach((edge) => {
+            // update the name and schema of the entity
+            (edge.value as EdgeCellValue).referencedEntity = editedEntity.name;
+            (edge.value as EdgeCellValue).referencedSchema = editedEntity.schema;
+            this.renderRelationship(edge.value);
+        });
+
+        // Add new outgoing edges
+        editedOutgoingEdges.forEach((edge) => {
+            (edge as EdgeCellValue).entity = editedEntity.name;
+            (edge as EdgeCellValue).schemaName = editedEntity.schema;
+            this.renderRelationship(edge);
+        });
+
+        // Update the cell position
+        this.autoArrange();
+
+        this._graph.model.endUpdate();
 
     }
 }

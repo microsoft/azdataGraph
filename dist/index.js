@@ -43429,39 +43429,10 @@ var SchemaDesignerEntity = class {
     }
   }
   async edit(state) {
-    const previouslyEditedCell = this._schemaDesigner.currentCellUnderEdit;
-    if (previouslyEditedCell) {
-      previouslyEditedCell.cell.value.editing = false;
-    }
-    this.editor = true;
     this._schemaDesigner.currentCellUnderEdit = state;
+    this.editor = true;
     const relationships = this._schemaDesigner.getRelationships(state);
-    this.graph.model.beginUpdate();
-    const { editedEntity, editedOutgoingEdges } = await this._config.editEntity(state.cell, state.x, state.y, this._graph.view.scale, relationships.incoming, relationships.outgoing, this._schemaDesigner.schema);
-    this.graph.cellLabelChanged(state.cell, {
-      name: editedEntity.name,
-      schema: editedEntity.schema,
-      columns: editedEntity.columns
-    }, true);
-    this.editor = false;
-    this.graph.resizeCell(state.cell, new mxGraphFactory.mxRectangle(state.x, state.y, this.getWidth(), this.getHeight()), true);
-    this.graph.refresh(state.cell);
-    const edges = this._graph.getEdges(state.cell);
-    edges.forEach((e) => {
-      this._graph.getModel().remove(e);
-    });
-    relationships.incoming.forEach((edge) => {
-      edge.value.referencedEntity = editedEntity.name;
-      edge.value.referencedSchema = editedEntity.schema;
-      this._schemaDesigner.renderRelationship(edge.value);
-    });
-    editedOutgoingEdges.forEach((edge) => {
-      edge.entity = editedEntity.name;
-      edge.schemaName = editedEntity.schema;
-      this._schemaDesigner.renderRelationship(edge);
-    });
-    this._schemaDesigner.autoArrange();
-    this.graph.model.endUpdate();
+    await this._config.editEntity(state.cell, state.x, state.y, this._graph.view.scale, relationships.incoming, relationships.outgoing, this._schemaDesigner.schema);
   }
   addListeners(div, type, callback) {
     this.listeners.push({
@@ -44069,7 +44040,7 @@ var SchemaDesigner = class {
           const entity = this.createNewTable();
           const cell2 = this.renderEntity(entity, pt.x, pt.y);
           const state = this._graph.view.getState(cell2);
-          if (state !== null) {
+          if (state !== void 0) {
             cell2.value.edit(state);
           }
         }
@@ -44315,6 +44286,39 @@ var SchemaDesigner = class {
         }
       ]
     };
+  }
+  editedEntity(editedEntity, editedOutgoingEdges) {
+    this._graph.model.beginUpdate();
+    const state = this._currentCellUnderEdit;
+    if (state === void 0) {
+      return;
+    }
+    const relationships = this.getRelationships(state);
+    this._graph.labelChanged(state.cell, {
+      name: editedEntity.name,
+      schema: editedEntity.schema,
+      columns: editedEntity.columns
+    });
+    state.cell.value.editor = false;
+    const cellValue = state.cell.value;
+    this._graph.resizeCell(state.cell, new mxGraphFactory.mxRectangle(state.x, state.y, cellValue.getWidth(), cellValue.getHeight()), true);
+    this._graph.refresh(state.cell);
+    const edges = this._graph.getEdges(state.cell);
+    edges.forEach((e) => {
+      this._graph.getModel().remove(e);
+    });
+    relationships.incoming.forEach((edge) => {
+      edge.value.referencedEntity = editedEntity.name;
+      edge.value.referencedSchema = editedEntity.schema;
+      this.renderRelationship(edge.value);
+    });
+    editedOutgoingEdges.forEach((edge) => {
+      edge.entity = editedEntity.name;
+      edge.schemaName = editedEntity.schema;
+      this.renderRelationship(edge);
+    });
+    this.autoArrange();
+    this._graph.model.endUpdate();
   }
 };
 var export_mx = import_mxgraph2.default;

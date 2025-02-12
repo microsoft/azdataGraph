@@ -161,12 +161,8 @@ export interface SchemaDesignerConfig {
      * @param x x coordinate of the editor
      * @param y y coordinate of the editor
      * @param scale scale of the graph
-     * @returns entity edited
      */
-    editEntity: (cell: mxCell, x: number, y: number, scale: number, incomingEdges: mxCell[], outgoingEdges: mxCell[], model: ISchema) => Promise<{
-        editedEntity: IEntity;
-        editedOutgoingEdges: IRelationship[];
-    }>;
+    editEntity: (cell: mxCell, x: number, y: number, scale: number, incomingEdges: mxCell[], outgoingEdges: mxCell[], model: ISchema) => void;
     /**
      * Callback to show the editor to edit the relationship
      * @param cell cell to edit

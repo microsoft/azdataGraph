@@ -1,5 +1,5 @@
 import { mxCellState, mxGraph, mxGraphModel } from "mxgraph";
-import { EdgeCellValue, IColumn, IEntity, SchemaDesignerConfig } from "./schemaDesignerInterfaces";
+import { IColumn, IEntity, SchemaDesignerConfig } from "./schemaDesignerInterfaces";
 import createColor from "create-color";
 import { mxGraphFactory as mx } from '../mx';
 import { SchemaDesigner } from "./schemaDesigner";
@@ -10,6 +10,7 @@ export class SchemaDesignerEntity implements IEntity {
     public columns: IColumn[];
     public editor!: boolean;
     public parentDiv!: HTMLElement;
+    public editPromise!: Promise<void>;
 
     private listeners: { target: HTMLElement, eventName: string, callback?: any }[] = [];
 
@@ -61,62 +62,10 @@ export class SchemaDesignerEntity implements IEntity {
     }
 
     public async edit(state: mxCellState): Promise<void> {
-        const previouslyEditedCell = this._schemaDesigner.currentCellUnderEdit;
-        if (previouslyEditedCell) {
-            previouslyEditedCell.cell.value.editing = false;
-        }
-        this.editor = true;
         this._schemaDesigner.currentCellUnderEdit = state;
+        this.editor = true;
         const relationships = this._schemaDesigner.getRelationships(state);
-
-        this.graph.model.beginUpdate();
-
-        // Callback to edit the entity
-        const { editedEntity, editedOutgoingEdges } = await this._config.editEntity(state.cell, state.x, state.y, this._graph.view.scale, relationships.incoming, relationships.outgoing, this._schemaDesigner.schema);
-
-        // Using this.graph.cellLabelChanged to update the cell label with undo/redo support
-        this.graph.cellLabelChanged(state.cell, {
-            name: editedEntity.name,
-            schema: editedEntity.schema,
-            columns: editedEntity.columns
-        }, true);
-
-        // Update the entity
-        // this.name = editedEntity.name;
-        // this.schema = editedEntity.schema;
-        // this.columns = editedEntity.columns;
-
-        // Update the entity cell in the graph
-        this.editor = false;
-        // this.graph.cellRenderer.redraw(state, true); Not need because the refresh takes care of it
-        this.graph.resizeCell(state.cell, new mx.mxRectangle(state.x, state.y, this.getWidth(), this.getHeight()), true);
-        this.graph.refresh(state.cell);
-        //this.graph.refresh(this.graph.getDefaultParent());
-        // Delete all edges;
-        const edges = this._graph.getEdges(state.cell);
-        edges.forEach(e => {
-            this._graph.getModel().remove(e);
-        });
-
-        // Add new incoming edges
-        relationships.incoming.forEach((edge) => {
-            // update the name and schema of the entity
-            (edge.value as EdgeCellValue).referencedEntity = editedEntity.name;
-            (edge.value as EdgeCellValue).referencedSchema = editedEntity.schema;
-            this._schemaDesigner.renderRelationship(edge.value);
-        });
-
-        // Add new outgoing edges
-        editedOutgoingEdges.forEach((edge) => {
-            (edge as EdgeCellValue).entity = editedEntity.name;
-            (edge as EdgeCellValue).schemaName = editedEntity.schema;
-            this._schemaDesigner.renderRelationship(edge);
-        });
-
-        // Update the cell position
-        this._schemaDesigner.autoArrange();
-
-        this.graph.model.endUpdate();
+        await this._config.editEntity(state.cell, state.x, state.y, this._graph.view.scale, relationships.incoming, relationships.outgoing, this._schemaDesigner.schema);
     }
 
     public addListeners(div: HTMLElement, type: string, callback: (event: Event) => void): void {

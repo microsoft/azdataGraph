@@ -1,6 +1,6 @@
 import './schemaDesigner.css';
 import '../../css/common.css';
-import { IRelationship, ISchema, SchemaDesignerConfig } from './schemaDesignerInterfaces';
+import { IEntity, IRelationship, ISchema, SchemaDesignerConfig } from './schemaDesignerInterfaces';
 import { mxCell, mxCellState, mxGraph } from 'mxgraph';
 export declare class SchemaDesigner {
     private _container;
@@ -36,4 +36,5 @@ export declare class SchemaDesigner {
         incoming: mxCell[];
     };
     private createNewTable;
+    editedEntity(editedEntity: IEntity, editedOutgoingEdges: IRelationship[]): void;
 }
