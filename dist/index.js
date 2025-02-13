@@ -43889,7 +43889,7 @@ var SchemaDesigner = class {
       return false;
     };
     this.mxGraph.isCellMovable = (cell2) => {
-      return this.config.isEditable && !this.mxModel.isEdge(cell2) && cell2.value.editor !== true;
+      return this.config.isEditable && !this.mxModel.isEdge(cell2);
     };
     this.mxGraph.isCellResizable = (_cell) => {
       return false;

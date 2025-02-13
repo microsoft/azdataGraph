@@ -227,7 +227,7 @@ class SchemaDesigner {
             return false; //this._config.isEditable && !this._model.isEdge(cell);
         };
         this.mxGraph.isCellMovable = (cell) => {
-            return this.config.isEditable && !this.mxModel.isEdge(cell) && cell.value.editor !== true;
+            return this.config.isEditable && !this.mxModel.isEdge(cell);
         };
         this.mxGraph.isCellResizable = (_cell) => {
             return false;
