@@ -92,7 +92,7 @@ export class SchemaDesigner {
         this.mxGraph.getStylesheet().getDefaultEdgeStyle()["strokeColor"] = this.config.colors.edge;
 
         mx.mxConstants.OUTLINE_HANDLE_FILLCOLOR = this.config.colors.outlineHandleFill
-
+        mx.mxConstants.OUTLINE_HANDLE_STROKECOLOR = this.config.colors.outlineHandleFill;
         mx.mxConstants.OUTLINE_COLOR = this.config.colors.outline;
         
         this.mxGraph.graphHandler.previewColor = this.config.colors.graphHandlePreview;
