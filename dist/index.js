@@ -6525,7 +6525,7 @@ var require_build = __commonJS({
           /**
            * Variable: STYLE_CELL_HIGHLIGHT_STROKE_WIDTH
            */
-          STYLE_CELL_HIGHLIGHT_STROKE_WIDTH: "cellHightlightStrokeWidth",
+          STYLE_CELL_HIGHLIGHT_STROKE_WIDTH: "cellHighlightStrokeWidth",
           /**
            * Variable: STYLE_CELL_HIGHLIGHT_DASHED
            */
@@ -43758,14 +43758,14 @@ var SchemaDesigner = class {
     body.style.setProperty("--sd-cell-html-hover-column-background", this.config.colors.cellColumnHover);
     body.style.setProperty("--sd-cell-divider-color", this.config.colors.cellDivider);
     body.style.setProperty("--sd-graph-background-color", this.config.colors.cellBackground);
-    this.mxGraph.getStylesheet().getDefaultVertexStyle()["fillColor"] = this.config.colors.cellBackground;
-    this.mxGraph.getStylesheet().getDefaultEdgeStyle()["strokeColor"] = this.config.colors.edge;
+    this.mxGraph.getStylesheet().getDefaultVertexStyle()[mxGraphFactory.mxConstants.STYLE_FILLCOLOR] = this.config.colors.cellBackground;
     this.mxGraph.getStylesheet().getDefaultVertexStyle()["cellHighlightColor"] = this.config.colors.cellHighlight;
-    this.mxGraph.getStylesheet().getDefaultVertexStyle()["cellHightlightStrokeWidth"] = 3;
+    this.mxGraph.getStylesheet().getDefaultVertexStyle()["cellHighlightStrokeWidth"] = 3;
     this.mxGraph.getStylesheet().getDefaultEdgeStyle()["cellHighlightColor"] = this.config.colors.cellHighlight;
-    mxGraphFactory.mxConstants.OUTLINE_HANDLE_FILLCOLOR = this.config.colors.cellHighlight;
-    mxGraphFactory.mxConstants.OUTLINE_HANDLE_STROKECOLOR = this.config.colors.cellHighlight;
-    mxGraphFactory.mxConstants.OUTLINE_COLOR = this.config.colors.cellHighlight;
+    this.mxGraph.getStylesheet().getDefaultEdgeStyle()["strokeColor"] = this.config.colors.edge;
+    mxGraphFactory.mxConstants.OUTLINE_HANDLE_FILLCOLOR = this.config.colors.outlineHandleFill;
+    mxGraphFactory.mxConstants.OUTLINE_COLOR = this.config.colors.outline;
+    this.mxGraph.graphHandler.previewColor = this.config.colors.graphHandlePreview;
   }
   /**
    * Overwrites the default mxGraph settings

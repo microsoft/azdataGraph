@@ -106,46 +106,69 @@ export interface SchemaDesignerConfig {
      */
     colors: {
         /**
-         * Cell highlight color
+         * Defines the color to be used for the cell highlight
          */
         cellHighlight: string;
+        /**
+         * Defines the color to be used for the cell foreground
+         */
         cellForeground: string;
+        /**
+         * Defines the color to be used for the cell background
+         */
         cellBackground: string;
+        /**
+         * Defines the color to be used for the cell border
+         */
         cellBorder: string;
+        /**
+         * Defines the color to be used for the cell column when the mouse is over it
+         */
         cellColumnHover: string;
+        /**
+         * Defines the color to be used for dividers in cell html
+         */
         cellDivider: string;
         /**
-         * Toolbar colors
+         * Defines the color to be used for the toolbar background
          */
         toolbarBackground: string;
+        /**
+         * Defines the color to be used for the toolbar buttons icons
+         */
         toolbarForeground: string;
+        /**
+         * Defines the color to be used for the toolbar buttons when the mouse is over them
+         */
         toolbarHoverBackground: string;
+        /**
+         * Defines the color to be used for the toolbar divider
+         */
         toolbarDividerBackground: string;
         /**
-         * Graph background colors
+         * Defines the color to be used for the graph background
          */
         graphBackground: string;
+        /**
+         * Defines the color to be used for the graph grid dots
+         */
         graphGrid: string;
         /**
-         * Edge colors
+         * Defines the color to be used for edges (relationships)
          */
         edge: string;
         /**
-         * Background color for the outline
+         * Defines the color to be used for the outline sizer fill color
          */
-        outlineCellBackground: string;
+        outlineHandleFill: string;
         /**
-         * Border color for the outline
+         * Defines the color to be used for the outline rectangle border
          */
-        outlineBorder: string;
+        outline: string;
         /**
-         * Size of the outline
+         * Specifies the color of the preview shape when the cell is moved
          */
-        outlineSize: string;
-        /**
-         * Rectangle color for the outline
-         */
-        outlineSizerRectangle: string;
+        graphHandlePreview: string;
     };
     /**
      * Font family for the graph

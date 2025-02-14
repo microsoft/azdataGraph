@@ -51,14 +51,14 @@ class SchemaDesigner {
         body.style.setProperty("--sd-cell-html-hover-column-background", this.config.colors.cellColumnHover);
         body.style.setProperty("--sd-cell-divider-color", this.config.colors.cellDivider);
         body.style.setProperty("--sd-graph-background-color", this.config.colors.cellBackground);
-        this.mxGraph.getStylesheet().getDefaultVertexStyle()["fillColor"] = this.config.colors.cellBackground;
-        this.mxGraph.getStylesheet().getDefaultEdgeStyle()["strokeColor"] = this.config.colors.edge;
+        this.mxGraph.getStylesheet().getDefaultVertexStyle()[mx_1.mxGraphFactory.mxConstants.STYLE_FILLCOLOR] = this.config.colors.cellBackground;
         this.mxGraph.getStylesheet().getDefaultVertexStyle()['cellHighlightColor'] = this.config.colors.cellHighlight;
-        this.mxGraph.getStylesheet().getDefaultVertexStyle()['cellHightlightStrokeWidth'] = 3;
+        this.mxGraph.getStylesheet().getDefaultVertexStyle()['cellHighlightStrokeWidth'] = 3;
         this.mxGraph.getStylesheet().getDefaultEdgeStyle()['cellHighlightColor'] = this.config.colors.cellHighlight;
-        mx_1.mxGraphFactory.mxConstants.OUTLINE_HANDLE_FILLCOLOR = this.config.colors.cellHighlight;
-        mx_1.mxGraphFactory.mxConstants.OUTLINE_HANDLE_STROKECOLOR = this.config.colors.cellHighlight;
-        mx_1.mxGraphFactory.mxConstants.OUTLINE_COLOR = this.config.colors.cellHighlight;
+        this.mxGraph.getStylesheet().getDefaultEdgeStyle()["strokeColor"] = this.config.colors.edge;
+        mx_1.mxGraphFactory.mxConstants.OUTLINE_HANDLE_FILLCOLOR = this.config.colors.outlineHandleFill;
+        mx_1.mxGraphFactory.mxConstants.OUTLINE_COLOR = this.config.colors.outline;
+        this.mxGraph.graphHandler.previewColor = this.config.colors.graphHandlePreview;
     }
     /**
      * Overwrites the default mxGraph settings

@@ -1871,7 +1871,7 @@
 	/**
 	 * Variable: STYLE_CELL_HIGHLIGHT_STROKE_WIDTH
 	 */
-	STYLE_CELL_HIGHLIGHT_STROKE_WIDTH: 'cellHightlightStrokeWidth',
+	STYLE_CELL_HIGHLIGHT_STROKE_WIDTH: 'cellHighlightStrokeWidth',
 
 	/**
 	 * Variable: STYLE_CELL_HIGHLIGHT_DASHED
