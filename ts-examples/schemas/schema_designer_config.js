@@ -108,10 +108,10 @@ export const schemaDesignerConfig = {
 
     edge: "#444444",
 
-    outlineCellBackground: "#f0f0f0",
-    outlineBorder: "#d9d9d9",
-    // bright flourcent colors
-    outlineSizerRectangle: "#00ff00",
+    outlineHandleFill: "#00ff00",
+    outline: "#00ff00",
+
+    graphHandlePreview: "#000000",
 
     cellColumnHover: "#BCCCDC",
     cellBackground: "#ffffff",
