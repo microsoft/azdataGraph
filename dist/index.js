@@ -43764,6 +43764,7 @@ var SchemaDesigner = class {
     this.mxGraph.getStylesheet().getDefaultEdgeStyle()["cellHighlightColor"] = this.config.colors.cellHighlight;
     this.mxGraph.getStylesheet().getDefaultEdgeStyle()["strokeColor"] = this.config.colors.edge;
     mxGraphFactory.mxConstants.OUTLINE_HANDLE_FILLCOLOR = this.config.colors.outlineHandleFill;
+    mxGraphFactory.mxConstants.OUTLINE_HANDLE_STROKECOLOR = this.config.colors.outlineHandleFill;
     mxGraphFactory.mxConstants.OUTLINE_COLOR = this.config.colors.outline;
     this.mxGraph.graphHandler.previewColor = this.config.colors.graphHandlePreview;
   }
