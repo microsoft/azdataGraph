@@ -113,8 +113,8 @@ export class SchemaDesignerTable implements ITable {
             id: mxCellTableValue.id,
             name: mxCellTableValue.name,
             schema: mxCellTableValue.schema,
-            columns: mxCellTableValue.columns.slice(), // clone the columns
-            foreignKeys: mxCellTableValue.schemaDesigner.getForeignKeysForTable(state.cell)
+            columns: JSON.parse(JSON.stringify(mxCellTableValue.columns)), // clone the columns
+            foreignKeys: JSON.parse(JSON.stringify(mxCellTableValue.schemaDesigner.getForeignKeysForTable(state.cell)))
         }
         await this.schemaDesigner.config.editTable(table, state.cell, state.x, state.y, this.mxGraph.view.scale, this.schemaDesigner.schema);
     }

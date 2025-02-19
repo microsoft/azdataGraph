@@ -912,32 +912,27 @@ export class SchemaDesigner {
      */
     public updateActiveCellStateTable(editedTable: ITable) {
         this.mxGraph.model.beginUpdate();
+
         const state = this._activeCellState;
         if (state === undefined) {
+            // No active cell state found. Make this a no-op.
             return;
         }
 
-        const relationships = this.getTableRelationships(state);
-        const columnMaps = new Map<string, {
-            newColumn: IColumn;
-            oldColumn: IColumn;
-        }>();
+        const oldTable = state.cell.value as SchemaDesignerTable;
 
-        const oldColumns = (state.cell.value as SchemaDesignerTable).columns;
-        const newColumns = editedTable.columns;
+        const incomingEdges = this.mxModel.getIncomingEdges(state.cell);
+        const outgoingEdges = this.mxModel.getOutgoingEdges(state.cell);
 
-        for (let i = 0; i < newColumns.length; i++) {
-            const newColumn = newColumns[i];
-            const oldColumn = oldColumns.find((column) => column.id === newColumn.id);
-            if (oldColumn !== undefined) {
-                columnMaps.set(oldColumn.name, {
-                    newColumn,
-                    oldColumn
-                });
-            }
-        }
+        const incomingEdgesIds = incomingEdges.map((edge) => {
+            const edgeValue = edge.value as EdgeCellValue;
+            return oldTable.columns[edgeValue.targetRow - 1].id;
+        });
 
-
+        const outgoingEdgesIds = outgoingEdges.map((edge) => {
+            const edgeValue = edge.value as EdgeCellValue;
+            return editedTable.columns[edgeValue.sourceRow - 1].id;
+        });
 
         this.mxGraph.labelChanged(state.cell, {
             id: editedTable.id,
@@ -945,11 +940,10 @@ export class SchemaDesigner {
             schema: editedTable.schema,
             columns: editedTable.columns
         });
+
         state.cell.value.editor = false;
 
-        const cellValue = state.cell.value as SchemaDesignerTable;
-
-        this.mxGraph.resizeCell(state.cell, new mx.mxRectangle(state.x, state.y, cellValue.width, cellValue.height), true);
+        this.mxGraph.resizeCell(state.cell, new mx.mxRectangle(state.x, state.y, oldTable.width, oldTable.height), true);
         this.mxGraph.refresh(state.cell);
 
         // Delete all edges;
@@ -958,26 +952,24 @@ export class SchemaDesigner {
             this.mxGraph.getModel().remove(e);
         });
 
-        // Add new incoming edges
-        relationships.incoming.forEach((edge) => {
-            // update the name and schema of the entity
+        incomingEdges.forEach((edge, index) => {
             const edgeValue = edge.value as EdgeCellValue;
             edgeValue.referencedTableName = editedTable.name;
             edgeValue.referencedSchemaName = editedTable.schema;
-            edgeValue.referencedColumns = edgeValue.columns.map((column) => {
-                const columnMap = columnMaps.get(column);
-                if (columnMap !== undefined) {
-                    return columnMap.newColumn.name;
-                }
-                return column;
-            });
-
-            this.renderForeignKey(edge.value, edge.source.value);
+            const column = editedTable.columns.find((column) => column.id === incomingEdgesIds[index]);
+            if (column !== undefined) {
+                edgeValue.referencedColumns = [column.name];
+                this.renderForeignKey(edgeValue, edge.source.value);
+            }
         });
 
-        // Add new outgoing edges
-        editedTable.foreignKeys.forEach((edge) => {
-            this.renderForeignKey(edge, editedTable);
+        outgoingEdges.forEach((edge, index) => {
+            const edgeValue = edge.value as EdgeCellValue;
+            const column = editedTable.columns.find((column) => column.id === outgoingEdgesIds[index]);
+            if (column !== undefined) {
+                edgeValue.columns = [column.name];
+                this.renderForeignKey(edgeValue, editedTable);
+            }
         });
 
         // Update the cell position
