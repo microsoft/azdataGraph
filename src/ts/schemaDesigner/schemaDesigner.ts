@@ -959,6 +959,8 @@ export class SchemaDesigner {
             const column = editedTable.columns.find((column) => column.id === incomingEdgesIds[index]);
             if (column !== undefined) {
                 edgeValue.referencedColumns = [column.name];
+                const columnIndex = editedTable.columns.findIndex((column) => column.id === incomingEdgesIds[index]);
+                edgeValue.targetRow = columnIndex + 1;
                 this.renderForeignKey(edgeValue, edge.source.value);
             }
         });
@@ -968,6 +970,8 @@ export class SchemaDesigner {
             const column = editedTable.columns.find((column) => column.id === outgoingEdgesIds[index]);
             if (column !== undefined) {
                 edgeValue.columns = [column.name];
+                const columnIndex = editedTable.columns.findIndex((column) => column.id === outgoingEdgesIds[index]);
+                edgeValue.sourceRow = columnIndex + 1;
                 this.renderForeignKey(edgeValue, editedTable);
             }
         });

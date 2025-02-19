@@ -44535,6 +44535,8 @@ var SchemaDesigner = class {
       const column = editedTable.columns.find((column2) => column2.id === incomingEdgesIds[index]);
       if (column !== void 0) {
         edgeValue.referencedColumns = [column.name];
+        const columnIndex = editedTable.columns.findIndex((column2) => column2.id === incomingEdgesIds[index]);
+        edgeValue.targetRow = columnIndex + 1;
         this.renderForeignKey(edgeValue, edge.source.value);
       }
     });
@@ -44543,6 +44545,8 @@ var SchemaDesigner = class {
       const column = editedTable.columns.find((column2) => column2.id === outgoingEdgesIds[index]);
       if (column !== void 0) {
         edgeValue.columns = [column.name];
+        const columnIndex = editedTable.columns.findIndex((column2) => column2.id === outgoingEdgesIds[index]);
+        edgeValue.sourceRow = columnIndex + 1;
         this.renderForeignKey(edgeValue, editedTable);
       }
     });
