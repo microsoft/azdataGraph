@@ -1,32 +1,39 @@
 import { mxCellState, mxGraph, mxGraphModel } from "mxgraph";
-import { IColumn, IEntity, SchemaDesignerConfig } from "./schemaDesignerInterfaces";
+import { IColumn, IForeignKey, ITable, SchemaDesignerConfig } from "./schemaDesignerInterfaces";
 import createColor from "create-color";
 import { mxGraphFactory as mx } from '../mx';
 import { SchemaDesigner } from "./schemaDesigner";
 
-export class SchemaDesignerEntity implements IEntity {
+export class SchemaDesignerTable implements ITable {
     private eventListeners: { target: HTMLElement, eventName: string, callback?: any }[] = [];
-
     /**
-     * The name of the entity
+     * The id of the table
+     */
+    public id: string;
+    /**
+     * The name of the table
      */
     public name: string;
     /**
-     * The schema of the entity
+     * The schema of the table
      */
     public schema: string;
     /**
-     * The columns of the entity
+     * The columns of the table
      */
     public columns: IColumn[];
     /**
-     * Indicates if the entity is being edited
+     * Indicates if the table is being edited
      */
     public editor: boolean;
     /**
-     * The parent div of the entity
+     * The parent div of the table
      */
     public parentDiv!: HTMLElement;
+    /**
+     * The foreign keys of the table
+     */
+    public foreignKeys: IForeignKey[] = [];
 
     /**
      * Creates a new instance of the SchemaDesignerEntity class
@@ -35,13 +42,16 @@ export class SchemaDesignerEntity implements IEntity {
      * @param mxGraph mxGraph instance
      * @param schemaDesigner schema designer instance
      */
-    constructor(entity: IEntity, private schemaDesigner: SchemaDesigner) {
+    constructor(entity: ITable, private schemaDesigner: SchemaDesigner) {
+        this.id = entity.id;
         this.name = entity.name;
         this.schema = entity.schema;
         this.columns = entity.columns;
+        // tracking foreign keys through mxCells instead of this object.
+        this.foreignKeys = [];
         this.editor = false;
     }
-    
+
     /**
      * Renders the entity
      * @returns the rendered entity
@@ -86,20 +96,27 @@ export class SchemaDesignerEntity implements IEntity {
             }
             editButton.setAttribute('clickHandler', 'true');
             this.addEventListeners(editButton as HTMLElement, "click", async () => {
-                this.editEntity(state);
+                this.editTable(state);
             });
         }
     }
 
     /**
-     * Edits the entity
+     * Edits the table
      * @param state state of the entity
      */
-    public async editEntity(state: mxCellState): Promise<void> {
+    public async editTable(state: mxCellState): Promise<void> {
         this.schemaDesigner.activeCellState = state;
         this.editor = true;
-        const relationships = this.schemaDesigner.getEntityRelationships(state);
-        await this.schemaDesigner.config.editEntity(state.cell, state.x, state.y, this.mxGraph.view.scale, relationships.incoming, relationships.outgoing, this.schemaDesigner.schema);
+        const mxCellTableValue = state.cell.value as SchemaDesignerTable;
+        const table: ITable = {
+            id: mxCellTableValue.id,
+            name: mxCellTableValue.name,
+            schema: mxCellTableValue.schema,
+            columns: mxCellTableValue.columns.slice(), // clone the columns
+            foreignKeys: mxCellTableValue.schemaDesigner.getForeignKeysForTable(state.cell)
+        }
+        await this.schemaDesigner.config.editTable(table, state.cell, state.x, state.y, this.mxGraph.view.scale, this.schemaDesigner.schema);
     }
 
     /**

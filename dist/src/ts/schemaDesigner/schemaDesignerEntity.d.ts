@@ -1,29 +1,37 @@
 import { mxCellState, mxGraph, mxGraphModel } from "mxgraph";
-import { IColumn, IEntity, SchemaDesignerConfig } from "./schemaDesignerInterfaces";
+import { IColumn, IForeignKey, ITable, SchemaDesignerConfig } from "./schemaDesignerInterfaces";
 import { SchemaDesigner } from "./schemaDesigner";
-export declare class SchemaDesignerEntity implements IEntity {
+export declare class SchemaDesignerTable implements ITable {
     private schemaDesigner;
     private eventListeners;
     /**
-     * The name of the entity
+     * The id of the table
+     */
+    id: string;
+    /**
+     * The name of the table
      */
     name: string;
     /**
-     * The schema of the entity
+     * The schema of the table
      */
     schema: string;
     /**
-     * The columns of the entity
+     * The columns of the table
      */
     columns: IColumn[];
     /**
-     * Indicates if the entity is being edited
+     * Indicates if the table is being edited
      */
     editor: boolean;
     /**
-     * The parent div of the entity
+     * The parent div of the table
      */
     parentDiv: HTMLElement;
+    /**
+     * The foreign keys of the table
+     */
+    foreignKeys: IForeignKey[];
     /**
      * Creates a new instance of the SchemaDesignerEntity class
      * @param entity entity to be rendered
@@ -31,7 +39,7 @@ export declare class SchemaDesignerEntity implements IEntity {
      * @param mxGraph mxGraph instance
      * @param schemaDesigner schema designer instance
      */
-    constructor(entity: IEntity, schemaDesigner: SchemaDesigner);
+    constructor(entity: ITable, schemaDesigner: SchemaDesigner);
     /**
      * Renders the entity
      * @returns the rendered entity
@@ -44,10 +52,10 @@ export declare class SchemaDesignerEntity implements IEntity {
      */
     setupEntityDOM(parentNode: HTMLElement, state: mxCellState): void;
     /**
-     * Edits the entity
+     * Edits the table
      * @param state state of the entity
      */
-    editEntity(state: mxCellState): Promise<void>;
+    editTable(state: mxCellState): Promise<void>;
     /**
      * Adds event listeners to the entity
      */

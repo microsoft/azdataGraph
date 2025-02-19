@@ -12,10 +12,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SchemaDesignerEntity = void 0;
+exports.SchemaDesignerTable = void 0;
 const create_color_1 = __importDefault(require("create-color"));
 const mx_1 = require("../mx");
-class SchemaDesignerEntity {
+class SchemaDesignerTable {
     /**
      * Creates a new instance of the SchemaDesignerEntity class
      * @param entity entity to be rendered
@@ -26,9 +26,16 @@ class SchemaDesignerEntity {
     constructor(entity, schemaDesigner) {
         this.schemaDesigner = schemaDesigner;
         this.eventListeners = [];
+        /**
+         * The foreign keys of the table
+         */
+        this.foreignKeys = [];
+        this.id = entity.id;
         this.name = entity.name;
         this.schema = entity.schema;
         this.columns = entity.columns;
+        // tracking foreign keys through mxCells instead of this object.
+        this.foreignKeys = [];
         this.editor = false;
     }
     /**
@@ -74,20 +81,27 @@ class SchemaDesignerEntity {
             }
             editButton.setAttribute('clickHandler', 'true');
             this.addEventListeners(editButton, "click", () => __awaiter(this, void 0, void 0, function* () {
-                this.editEntity(state);
+                this.editTable(state);
             }));
         }
     }
     /**
-     * Edits the entity
+     * Edits the table
      * @param state state of the entity
      */
-    editEntity(state) {
+    editTable(state) {
         return __awaiter(this, void 0, void 0, function* () {
             this.schemaDesigner.activeCellState = state;
             this.editor = true;
-            const relationships = this.schemaDesigner.getEntityRelationships(state);
-            yield this.schemaDesigner.config.editEntity(state.cell, state.x, state.y, this.mxGraph.view.scale, relationships.incoming, relationships.outgoing, this.schemaDesigner.schema);
+            const mxCellTableValue = state.cell.value;
+            const table = {
+                id: mxCellTableValue.id,
+                name: mxCellTableValue.name,
+                schema: mxCellTableValue.schema,
+                columns: mxCellTableValue.columns.slice(), // clone the columns
+                foreignKeys: mxCellTableValue.schemaDesigner.getForeignKeysForTable(state.cell)
+            };
+            yield this.schemaDesigner.config.editTable(table, state.cell, state.x, state.y, this.mxGraph.view.scale, this.schemaDesigner.schema);
         });
     }
     /**
@@ -257,4 +271,4 @@ class SchemaDesignerEntity {
         return Math.min(330, 52 + this.columns.length * 28) + 4;
     }
 }
-exports.SchemaDesignerEntity = SchemaDesignerEntity;
+exports.SchemaDesignerTable = SchemaDesignerTable;

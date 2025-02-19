@@ -43240,7 +43240,7 @@ var ts_exports = {};
 __export(ts_exports, {
   OnAction: () => OnAction,
   SchemaDesigner: () => SchemaDesigner,
-  SchemaDesignerEntity: () => SchemaDesignerEntity,
+  SchemaDesignerTable: () => SchemaDesignerTable,
   SchemaDesignerToolbar: () => SchemaDesignerToolbar,
   extendedConnectionHandler: () => extendedConnectionHandler,
   mx: () => import_mxgraph2.default
@@ -43393,7 +43393,7 @@ var getHash = (str) => {
 var src_default = createColor;
 
 // src/ts/schemaDesigner/schemaDesignerEntity.ts
-var SchemaDesignerEntity = class {
+var SchemaDesignerTable = class {
   /**
    * Creates a new instance of the SchemaDesignerEntity class
    * @param entity entity to be rendered
@@ -43404,9 +43404,15 @@ var SchemaDesignerEntity = class {
   constructor(entity, schemaDesigner) {
     this.schemaDesigner = schemaDesigner;
     this.eventListeners = [];
+    /**
+     * The foreign keys of the table
+     */
+    this.foreignKeys = [];
+    this.id = entity.id;
     this.name = entity.name;
     this.schema = entity.schema;
     this.columns = entity.columns;
+    this.foreignKeys = [];
     this.editor = false;
   }
   /**
@@ -43450,19 +43456,27 @@ var SchemaDesignerEntity = class {
       }
       editButton.setAttribute("clickHandler", "true");
       this.addEventListeners(editButton, "click", async () => {
-        this.editEntity(state);
+        this.editTable(state);
       });
     }
   }
   /**
-   * Edits the entity
+   * Edits the table
    * @param state state of the entity
    */
-  async editEntity(state) {
+  async editTable(state) {
     this.schemaDesigner.activeCellState = state;
     this.editor = true;
-    const relationships = this.schemaDesigner.getEntityRelationships(state);
-    await this.schemaDesigner.config.editEntity(state.cell, state.x, state.y, this.mxGraph.view.scale, relationships.incoming, relationships.outgoing, this.schemaDesigner.schema);
+    const mxCellTableValue = state.cell.value;
+    const table = {
+      id: mxCellTableValue.id,
+      name: mxCellTableValue.name,
+      schema: mxCellTableValue.schema,
+      columns: mxCellTableValue.columns.slice(),
+      // clone the columns
+      foreignKeys: mxCellTableValue.schemaDesigner.getForeignKeysForTable(state.cell)
+    };
+    await this.schemaDesigner.config.editTable(table, state.cell, state.x, state.y, this.mxGraph.view.scale, this.schemaDesigner.schema);
   }
   /**
    * Adds event listeners to the entity
@@ -43715,6 +43729,58 @@ var SchemaDesignerLayout = class extends mxGraphFactory.mxHierarchicalLayout {
   }
 };
 
+// node_modules/uuid/dist/esm-browser/stringify.js
+var byteToHex = [];
+for (let i = 0; i < 256; ++i) {
+  byteToHex.push((i + 256).toString(16).slice(1));
+}
+function unsafeStringify(arr, offset = 0) {
+  return (byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + "-" + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + "-" + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + "-" + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + "-" + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]]).toLowerCase();
+}
+
+// node_modules/uuid/dist/esm-browser/rng.js
+var getRandomValues;
+var rnds8 = new Uint8Array(16);
+function rng() {
+  if (!getRandomValues) {
+    if (typeof crypto === "undefined" || !crypto.getRandomValues) {
+      throw new Error("crypto.getRandomValues() not supported. See https://github.com/uuidjs/uuid#getrandomvalues-not-supported");
+    }
+    getRandomValues = crypto.getRandomValues.bind(crypto);
+  }
+  return getRandomValues(rnds8);
+}
+
+// node_modules/uuid/dist/esm-browser/native.js
+var randomUUID = typeof crypto !== "undefined" && crypto.randomUUID && crypto.randomUUID.bind(crypto);
+var native_default = { randomUUID };
+
+// node_modules/uuid/dist/esm-browser/v4.js
+function v4(options, buf, offset) {
+  if (native_default.randomUUID && !buf && !options) {
+    return native_default.randomUUID();
+  }
+  options = options || {};
+  const rnds = options.random ?? options.rng?.() ?? rng();
+  if (rnds.length < 16) {
+    throw new Error("Random bytes length must be >= 16");
+  }
+  rnds[6] = rnds[6] & 15 | 64;
+  rnds[8] = rnds[8] & 63 | 128;
+  if (buf) {
+    offset = offset || 0;
+    if (offset < 0 || offset + 16 > buf.length) {
+      throw new RangeError(`UUID byte range ${offset}:${offset + 15} is out of buffer bounds`);
+    }
+    for (let i = 0; i < 16; ++i) {
+      buf[offset + i] = rnds[i];
+    }
+    return buf;
+  }
+  return unsafeStringify(rnds);
+}
+var v4_default = v4;
+
 // src/ts/schemaDesigner/schemaDesigner.ts
 var SchemaDesigner = class {
   constructor(container, config) {
@@ -43906,10 +43972,12 @@ var SchemaDesigner = class {
     };
     this.mxGraph.model.valueForCellChanged = function(cell2, value) {
       const old = {
+        id: cell2.value.id,
         name: cell2.value.name,
         schema: cell2.value.schema,
         columns: cell2.value.columns
       };
+      cell2.value.id = value.id;
       cell2.value.name = value.name;
       cell2.value.schema = value.schema;
       cell2.value.columns = value.columns;
@@ -43965,6 +44033,7 @@ var SchemaDesigner = class {
       if (this.edgeState !== null) {
         this.currentRowNode = this.updateRow(me.getSource());
         const cellValue = this.edgeState.cell.value;
+        const sourceTableValue = this.previous.cell.value;
         if (this.currentRow !== null && this.currentRow !== void 0) {
           const targetCellState = this.currentState;
           if (targetCellState?.cell?.value) {
@@ -43972,10 +44041,10 @@ var SchemaDesigner = class {
             if (cellValue) {
               const targetColumnName = targetCellValue.columns[this.currentRow - 1].name;
               cellValue.targetRow = this.currentRow;
-              cellValue.referencedColumn = targetColumnName;
-              cellValue.referencedSchema = targetCellValue.schema;
-              cellValue.referencedEntity = targetCellValue.name;
-              cellValue.foreignKeyName = `FK_${cellValue.entity}_${cellValue.column}_${cellValue.referencedEntity}_${cellValue.referencedColumn}`;
+              cellValue.referencedColumns = [targetColumnName];
+              cellValue.referencedSchemaName = targetCellValue.schema;
+              cellValue.referencedTableName = targetCellValue.name;
+              cellValue.name = `FK_${sourceTableValue.name}_${cellValue.referencedTableName}`;
             }
           }
         } else {
@@ -43988,20 +44057,19 @@ var SchemaDesigner = class {
       const sourceCellState = this.currentState;
       const sourceCellValue = sourceCellState.cell.value;
       const targetColumnName = sourceCellValue.columns[this.currentRow ? this.currentRow - 1 : 0].name;
-      const relation = {
+      const foreignKey = {
         sourceRow: this.currentRow || 0,
         targetRow: 0,
-        foreignKeyName: "",
-        schemaName: sourceCellValue.schema,
-        entity: sourceCellValue.name,
-        column: targetColumnName,
-        referencedSchema: "",
-        referencedEntity: "",
-        referencedColumn: "",
-        onDeleteAction: "1" /* NO_ACTION */,
-        onUpdateAction: "1" /* NO_ACTION */
+        id: v4_default(),
+        name: "",
+        columns: [targetColumnName],
+        referencedSchemaName: "",
+        referencedTableName: "",
+        referencedColumns: [],
+        onDeleteAction: "0" /* CASCADE */,
+        onUpdateAction: "0" /* CASCADE */
       };
-      const edge = this.createEdge(relation);
+      const edge = this.createEdge(foreignKey);
       const style = this.graph.getCellStyle(edge);
       const state = new mxGraphFactory.mxCellState(this.graph.view, edge, style);
       this.sourceRowNode = this.currentRowNode;
@@ -44112,11 +44180,11 @@ var SchemaDesigner = class {
         (_graph, evt, _cell) => {
           this.mxGraph.stopEditing(false);
           const pt = this.mxGraph.getPointForEvent(evt, true);
-          const entity = this.createEntity();
-          const cell2 = this.renderEntity(entity, pt.x, pt.y);
+          const entity = this.createTable();
+          const cell2 = this.renderTable(entity, pt.x, pt.y);
           const state = this.mxGraph.view.getState(cell2);
           if (state !== void 0) {
-            cell2.value.editEntity(state);
+            cell2.value.editTable(state);
           }
         }
       );
@@ -44218,14 +44286,17 @@ var SchemaDesigner = class {
     this.mxModel.beginUpdate();
     try {
       this.mxGraph.removeCells(this.mxModel.getChildCells(parent));
-      const entities = schema.entities;
-      for (let i = 0; i < entities.length; i++) {
-        const entity = entities[i];
-        this.renderEntity(entity, 100 + i * 50, 100 + i * 50);
+      const tables = schema.tables;
+      for (let i = 0; i < tables.length; i++) {
+        const table = tables[i];
+        this.renderTable(table, 100 + i * 50, 100 + i * 50);
       }
-      for (let i = 0; i < schema.relationships.length; i++) {
-        const relationship = schema.relationships[i];
-        this.renderRelationship(relationship);
+      for (let i = 0; i < tables.length; i++) {
+        const table = tables[i];
+        for (let j = 0; j < table.foreignKeys.length; j++) {
+          const foreignKey = table.foreignKeys[j];
+          this.renderForeignKey(foreignKey, table);
+        }
       }
     } finally {
       this.mxModel.endUpdate();
@@ -44251,8 +44322,8 @@ var SchemaDesigner = class {
    * @param y the y position to render the entity at
    * @returns The cell that was rendered
    */
-  renderEntity(entity, x, y) {
-    const entityValue = new SchemaDesignerEntity(entity, this);
+  renderTable(entity, x, y) {
+    const entityValue = new SchemaDesignerTable(entity, this);
     const entityCell = new mxGraphFactory.mxCell(
       entityValue,
       new mxGraphFactory.mxGeometry(
@@ -44280,27 +44351,38 @@ var SchemaDesigner = class {
    * @param relationship The relationship to render
    * @returns The edge that was rendered
    */
-  renderRelationship(relationship) {
+  renderForeignKey(foreignKey, sourceTable) {
     const cells = this.mxModel.getChildCells(this.mxGraph.getDefaultParent());
-    const source = cells.find((cell2) => cell2.value.name === relationship.entity && cell2.value.schema === relationship.schemaName);
-    const target = cells.find((cell2) => cell2.value.name === relationship.referencedEntity && cell2.value.schema === relationship.referencedSchema);
+    const source = cells.find((cell2) => {
+      const value = cell2.value;
+      return value.name === sourceTable.name && value.schema === sourceTable.schema;
+    });
+    const target = cells.find((cell2) => {
+      const value = cell2.value;
+      return value.name === foreignKey.referencedTableName && value.schema === foreignKey.referencedSchemaName;
+    });
     if (source === void 0 || target === void 0) {
       return;
     }
-    const edgeValue = {
-      sourceRow: source.value.columns.findIndex((column) => column.name === relationship.column) + 1,
-      targetRow: target.value.columns.findIndex((column) => column.name === relationship.referencedColumn) + 1,
-      column: relationship.column,
-      entity: relationship.entity,
-      foreignKeyName: relationship.foreignKeyName,
-      onDeleteAction: relationship.onDeleteAction,
-      onUpdateAction: relationship.onUpdateAction,
-      referencedEntity: relationship.referencedEntity,
-      referencedSchema: relationship.referencedSchema,
-      referencedColumn: relationship.referencedColumn,
-      schemaName: relationship.schemaName
-    };
-    this.mxGraph.insertEdge(this.mxGraph.getDefaultParent(), null, edgeValue, source, target);
+    const sourceValue = source.value;
+    const targetValue = target.value;
+    for (let i = 0; i < foreignKey.columns.length; i++) {
+      const sourceRowIndex = sourceValue.columns.findIndex((column) => column.name === foreignKey.columns[i]) + 1;
+      const targetRowIndex = targetValue.columns.findIndex((column) => column.name === foreignKey.referencedColumns[i]) + 1;
+      const edgeValue = {
+        sourceRow: sourceRowIndex,
+        targetRow: targetRowIndex,
+        columns: [foreignKey.columns[i]],
+        name: foreignKey.name,
+        onDeleteAction: foreignKey.onDeleteAction,
+        onUpdateAction: foreignKey.onUpdateAction,
+        referencedTableName: targetValue.name,
+        referencedColumns: [foreignKey.referencedColumns[i]],
+        referencedSchemaName: targetValue.schema,
+        id: foreignKey.id
+      };
+      this.mxGraph.insertEdge(this.mxGraph.getDefaultParent(), null, edgeValue, source, target);
+    }
     this.mxGraph.view.invalidate(source, false, false);
     this.mxGraph.view.validate(source);
     this.mxGraph.view.invalidate(target, false, false);
@@ -44311,32 +44393,21 @@ var SchemaDesigner = class {
    */
   get schema() {
     const schema = {
-      entities: [],
-      relationships: []
+      tables: []
     };
     const cells = this.mxModel.getChildCells(this.mxGraph.getDefaultParent());
     for (let i = 0; i < cells.length; i++) {
       const cell2 = cells[i];
       if (cell2.vertex) {
-        const entity = {
+        const table = {
           columns: cell2.value.columns,
           name: cell2.value.name,
-          schema: cell2.value.schema
+          schema: cell2.value.schema,
+          foreignKeys: [],
+          id: cell2.value.id
         };
-        schema.entities.push(entity);
-      } else if (cell2.edge) {
-        const relationship = {
-          foreignKeyName: cell2.value.foreignKeyName,
-          onDeleteAction: "0" /* CASCADE */,
-          onUpdateAction: "0" /* CASCADE */,
-          column: cell2.source.value.columns[cell2.value.sourceRow - 1].name,
-          entity: cell2.source.value.name,
-          schemaName: cell2.source.value.schema,
-          referencedEntity: cell2.target.value.name,
-          referencedColumn: cell2.target.value.columns[cell2.value.targetRow - 1].name,
-          referencedSchema: cell2.target.value.schema
-        };
-        schema.relationships.push(relationship);
+        schema.tables.push(table);
+        table.foreignKeys = this.getForeignKeysForTable(cell2);
       }
     }
     return schema;
@@ -44375,7 +44446,7 @@ var SchemaDesigner = class {
    * @param entityCellState The cell state of the entity
    * @returns The relationships of the entity
    */
-  getEntityRelationships(entityCellState) {
+  getTableRelationships(entityCellState) {
     const outgoing = [];
     const incoming = [];
     const cells = this.mxModel.getChildCells(this.mxGraph.getDefaultParent());
@@ -44398,43 +44469,47 @@ var SchemaDesigner = class {
    * Creates a new entity
    * @returns The new entity
    */
-  createEntity() {
+  createTable() {
     let index = 1;
     let name2 = `Table${index}`;
-    for (this.schema.entities.length; this.schema.entities.find((entity) => entity.name === name2); index++) {
+    for (this.schema.tables.length; this.schema.tables.find((tables) => tables.name === name2); index++) {
       name2 = `Table${index}`;
     }
-    const schemas = new Set(this.schema.entities.map((entity) => entity.schema));
+    const schemas = new Set(this.schema.tables.map((tables) => tables.schema));
     return {
+      id: v4_default(),
       name: name2,
       schema: schemas.size > 0 ? Array.from(schemas)[0] : "dbo",
       columns: [
         {
+          id: v4_default(),
           name: "column_1",
           dataType: "int",
           isPrimaryKey: true,
           isIdentity: true
         }
-      ]
+      ],
+      foreignKeys: []
     };
   }
   /**
    * Updates the active cell state entity
-   * @param editedEntity describes the new entity
+   * @param editedTable describes the new entity
    * @param editedOutgoingEdges describes the new relationships
    * @returns void
    */
-  updateActiveCellStateEntity(editedEntity, editedOutgoingEdges) {
+  updateActiveCellStateTable(editedTable) {
     this.mxGraph.model.beginUpdate();
     const state = this._activeCellState;
     if (state === void 0) {
       return;
     }
-    const relationships = this.getEntityRelationships(state);
+    const relationships = this.getTableRelationships(state);
     this.mxGraph.labelChanged(state.cell, {
-      name: editedEntity.name,
-      schema: editedEntity.schema,
-      columns: editedEntity.columns
+      id: editedTable.id,
+      name: editedTable.name,
+      schema: editedTable.schema,
+      columns: editedTable.columns
     });
     state.cell.value.editor = false;
     const cellValue = state.cell.value;
@@ -44445,24 +44520,48 @@ var SchemaDesigner = class {
       this.mxGraph.getModel().remove(e);
     });
     relationships.incoming.forEach((edge) => {
-      edge.value.referencedEntity = editedEntity.name;
-      edge.value.referencedSchema = editedEntity.schema;
-      this.renderRelationship(edge.value);
+      const edgeValue = edge.value;
+      edgeValue.referencedTableName = editedTable.name;
+      edgeValue.referencedSchemaName = editedTable.schema;
+      this.renderForeignKey(edge.value, edge.source.value);
     });
-    editedOutgoingEdges.forEach((edge) => {
-      edge.entity = editedEntity.name;
-      edge.schemaName = editedEntity.schema;
-      this.renderRelationship(edge);
+    editedTable.foreignKeys.forEach((edge) => {
+      this.renderForeignKey(edge, editedTable);
     });
     this.autoLayout();
     this.mxGraph.model.endUpdate();
+  }
+  // Gets the foreign keys for a table
+  getForeignKeysForTable(tableCell) {
+    const outgoingEdges = this.mxModel.getOutgoingEdges(tableCell);
+    const foreignKeyMap = outgoingEdges.reduce((map, edge) => {
+      const edgeValue = edge.value;
+      if (map.has(edgeValue.id)) {
+        const existingForeignKey = map.get(edgeValue.id);
+        existingForeignKey.columns.push(...edgeValue.columns.slice());
+        existingForeignKey.referencedColumns.push(...edgeValue.referencedColumns.slice());
+      } else {
+        map.set(edgeValue.id, {
+          id: edgeValue.id,
+          name: edgeValue.name,
+          columns: edgeValue.columns.slice(),
+          referencedSchemaName: edgeValue.referencedSchemaName,
+          referencedTableName: edgeValue.referencedTableName,
+          referencedColumns: edgeValue.referencedColumns.slice(),
+          onDeleteAction: edgeValue.onDeleteAction,
+          onUpdateAction: edgeValue.onUpdateAction
+        });
+      }
+      return map;
+    }, /* @__PURE__ */ new Map());
+    return Array.from(foreignKeyMap.values());
   }
 };
 var export_mx = import_mxgraph2.default;
 export {
   OnAction,
   SchemaDesigner,
-  SchemaDesignerEntity,
+  SchemaDesignerTable,
   SchemaDesignerToolbar,
   extendedConnectionHandler,
   export_mx as mx

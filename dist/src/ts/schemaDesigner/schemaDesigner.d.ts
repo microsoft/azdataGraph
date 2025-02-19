@@ -1,6 +1,6 @@
 import './schemaDesigner.css';
 import '../../css/common.css';
-import { IEntity, IRelationship, ISchema, SchemaDesignerConfig } from './schemaDesignerInterfaces';
+import { IForeignKey, ISchema, ITable, SchemaDesignerConfig } from './schemaDesignerInterfaces';
 import { mxCell, mxCellState, mxEditor, mxGraph, mxGraphLayout, mxGraphModel } from 'mxgraph';
 import { SchemaDesignerToolbar } from './schemaDesignerToolbar';
 export declare class SchemaDesigner {
@@ -88,13 +88,13 @@ export declare class SchemaDesigner {
      * @param y the y position to render the entity at
      * @returns The cell that was rendered
      */
-    renderEntity(entity: IEntity, x: number, y: number): mxCell;
+    renderTable(entity: ITable, x: number, y: number): mxCell;
     /**
      * Renders a relationship in the schema designer
      * @param relationship The relationship to render
      * @returns The edge that was rendered
      */
-    renderRelationship(relationship: IRelationship): void;
+    renderForeignKey(foreignKey: IForeignKey, sourceTable: ITable): void;
     /**
      * Gets the current schema from the schema designer
      */
@@ -123,7 +123,7 @@ export declare class SchemaDesigner {
      * @param entityCellState The cell state of the entity
      * @returns The relationships of the entity
      */
-    getEntityRelationships(entityCellState: mxCellState): {
+    getTableRelationships(entityCellState: mxCellState): {
         outgoing: mxCell[];
         incoming: mxCell[];
     };
@@ -131,12 +131,13 @@ export declare class SchemaDesigner {
      * Creates a new entity
      * @returns The new entity
      */
-    private createEntity;
+    private createTable;
     /**
      * Updates the active cell state entity
-     * @param editedEntity describes the new entity
+     * @param editedTable describes the new entity
      * @param editedOutgoingEdges describes the new relationships
      * @returns void
      */
-    updateActiveCellStateEntity(editedEntity: IEntity, editedOutgoingEdges: IRelationship[]): void;
+    updateActiveCellStateTable(editedTable: ITable): void;
+    getForeignKeysForTable(tableCell: mxCell): IForeignKey[];
 }
