@@ -931,7 +931,7 @@ export class SchemaDesigner {
 
         const outgoingEdgesIds = outgoingEdges.map((edge) => {
             const edgeValue = edge.value as EdgeCellValue;
-            return editedTable.columns[edgeValue.sourceRow - 1].id;
+            return oldTable.columns[edgeValue.sourceRow - 1].id;
         });
 
         this.mxGraph.labelChanged(state.cell, {
@@ -953,25 +953,23 @@ export class SchemaDesigner {
         });
 
         incomingEdges.forEach((edge, index) => {
+            const incomingEdgeId = incomingEdgesIds[index];
             const edgeValue = edge.value as EdgeCellValue;
             edgeValue.referencedTableName = editedTable.name;
             edgeValue.referencedSchemaName = editedTable.schema;
-            const column = editedTable.columns.find((column) => column.id === incomingEdgesIds[index]);
+            const column = editedTable.columns.find((column) => column.id === incomingEdgeId);
             if (column !== undefined) {
                 edgeValue.referencedColumns = [column.name];
-                const columnIndex = editedTable.columns.findIndex((column) => column.id === incomingEdgesIds[index]);
-                edgeValue.targetRow = columnIndex + 1;
                 this.renderForeignKey(edgeValue, edge.source.value);
             }
         });
 
         outgoingEdges.forEach((edge, index) => {
+            const outgoingEdgeId = outgoingEdgesIds[index];
             const edgeValue = edge.value as EdgeCellValue;
-            const column = editedTable.columns.find((column) => column.id === outgoingEdgesIds[index]);
+            const column = editedTable.columns.find((column) => column.id === outgoingEdgeId);
             if (column !== undefined) {
                 edgeValue.columns = [column.name];
-                const columnIndex = editedTable.columns.findIndex((column) => column.id === outgoingEdgesIds[index]);
-                edgeValue.sourceRow = columnIndex + 1;
                 this.renderForeignKey(edgeValue, editedTable);
             }
         });

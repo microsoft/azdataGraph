@@ -44513,7 +44513,7 @@ var SchemaDesigner = class {
     });
     const outgoingEdgesIds = outgoingEdges.map((edge) => {
       const edgeValue = edge.value;
-      return editedTable.columns[edgeValue.sourceRow - 1].id;
+      return oldTable.columns[edgeValue.sourceRow - 1].id;
     });
     this.mxGraph.labelChanged(state.cell, {
       id: editedTable.id,
@@ -44529,24 +44529,22 @@ var SchemaDesigner = class {
       this.mxGraph.getModel().remove(e);
     });
     incomingEdges.forEach((edge, index) => {
+      const incomingEdgeId = incomingEdgesIds[index];
       const edgeValue = edge.value;
       edgeValue.referencedTableName = editedTable.name;
       edgeValue.referencedSchemaName = editedTable.schema;
-      const column = editedTable.columns.find((column2) => column2.id === incomingEdgesIds[index]);
+      const column = editedTable.columns.find((column2) => column2.id === incomingEdgeId);
       if (column !== void 0) {
         edgeValue.referencedColumns = [column.name];
-        const columnIndex = editedTable.columns.findIndex((column2) => column2.id === incomingEdgesIds[index]);
-        edgeValue.targetRow = columnIndex + 1;
         this.renderForeignKey(edgeValue, edge.source.value);
       }
     });
     outgoingEdges.forEach((edge, index) => {
+      const outgoingEdgeId = outgoingEdgesIds[index];
       const edgeValue = edge.value;
-      const column = editedTable.columns.find((column2) => column2.id === outgoingEdgesIds[index]);
+      const column = editedTable.columns.find((column2) => column2.id === outgoingEdgeId);
       if (column !== void 0) {
         edgeValue.columns = [column.name];
-        const columnIndex = editedTable.columns.findIndex((column2) => column2.id === outgoingEdgesIds[index]);
-        edgeValue.sourceRow = columnIndex + 1;
         this.renderForeignKey(edgeValue, editedTable);
       }
     });
