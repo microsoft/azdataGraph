@@ -918,6 +918,27 @@ export class SchemaDesigner {
         }
 
         const relationships = this.getTableRelationships(state);
+        const columnMaps = new Map<string, {
+            newColumn: IColumn;
+            oldColumn: IColumn;
+        }>();
+
+        const oldColumns = (state.cell.value as SchemaDesignerTable).columns;
+        const newColumns = editedTable.columns;
+
+        for (let i = 0; i < newColumns.length; i++) {
+            const newColumn = newColumns[i];
+            const oldColumn = oldColumns.find((column) => column.id === newColumn.id);
+            if (oldColumn !== undefined) {
+                columnMaps.set(oldColumn.name, {
+                    newColumn,
+                    oldColumn
+                });
+            }
+        }
+
+
+
         this.mxGraph.labelChanged(state.cell, {
             id: editedTable.id,
             name: editedTable.name,
@@ -943,7 +964,14 @@ export class SchemaDesigner {
             const edgeValue = edge.value as EdgeCellValue;
             edgeValue.referencedTableName = editedTable.name;
             edgeValue.referencedSchemaName = editedTable.schema;
-            
+            edgeValue.referencedColumns = edgeValue.columns.map((column) => {
+                const columnMap = columnMaps.get(column);
+                if (columnMap !== undefined) {
+                    return columnMap.newColumn.name;
+                }
+                return column;
+            });
+
             this.renderForeignKey(edge.value, edge.source.value);
         });
 
