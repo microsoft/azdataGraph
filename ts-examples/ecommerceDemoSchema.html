@@ -10,8 +10,8 @@
       import { schemaDesignerConfig } from "./schemas/schema_designer_config.js";
       import { ecommerceDemoSchema } from "./schemas/schema_ecommerce_demo.js";
       window.onload = () => {
-        let currentEntity = undefined;
-        let currentRelationships = undefined;
+        let currentTable = undefined;
+        let currentForeignKey = undefined;
         const targetDiv1 = document.getElementById("graphContainer");
         const floatingDiv = document.createElement("div");
         floatingDiv.id = "floating-div";
@@ -21,13 +21,13 @@
         if (targetDiv1) {
           const schemaDesigner = new SchemaDesigner(targetDiv1, {
             ...schemaDesignerConfig,
-            editEntity: (
+            editTable: (
+              table,
               cell,
               x,
               y,
               scale,
-              incomingEdges,
-              outgoingEdges
+              model,
             ) => {
               // Update displayed coordinates
               floatingDiv.style.left = `${x}px`;
@@ -37,9 +37,8 @@
               floatingDiv.style.width = scale * floatingDiv.clientWidth;
               floatingDiv.style.fontSize = `${scale * 16}px`;
               floatingDiv.setAttribute("cell-id", cell.id);
-              document.getElementById("title").innerText = cell.value.name;
-              currentEntity = cell.value;
-              currentRelationships = outgoingEdges.map((edge) => edge.value);
+              document.getElementById("title").innerText = table.name;
+              currentTable = table;
             },
             updateEditorPosition: (x, y, scale) => {
               floatingDiv.style.left = `${x}px`;
@@ -47,18 +46,7 @@
               floatingDiv.style.height = scale * floatingDiv.clientHeight;
               floatingDiv.style.width = scale * floatingDiv.clientWidth;
               floatingDiv.style.fontSize = `${scale * 16}px`;
-            },
-            editRelationship: (cell, x, y, scale) => {
-              console.log(cell);
-              floatingDiv.style.left = `${x}px`;
-              floatingDiv.style.top = `${y}px`;
-              floatingDiv.style.display = "block";
-              floatingDiv.style.height = scale * floatingDiv.clientHeight;
-              floatingDiv.style.width = scale * floatingDiv.clientWidth;
-              floatingDiv.style.fontSize = `${scale * 16}px`;
-              floatingDiv.setAttribute("cell-id", cell.id);
-              document.getElementById("title").innerText = cell.value.name;
-            },
+            }
           });
           schemaDesigner.renderSchema(ecommerceDemoSchema);
           schemaDesigner.addCellClickListener((cell) => {
@@ -67,12 +55,11 @@
           document.getElementById("done-btn").addEventListener("click", () => {
             floatingDiv.style.display = "none";
             if (schemaDesigner) {
-              schemaDesigner.updateActiveCellStateEntity(
+              schemaDesigner.updateActiveCellStateTable(
                 {
-                  ...currentEntity,
-                  name: currentEntity.name + " (edited)",
-                },
-                currentRelationships
+                  ...currentTable,
+                  name: currentTable.name + " (edited)",
+                }
               )
             }
           });

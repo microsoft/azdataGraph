@@ -2,27 +2,37 @@ import { mxCell } from "mxgraph";
 import { mxGraphFactory as mx } from '../mx';
 
 export interface ISchema {
-    entities: IEntity[];
-    relationships: IRelationship[];
+    tables: ITable[];
 }
 
-
-export interface IEntity {
+export interface ITable {
     /**
-     * Name of the entity
+     * Id of the table
+     */
+    id: string;
+    /**
+     * Name of the table
      */
     name: string;
     /**
-     * Schema of the entity
+     * Schema of the table
      */
     schema: string;
     /**
-     * Columns of the entity
+     * Columns of the table
      */
     columns: IColumn[];
+    /**
+     * Foreign keys of the table
+     */
+    foreignKeys: IForeignKey[];
 }
 
 export interface IColumn {
+    /**
+     * Id of the column
+     */
+    id: string;
     /**
      * Name of the column
      */
@@ -41,35 +51,31 @@ export interface IColumn {
     isIdentity: boolean;
 }
 
-export interface IRelationship {
+export interface IForeignKey {
     /**
-     * Name of the relationship
+     * Id of the foreign key
      */
-    foreignKeyName: string;
+    id: string;
     /**
-     * Schema of the relationship
+     * Name of the foreign key
      */
-    schemaName: string;
+    name: string;
     /**
-     * Parent entity of the relationship
+     * Parent columns of the relationship
      */
-    entity: string;
-    /**
-     * Parent column of the relationship
-     */
-    column: string;
+    columns: string[];
     /**
      * Referenced schema of the relationship
      */
-    referencedSchema: string;
+    referencedSchemaName: string;
     /**
-     * Referenced entity of the relationship
+     * Referenced table of the relationship
      */
-    referencedEntity: string;
+    referencedTableName: string;
     /**
-     * Referenced column of the relationship
+     * Referenced columns of the relationship
      */
-    referencedColumn: string;
+    referencedColumns: string[];
     /**
      * On delete action of the relationship
      */
@@ -193,16 +199,7 @@ export interface SchemaDesignerConfig {
      * @param y y coordinate of the editor
      * @param scale scale of the graph
      */
-    editEntity: (cell: mxCell, x: number, y: number, scale: number, incomingEdges: mxCell[], outgoingEdges: mxCell[], model: ISchema) => void
-    /**
-     * Callback to show the editor to edit the relationship
-     * @param cell cell to edit
-     * @param x x coordinate of the editor
-     * @param y y coordinate of the editor
-     * @param scale scale of the graph
-     * @returns relationship edited
-     */
-    editRelationship: (cell: mxCell, x: number, y: number, scale: number) => IRelationship;
+    editTable: (table: ITable, cell: mxCell, x: number, y: number, scale: number, model: ISchema) => void
     /**
      * Update the position of the editor based on changed in the graph
      * @param x x coordinate of the editor
@@ -215,7 +212,7 @@ export interface SchemaDesignerConfig {
 /**
  * Interface for edge cells in schema designer
  */
-export interface EdgeCellValue extends IRelationship {
+export interface EdgeCellValue extends IForeignKey {
     /**
      * Source row of the edge
      */
