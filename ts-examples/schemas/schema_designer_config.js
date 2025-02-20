@@ -123,5 +123,8 @@ export const schemaDesignerConfig = {
     graphBackground: "#ffffff",
   },
   editEntity: (state) => {
+  },
+  publish: (schema) => {
+    console.log(schema);
   }
 };

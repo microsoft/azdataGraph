@@ -21,14 +21,7 @@
         if (targetDiv1) {
           const schemaDesigner = new SchemaDesigner(targetDiv1, {
             ...schemaDesignerConfig,
-            editTable: (
-              table,
-              cell,
-              x,
-              y,
-              scale,
-              model,
-            ) => {
+            editTable: (table, cell, x, y, scale, model) => {
               // Update displayed coordinates
               floatingDiv.style.left = `${x}px`;
               floatingDiv.style.top = `${y}px`;
@@ -46,7 +39,7 @@
               floatingDiv.style.height = scale * floatingDiv.clientHeight;
               floatingDiv.style.width = scale * floatingDiv.clientWidth;
               floatingDiv.style.fontSize = `${scale * 16}px`;
-            }
+            },
           });
           schemaDesigner.renderSchema(ecommerceDemoSchema);
           schemaDesigner.addCellClickListener((cell) => {
@@ -55,12 +48,10 @@
           document.getElementById("done-btn").addEventListener("click", () => {
             floatingDiv.style.display = "none";
             if (schemaDesigner) {
-              schemaDesigner.updateActiveCellStateTable(
-                {
-                  ...currentTable,
-                  name: currentTable.name + " (edited)",
-                }
-              )
+              schemaDesigner.updateActiveCellStateTable({
+                ...currentTable,
+                name: currentTable.name + " (edited)",
+              });
             }
           });
         }

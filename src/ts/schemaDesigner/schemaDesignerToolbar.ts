@@ -4,6 +4,9 @@ import { SchemaDesignerConfig } from "./schemaDesignerInterfaces";
 
 export class SchemaDesignerToolbar {
     private _toolbarDiv: HTMLElement;
+
+    public buttons: Map<string, HTMLElement> = new Map();
+
     constructor(private _container: HTMLElement, private _graph: mxGraph, private _config: SchemaDesignerConfig) {
         this._toolbarDiv = document.createElement("div");
         this._container.appendChild(this._toolbarDiv);
@@ -20,7 +23,11 @@ export class SchemaDesignerToolbar {
         this._toolbarDiv.appendChild(button);
         button.classList.add("sd-toolbar-button");
         button.innerHTML = icon;
-        button.onclick = callback;
+        button.onclick = () => {
+            if (!this.isButtonDisabled(title)) {
+                callback();
+            }
+        }
         button.title = title;
         if (onDragEndCallback) {
             const dragImage = button.cloneNode(true) as HTMLElement;
@@ -33,6 +40,19 @@ export class SchemaDesignerToolbar {
             );
             ds.highlightDropTargets = true;
         }
+        this.buttons.set(title, button);
+    }
+
+    public disableButton(title: string) {
+        this.buttons.get(title)?.classList.add("sd-toolbar-button-disabled");
+    }
+
+    public enableButton(title: string) {
+        this.buttons.get(title)?.classList.remove("sd-toolbar-button-disabled");
+    }
+
+    public isButtonDisabled(title: string) {
+        return this.buttons.get(title)?.classList.contains("sd-toolbar-button-disabled");
     }
 
     public addDivider() {
