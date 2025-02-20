@@ -285,6 +285,7 @@ class SchemaDesigner {
             const targetNode = me.getSource();
             const columnDiv = this.updateRow(targetNode);
             if (columnDiv !== null && this.currentRow !== undefined) {
+                const columnsDiv = columnDiv.parentElement;
                 const s = state.view.scale;
                 icons[0].node.style.userSelect = "none";
                 icons[0].node.style.visibility = "visible";
@@ -294,7 +295,7 @@ class SchemaDesigner {
                 icons[0].bounds.y =
                     state.y +
                         columnDiv.offsetTop * s +
-                        -columnDiv.scrollTop +
+                        -columnsDiv.scrollTop +
                         (columnDiv.offsetHeight * s) / 2 -
                         icons[0].bounds.height / 2;
                 if (icons[0].node.getAttribute("cell-id") === state.cell.id && icons[0].node.getAttribute("row-id") === this.currentRow.toString()) {

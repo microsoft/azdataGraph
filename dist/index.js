@@ -44010,13 +44010,14 @@ var SchemaDesigner = class {
       const targetNode = me.getSource();
       const columnDiv = this.updateRow(targetNode);
       if (columnDiv !== null && this.currentRow !== void 0) {
+        const columnsDiv = columnDiv.parentElement;
         const s = state.view.scale;
         icons[0].node.style.userSelect = "none";
         icons[0].node.style.visibility = "visible";
         icons[0].bounds.width = s * 24;
         icons[0].bounds.height = s * 24;
         icons[0].bounds.x = state.x + columnDiv.offsetWidth * s;
-        icons[0].bounds.y = state.y + columnDiv.offsetTop * s + -columnDiv.scrollTop + columnDiv.offsetHeight * s / 2 - icons[0].bounds.height / 2;
+        icons[0].bounds.y = state.y + columnDiv.offsetTop * s + -columnsDiv.scrollTop + columnDiv.offsetHeight * s / 2 - icons[0].bounds.height / 2;
         if (icons[0].node.getAttribute("cell-id") === state.cell.id && icons[0].node.getAttribute("row-id") === this.currentRow.toString()) {
           return;
         }
