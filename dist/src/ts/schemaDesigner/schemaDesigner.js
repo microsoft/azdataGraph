@@ -510,6 +510,11 @@ class SchemaDesigner {
                     this.mxEditor.execute("delete", cell);
                 }
             });
+            this.toolbar.addDivider();
+            this.toolbar.addButton(this.config.icons.exportIcon, "Export", () => {
+                const schema = this.schema;
+                this.config.publish(schema);
+            });
         }
     }
     /**

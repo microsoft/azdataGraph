@@ -43277,6 +43277,7 @@ var SchemaDesignerToolbar = class {
     this._container = _container;
     this._graph = _graph;
     this._config = _config;
+    this.buttons = /* @__PURE__ */ new Map();
     this._toolbarDiv = document.createElement("div");
     this._container.appendChild(this._toolbarDiv);
     this._toolbarDiv.classList.add("sd-toolbar");
@@ -43287,7 +43288,11 @@ var SchemaDesignerToolbar = class {
     this._toolbarDiv.appendChild(button);
     button.classList.add("sd-toolbar-button");
     button.innerHTML = icon;
-    button.onclick = callback;
+    button.onclick = () => {
+      if (!this.isButtonDisabled(title)) {
+        callback();
+      }
+    };
     button.title = title;
     if (onDragEndCallback) {
       const dragImage = button.cloneNode(true);
@@ -43300,6 +43305,16 @@ var SchemaDesignerToolbar = class {
       );
       ds.highlightDropTargets = true;
     }
+    this.buttons.set(title, button);
+  }
+  disableButton(title) {
+    this.buttons.get(title)?.classList.add("sd-toolbar-button-disabled");
+  }
+  enableButton(title) {
+    this.buttons.get(title)?.classList.remove("sd-toolbar-button-disabled");
+  }
+  isButtonDisabled(title) {
+    return this.buttons.get(title)?.classList.contains("sd-toolbar-button-disabled");
   }
   addDivider() {
     const divider = document.createElement("div");
@@ -44250,6 +44265,15 @@ var SchemaDesigner = class {
           if (cell2 !== void 0) {
             this.mxEditor.execute("delete", cell2);
           }
+        }
+      );
+      this.toolbar.addDivider();
+      this.toolbar.addButton(
+        this.config.icons.exportIcon,
+        "Export",
+        () => {
+          const schema = this.schema;
+          this.config.publish(schema);
         }
       );
     }

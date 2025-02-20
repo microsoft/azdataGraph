@@ -46,6 +46,10 @@
   justify-content: center;
   align-items: center;
 }
+.sd-toolbar-button-disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
 .sd-toolbar-button:hover {
   background-color: var(--sd-toolbar-hover-background-color);
 }

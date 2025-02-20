@@ -200,6 +200,11 @@ export interface SchemaDesignerConfig {
      * @param scale scale of the graph
      */
     updateEditorPosition: (x: number, y: number, scale: number) => void;
+    /**
+     * Callback to publish the schema
+     * @param model schema model
+     */
+    publish: (model: ISchema) => void;
 }
 /**
  * Interface for edge cells in schema designer
