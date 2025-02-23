@@ -187,102 +187,35 @@ export class SchemaDesigner {
 
         this.mxGraph.view.updateFloatingTerminalPoint = function (edge, start, end, source) {
             const next = this.getNextPoint(edge, end, source);
-            if (start?.text?.node === undefined) {
-                // This means that the start cell doesn't have a label.
-                return;
-            }
-
-            const div = start.text.node.getElementsByClassName("sd-table-columns")[0];
+            const div = start.text.node.getElementsByClassName("sd-table-columns")[0] as HTMLElement;
 
             let x = start.x;
             let y = start.getCenterY();
+
             // Checks on which side of the terminal to leave
             if (next.x > x + start.width / 2) {
                 x += start.width;
             }
 
-            if (div !== null && div !== undefined) {
+            if (div !== null) {
                 y = start.getCenterY() - div.scrollTop;
-                if (
-                    edge.cell.value !== undefined &&
-                    !this.graph.isCellCollapsed(start.cell)
-                ) {
-                    const edgeCellValue = edge.cell.value as EdgeCellValue;
+                const edgeCellValue = edge.cell.value as EdgeCellValue;
+
+                if (edgeCellValue !== undefined) {
                     const row = source ? edgeCellValue.sourceRow : edgeCellValue.targetRow;
                     const columns = div.getElementsByClassName("sd-table-column");
                     const column = columns[Math.min(columns.length - 1, row - 1)] as HTMLElement;
-                    // Gets vertical center of source or target row
-                    if (column !== undefined || column !== null) {
+                    if (column !== null) {
                         y = getRowY(start, column);
-                    } else {
-                        return;
                     }
-                }
 
+                }
+                y = Math.min(start.y + start.height, Math.max(start.y, y));
                 if (edge !== null && edge.absolutePoints !== null) {
                     next.y = y;
                 }
-            } else {
-                return;
             }
-
             edge.setAbsoluteTerminalPoint(new mx.mxPoint(x, y), source);
-
-            if (start.cell.value.scrollTop) {
-                div.scrollTop = start.cell.value.scrollTop;
-            }
-
-            // /**
-            //  * Routes multiple incoming edges along common waypoints if the edges
-            //  * have the common target row
-            //  */
-
-            // if (source && edge.cell.value !== undefined && start !== null && end !== null) {
-            //     let edges = this.graph.getEdgesBetween(start.cell, end.cell, true);
-            //     const tmp = [];
-
-            //     // Filters the edges with the same source row
-            //     const row = (edge.cell.value as EdgeCellValue).targetRow;
-
-            //     for (let i = 0; i < edges.length; i++) {
-            //         if (
-            //             edges[i].value !== undefined &&
-            //             (edges[i].value as EdgeCellValue).targetRow === row
-            //         ) {
-            //             tmp.push(edges[i]);
-            //         }
-            //     }
-
-            //     edges = tmp;
-
-            //     if (edges.length > 1 && edge.cell === edges[edges.length - 1]) {
-            //         // Finds the vertical center
-            //         const states = [];
-            //         let y = 0;
-
-            //         for (let i = 0; i < edges.length; i++) {
-            //             states[i] = this.getState(edges[i]);
-            //             y += states[i].absolutePoints[0].y;
-            //         }
-
-            //         y /= edges.length;
-
-            //         for (let i = 0; i < states.length; i++) {
-            //             const x = states[i].absolutePoints[1].x;
-
-            //             if (states[i].absolutePoints.length < 5) {
-            //                 states[i].absolutePoints.splice(2, 0, new mx.mxPoint(x, y));
-            //             } else {
-            //                 states[i].absolutePoints[2] = new mx.mxPoint(x, y);
-            //             }
-
-            //             // Must redraw the previous edges with the changed point
-            //             if (i < states.length - 1) {
-            //                 this.graph.cellRenderer.redraw(states[i]);
-            //             }
-            //         }
-            //     }
-            // }
 
         };
 
@@ -532,7 +465,7 @@ export class SchemaDesigner {
                 this.cellClickListeners.forEach((listener) => listener(cell));
             }
         });
-        this.mxGraph.getStylesheet().getDefaultEdgeStyle()['edgeStyle'] = mx.mxEdgeStyle.ElbowConnector;
+        this.mxGraph.getStylesheet().getDefaultEdgeStyle()['edgeStyle'] = mx.mxEdgeStyle.EntityRelation;
     }
 
     /**

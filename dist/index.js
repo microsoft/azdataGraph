@@ -43925,38 +43925,29 @@ var SchemaDesigner = class {
     this.mxGraph.panningHandler.useLeftButtonForPanning = true;
     this.mxGraph.view.updateFloatingTerminalPoint = function(edge, start, end, source) {
       const next = this.getNextPoint(edge, end, source);
-      if (start?.text?.node === void 0) {
-        return;
-      }
       const div = start.text.node.getElementsByClassName("sd-table-columns")[0];
       let x = start.x;
       let y = start.getCenterY();
       if (next.x > x + start.width / 2) {
         x += start.width;
       }
-      if (div !== null && div !== void 0) {
+      if (div !== null) {
         y = start.getCenterY() - div.scrollTop;
-        if (edge.cell.value !== void 0 && !this.graph.isCellCollapsed(start.cell)) {
-          const edgeCellValue = edge.cell.value;
+        const edgeCellValue = edge.cell.value;
+        if (edgeCellValue !== void 0) {
           const row = source ? edgeCellValue.sourceRow : edgeCellValue.targetRow;
           const columns = div.getElementsByClassName("sd-table-column");
           const column = columns[Math.min(columns.length - 1, row - 1)];
-          if (column !== void 0 || column !== null) {
+          if (column !== null) {
             y = getRowY(start, column);
-          } else {
-            return;
           }
         }
+        y = Math.min(start.y + start.height, Math.max(start.y, y));
         if (edge !== null && edge.absolutePoints !== null) {
           next.y = y;
         }
-      } else {
-        return;
       }
       edge.setAbsoluteTerminalPoint(new mxGraphFactory.mxPoint(x, y), source);
-      if (start.cell.value.scrollTop) {
-        div.scrollTop = start.cell.value.scrollTop;
-      }
     };
     this.mxGraph.getLabel = (cell2) => {
       if (cell2?.value?.render !== void 0) {
@@ -44168,7 +44159,7 @@ var SchemaDesigner = class {
         this.cellClickListeners.forEach((listener) => listener(cell2));
       }
     });
-    this.mxGraph.getStylesheet().getDefaultEdgeStyle()["edgeStyle"] = mxGraphFactory.mxEdgeStyle.ElbowConnector;
+    this.mxGraph.getStylesheet().getDefaultEdgeStyle()["edgeStyle"] = mxGraphFactory.mxEdgeStyle.EntityRelation;
   }
   /**
    * Configures the mxGraph outline for the schema designer
