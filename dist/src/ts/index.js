@@ -17,10 +17,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.mx = void 0;
+exports.mxGraphFactory = exports.mx = void 0;
 /// <reference path="./mxtypings/index.d.ts" />
 const mxgraph_1 = __importDefault(require("mxgraph"));
 exports.mx = mxgraph_1.default;
+const mx_1 = require("./mx");
+Object.defineProperty(exports, "mxGraphFactory", { enumerable: true, get: function () { return mx_1.mxGraphFactory; } });
 __exportStar(require("mxgraph"), exports);
 __exportStar(require("./schemaDesigner/schemaDesigner"), exports);
 __exportStar(require("./schemaDesigner/schemaDesignerInterfaces"), exports);

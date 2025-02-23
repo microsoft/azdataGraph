@@ -43243,10 +43243,10 @@ __export(ts_exports, {
   SchemaDesignerTable: () => SchemaDesignerTable,
   SchemaDesignerToolbar: () => SchemaDesignerToolbar,
   extendedConnectionHandler: () => extendedConnectionHandler,
-  mx: () => import_mxgraph2.default
+  mx: () => import_mxgraph2.default,
+  mxGraphFactory: () => mxGraphFactory
 });
 var import_mxgraph2 = __toESM(require_build());
-__reExport(ts_exports, __toESM(require_build()));
 
 // src/ts/mx.ts
 var import_mxgraph = __toESM(require_build());
@@ -43255,6 +43255,9 @@ window.mxForceIncludes = false;
 window.mxLoadStylesheets = false;
 window.mxResourceExtension = ".txt";
 var mxGraphFactory = (0, import_mxgraph.default)({});
+
+// src/ts/index.ts
+__reExport(ts_exports, __toESM(require_build()));
 
 // src/ts/schemaDesigner/schemaDesignerInterfaces.ts
 var OnAction = /* @__PURE__ */ ((OnAction2) => {
@@ -44589,6 +44592,7 @@ export {
   SchemaDesignerTable,
   SchemaDesignerToolbar,
   extendedConnectionHandler,
-  export_mx as mx
+  export_mx as mx,
+  mxGraphFactory
 };
 //# sourceMappingURL=index.js.map
