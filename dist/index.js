@@ -44522,14 +44522,9 @@ var SchemaDesigner = class {
     }
     const oldTable = state.cell.value;
     const incomingEdges = this.mxModel.getIncomingEdges(state.cell);
-    const outgoingEdges = this.mxModel.getOutgoingEdges(state.cell);
     const incomingEdgesIds = incomingEdges.map((edge) => {
       const edgeValue = edge.value;
       return oldTable.columns[edgeValue.targetRow - 1].id;
-    });
-    const outgoingEdgesIds = outgoingEdges.map((edge) => {
-      const edgeValue = edge.value;
-      return oldTable.columns[edgeValue.sourceRow - 1].id;
     });
     this.mxGraph.labelChanged(state.cell, {
       id: editedTable.id,
@@ -44555,14 +44550,8 @@ var SchemaDesigner = class {
         this.renderForeignKey(edgeValue, edge.source.value);
       }
     });
-    outgoingEdges.forEach((edge, index) => {
-      const outgoingEdgeId = outgoingEdgesIds[index];
-      const edgeValue = edge.value;
-      const column = editedTable.columns.find((column2) => column2.id === outgoingEdgeId);
-      if (column !== void 0) {
-        edgeValue.columns = [column.name];
-        this.renderForeignKey(edgeValue, editedTable);
-      }
+    editedTable.foreignKeys.forEach((foreignKey) => {
+      this.renderForeignKey(foreignKey, editedTable);
     });
     this.autoLayout();
     this.mxGraph.model.endUpdate();
