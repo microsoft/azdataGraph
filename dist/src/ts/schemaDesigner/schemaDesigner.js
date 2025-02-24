@@ -32,35 +32,35 @@ class SchemaDesigner {
         this.mxModel = this.mxGraph.getModel();
         this.configureMxEditor();
         this.configureMxGraph();
-        this.applyColors();
+        this.applyColors(this.config.colors);
         this.configureMxOutline();
         this.initializeToolbar();
     }
     /**
      * Applies the colors from the config to the schema designer
      */
-    applyColors() {
+    applyColors(colors) {
         const body = document.getElementsByTagName("body")[0];
-        body.style.setProperty("--sd-toolbar-background-color", this.config.colors.toolbarBackground);
-        body.style.setProperty("--sd-toolbar-foreground-color", this.config.colors.toolbarForeground);
-        body.style.setProperty("--sd-toolbar-hover-background-color", this.config.colors.toolbarHoverBackground);
-        body.style.setProperty("--sd-toolbar-divider-background-color", this.config.colors.toolbarDividerBackground);
-        body.style.setProperty("--sd-graph-background-color", this.config.colors.graphBackground);
-        body.style.setProperty("--sd-graph-grid-color", this.config.colors.graphGrid);
-        body.style.setProperty("--sd-border-color", this.config.colors.cellBorder);
-        body.style.setProperty("--sd-cell-html-foreground", this.config.colors.cellForeground);
-        body.style.setProperty("--sd-cell-html-hover-column-background", this.config.colors.cellColumnHover);
-        body.style.setProperty("--sd-cell-divider-color", this.config.colors.cellDivider);
-        body.style.setProperty("--sd-graph-background-color", this.config.colors.cellBackground);
-        this.mxGraph.getStylesheet().getDefaultVertexStyle()[mx_1.mxGraphFactory.mxConstants.STYLE_FILLCOLOR] = this.config.colors.cellBackground;
-        this.mxGraph.getStylesheet().getDefaultVertexStyle()['cellHighlightColor'] = this.config.colors.cellHighlight;
+        body.style.setProperty("--sd-toolbar-background-color", colors.toolbarBackground);
+        body.style.setProperty("--sd-toolbar-foreground-color", colors.toolbarForeground);
+        body.style.setProperty("--sd-toolbar-hover-background-color", colors.toolbarHoverBackground);
+        body.style.setProperty("--sd-toolbar-divider-background-color", colors.toolbarDividerBackground);
+        body.style.setProperty("--sd-graph-background-color", colors.graphBackground);
+        body.style.setProperty("--sd-graph-grid-color", colors.graphGrid);
+        body.style.setProperty("--sd-border-color", colors.cellBorder);
+        body.style.setProperty("--sd-cell-html-foreground", colors.cellForeground);
+        body.style.setProperty("--sd-cell-html-hover-column-background", colors.cellColumnHover);
+        body.style.setProperty("--sd-cell-divider-color", colors.cellDivider);
+        body.style.setProperty("--sd-graph-background-color", colors.cellBackground);
+        this.mxGraph.getStylesheet().getDefaultVertexStyle()[mx_1.mxGraphFactory.mxConstants.STYLE_FILLCOLOR] = colors.cellBackground;
+        this.mxGraph.getStylesheet().getDefaultVertexStyle()['cellHighlightColor'] = colors.cellHighlight;
         this.mxGraph.getStylesheet().getDefaultVertexStyle()['cellHighlightStrokeWidth'] = 3;
-        this.mxGraph.getStylesheet().getDefaultEdgeStyle()['cellHighlightColor'] = this.config.colors.cellHighlight;
-        this.mxGraph.getStylesheet().getDefaultEdgeStyle()["strokeColor"] = this.config.colors.edge;
-        mx_1.mxGraphFactory.mxConstants.OUTLINE_HANDLE_FILLCOLOR = this.config.colors.outlineHandleFill;
-        mx_1.mxGraphFactory.mxConstants.OUTLINE_HANDLE_STROKECOLOR = this.config.colors.outlineHandleFill;
-        mx_1.mxGraphFactory.mxConstants.OUTLINE_COLOR = this.config.colors.outline;
-        this.mxGraph.graphHandler.previewColor = this.config.colors.graphHandlePreview;
+        this.mxGraph.getStylesheet().getDefaultEdgeStyle()['cellHighlightColor'] = colors.cellHighlight;
+        this.mxGraph.getStylesheet().getDefaultEdgeStyle()["strokeColor"] = colors.edge;
+        mx_1.mxGraphFactory.mxConstants.OUTLINE_HANDLE_FILLCOLOR = colors.outlineHandleFill;
+        mx_1.mxGraphFactory.mxConstants.OUTLINE_HANDLE_STROKECOLOR = colors.outlineHandleFill;
+        mx_1.mxGraphFactory.mxConstants.OUTLINE_COLOR = colors.outline;
+        this.mxGraph.graphHandler.previewColor = colors.graphHandlePreview;
     }
     /**
      * Overwrites the default mxGraph settings

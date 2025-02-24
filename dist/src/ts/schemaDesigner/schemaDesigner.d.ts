@@ -1,6 +1,6 @@
 import './schemaDesigner.css';
 import '../../css/common.css';
-import { IForeignKey, ISchema, ITable, SchemaDesignerConfig } from './schemaDesignerInterfaces';
+import { IForeignKey, ISchema, ITable, SchemaDesignerColors, SchemaDesignerConfig } from './schemaDesignerInterfaces';
 import { mxCell, mxCellState, mxEditor, mxGraph, mxGraphLayout, mxGraphModel } from 'mxgraph';
 import { SchemaDesignerToolbar } from './schemaDesignerToolbar';
 export declare class SchemaDesigner {
@@ -42,7 +42,7 @@ export declare class SchemaDesigner {
     /**
      * Applies the colors from the config to the schema designer
      */
-    private applyColors;
+    applyColors(colors: SchemaDesignerColors): void;
     /**
      * Overwrites the default mxGraph settings
      */
