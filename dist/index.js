@@ -43931,6 +43931,8 @@ var SchemaDesigner = class {
     mxGraphFactory.mxConstants.OUTLINE_HANDLE_STROKECOLOR = colors.outlineHandleFill;
     mxGraphFactory.mxConstants.OUTLINE_COLOR = colors.outline;
     this.mxGraph.graphHandler.previewColor = colors.graphHandlePreview;
+    this.mxGraph.refresh();
+    this.mxGraph.view.refresh();
   }
   /**
    * Overwrites the default mxGraph settings

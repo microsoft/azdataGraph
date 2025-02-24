@@ -97,6 +97,9 @@ export class SchemaDesigner {
         mx.mxConstants.OUTLINE_COLOR = colors.outline;
 
         this.mxGraph.graphHandler.previewColor = colors.graphHandlePreview;
+
+        this.mxGraph.refresh();
+        this.mxGraph.view.refresh();
     }
 
     /**

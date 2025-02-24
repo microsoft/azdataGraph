@@ -61,6 +61,8 @@ class SchemaDesigner {
         mx_1.mxGraphFactory.mxConstants.OUTLINE_HANDLE_STROKECOLOR = colors.outlineHandleFill;
         mx_1.mxGraphFactory.mxConstants.OUTLINE_COLOR = colors.outline;
         this.mxGraph.graphHandler.previewColor = colors.graphHandlePreview;
+        this.mxGraph.refresh();
+        this.mxGraph.view.refresh();
     }
     /**
      * Overwrites the default mxGraph settings
