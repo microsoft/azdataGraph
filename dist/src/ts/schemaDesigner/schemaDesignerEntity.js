@@ -146,6 +146,9 @@ class SchemaDesignerTable {
      * @returns the table div
      */
     renderTableDiv() {
+        const FONT_SIZE = "13px";
+        const LINE_HEIGHT = "18px";
+        const FONT_WEIGHT = "400";
         if (this.parentDiv) {
             this.removeEventListeners();
             this.parentDiv.remove();
@@ -153,22 +156,55 @@ class SchemaDesignerTable {
         const parent = document.createElement("div");
         this.parentDiv = parent;
         parent.classList.add("sd-table");
+        parent.style.width = "400px";
+        parent.style.height = "100%";
+        parent.style.borderRadius = "2px";
+        parent.style.color = "var(--sd-cell-html-foreground)";
+        parent.style.boxShadow = "0px 3px 8px rgba(0, 0, 0, 0.35), 0px 1px 3px rgba(0, 0, 0, 0.5), inset 0px 0.5px 0px rgba(255, 255, 255, 0.08), inset 0px 0px 0.5px rgba(255, 255, 255, 0.3)";
+        parent.style.display = "flex";
+        parent.style.flexDirection = "column";
+        parent.style.backgroundColor = "var(--sd-graph-background-color)";
         // Tables are colored based on the schema
         const tableColor = (0, create_color_1.default)(this.schema, { format: "hex" });
         const colorIndicator = document.createElement("div");
         colorIndicator.classList.add("sd-table-color-indicator");
         colorIndicator.style.backgroundColor = tableColor;
+        colorIndicator.style.width = "100%";
+        colorIndicator.style.height = "6px";
+        colorIndicator.style.borderRadius = "2px 2px 0 0";
         parent.appendChild(colorIndicator);
         // Table header
         const header = document.createElement("div");
         header.classList.add("sd-table-header");
+        header.style.display = "flex";
+        header.style.gap = "10px";
+        header.style.height = "40px";
+        header.style.borderBottom = "1px solid var(--sd-cell-divider-color)";
         const headerIcon = document.createElement("div");
         headerIcon.innerHTML = this.schemaDesignerConfig.icons.entityIcon;
         headerIcon.classList.add("sd-table-header-icon");
+        headerIcon.style.width = "24px";
+        headerIcon.style.height = "100%";
+        headerIcon.style.backgroundSize = "16px 16px";
+        headerIcon.style.backgroundRepeat = "no-repeat";
+        headerIcon.style.backgroundPosition = "center";
+        headerIcon.style.marginLeft = "10px";
+        headerIcon.style.display = "flex";
+        headerIcon.style.justifyContent = "center";
+        headerIcon.style.alignItems = "center";
+        headerIcon.style.color = "var(--sd-cell-html-foreground)";
         headerIcon.innerHTML = this.schemaDesignerConfig.icons.entityIcon;
         header.appendChild(headerIcon);
         const headerText = document.createElement("div");
         headerText.classList.add("sd-table-header-text");
+        headerText.style.fontSize = "14px";
+        headerText.style.fontWeight = "500";
+        headerText.style.alignSelf = "center";
+        headerText.style.textAlign = "left";
+        headerText.style.flex = "1";
+        headerText.style.userSelect = "none";
+        headerText.style.textOverflow = "ellipsis";
+        headerText.style.overflow = "hidden";
         const tableTitle = `${this.schema}.${this.name}`;
         headerText.innerText = tableTitle;
         headerText.title = tableTitle;
@@ -188,12 +224,40 @@ class SchemaDesignerTable {
         // TODO: Make this keyboard accessible
         const columns = document.createElement("div");
         columns.classList.add("sd-table-columns");
+        columns.style.display = "flex";
+        columns.style.flexDirection = "column";
+        columns.style.maxHeight = "280px";
+        columns.style.overflowY = "auto";
+        columns.style.marginTop = "5px";
+        columns.style.padding = "0";
+        columns.style.boxSizing = "border-box";
         this.columns.forEach((column, index) => {
             const columnDiv = document.createElement("div");
             columnDiv.classList.add("sd-table-column");
+            columnDiv.style.display = "flex";
+            columnDiv.style.gap = "10px";
+            columnDiv.style.height = "28px";
+            columnDiv.style.minHeight = "28px";
+            columnDiv.style.boxSizing = "border-box";
+            columnDiv.addEventListener("mouseenter", () => {
+                columnDiv.style.backgroundColor = "var(--sd-cell-html-hover-column-background);";
+            });
+            columnDiv.addEventListener("mouseleave", () => {
+                columnDiv.style.backgroundColor = "transparent";
+            });
             // Add column constraint icon
             const keyIcon = document.createElement("div");
             keyIcon.classList.add("sd-table-column-icon");
+            keyIcon.style.width = "18px";
+            keyIcon.style.height = "18px";
+            keyIcon.style.height = "100%";
+            keyIcon.style.backgroundSize = "16px 16px";
+            keyIcon.style.backgroundRepeat = "no-repeat";
+            keyIcon.style.backgroundPosition = "center";
+            keyIcon.style.marginLeft = "10px";
+            keyIcon.style.display = "flex";
+            keyIcon.style.justifyContent = "center";
+            keyIcon.style.alignItems = "center";
             if (column.isPrimaryKey) {
                 keyIcon.innerHTML = this.schemaDesignerConfig.icons.primaryKeyIcon;
                 keyIcon.title = "Primary key";
@@ -206,6 +270,15 @@ class SchemaDesignerTable {
             // Add column name
             const columnNameDiv = document.createElement("div");
             columnNameDiv.classList.add("sd-table-column-text");
+            columnNameDiv.style.fontSize = FONT_SIZE;
+            columnNameDiv.style.lineHeight = LINE_HEIGHT;
+            columnNameDiv.style.fontWeight = FONT_WEIGHT;
+            columnNameDiv.style.alignSelf = "center";
+            columnNameDiv.style.textAlign = "left";
+            columnNameDiv.style.userSelect = "none";
+            columnNameDiv.style.flex = "1";
+            columnNameDiv.style.overflow = "hidden";
+            columnNameDiv.style.textOverflow = "ellipsis";
             columnNameDiv.title = column.name;
             columnNameDiv.innerText = column.name;
             columnNameDiv.title = this.getColumnTooltip(index);
@@ -213,6 +286,13 @@ class SchemaDesignerTable {
             // Add column data type
             const columnDataTypeDiv = document.createElement("div");
             columnDataTypeDiv.classList.add("sd-table-column-datatype-text");
+            columnDataTypeDiv.style.fontSize = FONT_SIZE;
+            columnDataTypeDiv.style.lineHeight = LINE_HEIGHT;
+            columnDataTypeDiv.style.fontWeight = FONT_WEIGHT;
+            columnDataTypeDiv.style.alignSelf = "center";
+            columnDataTypeDiv.style.textAlign = "left";
+            columnDataTypeDiv.style.marginRight = "10px";
+            columnDataTypeDiv.style.userSelect = "none";
             columnDataTypeDiv.innerText = column.dataType;
             columnDiv.appendChild(columnDataTypeDiv);
             columnDiv.setAttribute("column-id", index.toString());
