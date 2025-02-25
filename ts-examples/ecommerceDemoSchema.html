@@ -9,7 +9,7 @@
       import { SchemaDesigner } from "../dist/index.js";
       import { schemaDesignerConfig } from "./schemas/schema_designer_config.js";
       import { ecommerceDemoSchema } from "./schemas/schema_ecommerce_demo.js";
-      window.onload = () => {
+      window.onload = async () => {
         let currentTable = undefined;
         let currentForeignKey = undefined;
         const targetDiv1 = document.getElementById("graphContainer");
@@ -54,6 +54,8 @@
               });
             }
           });
+          const file = await schemaDesigner.exportImage("svg");
+          console.log(file);
         }
       };
     </script>
