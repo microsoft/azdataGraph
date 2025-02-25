@@ -9,6 +9,7 @@ import { getRowY } from './utils';
 import { SchemaDesignerTable } from './schemaDesignerEntity';
 import { SchemaDesignerLayout } from './schemaDesignerLayout';
 import { v4 as uuidv4 } from 'uuid';
+import * as htmlToImage from 'html-to-image';
 
 export class SchemaDesigner {
     /**
@@ -658,7 +659,6 @@ export class SchemaDesigner {
             for (let i = 0; i < cells.length; i++) {
                 const edges = this.mxModel.getEdges(cells[i]);
                 if (edges.length > max) {
-                    console.log(edges.length, cell.value.name);
                     max = edges.length;
                     cell = cells[i];
                 }
@@ -956,6 +956,55 @@ export class SchemaDesigner {
         }, new Map<string, IForeignKey>());
 
         return Array.from(foreignKeyMap.values());
+    }
+
+    public async exportImage(format: string): Promise<{
+        fileContent: string,
+        format: string,
+        width: number,
+        height: number
+    }> {
+        const selectedCells = this.mxGraph.getSelectionCells();
+        this.mxGraph.setSelectionCells([]);
+        const width = this.mxGraph.getGraphBounds().width + 300;
+        const height = this.mxGraph.getGraphBounds().height + 300;
+        const fileContentPromise = new Promise<string>((resolve) => {
+            switch (format) {
+                case 'png':
+                    htmlToImage.toPng(this.container, {
+                        width: width,
+                        height: height,
+                    }).then((dataUrl) => {
+                        resolve(dataUrl);
+                    })
+                    break;
+                case 'jpeg':
+                    htmlToImage.toJpeg(this.container, {
+                        width: width,
+                        height: height,
+                    }).then((dataUrl) => {
+                        resolve(dataUrl);
+                    })
+                    break;
+                case 'svg':
+                    htmlToImage.toSvg(this.container, {
+                        width: width,
+                        height: height,
+                    }).then((dataUrl) => {
+                        resolve(dataUrl);
+                    })
+                    break;
+                default:
+                    throw new Error('Invalid format');
+            }
+        });
+        this.mxGraph.setSelectionCells(selectedCells);
+        return {
+            fileContent: await fileContentPromise,
+            format: format,
+            width: width,
+            height: height
+        }
     }
 }
 

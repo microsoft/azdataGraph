@@ -44,6 +44,7 @@
   "dependencies": {
     "@dagrejs/dagre": "^1.1.4",
     "create-color": "^2.0.6",
+    "html-to-image": "^1.11.13",
     "uuid": "^11.0.5"
   }
 }
