@@ -1,7 +1,7 @@
 import './schemaDesigner.css';
 import '../../css/common.css';
 
-import { EdgeCellValue, extendedConnectionHandler, IColumn, IForeignKey, ISchema, ITable, OnAction, SchemaDesignerConfig } from './schemaDesignerInterfaces';
+import { EdgeCellValue, extendedConnectionHandler, IColumn, IForeignKey, ISchema, ITable, OnAction, SchemaDesignerColors, SchemaDesignerConfig } from './schemaDesignerInterfaces';
 import { mxCell, mxCellState, mxEditor, mxGraph, mxGraphLayout, mxGraphModel } from 'mxgraph';
 import { mxGraphFactory as mx } from '../mx';
 import { SchemaDesignerToolbar } from './schemaDesignerToolbar';
@@ -61,7 +61,7 @@ export class SchemaDesigner {
         this.mxModel = this.mxGraph.getModel();
         this.configureMxEditor();
         this.configureMxGraph();
-        this.applyColors();
+        this.applyColors(this.config.colors);
         this.configureMxOutline();
         this.initializeToolbar();
     }
@@ -69,34 +69,37 @@ export class SchemaDesigner {
     /**
      * Applies the colors from the config to the schema designer
      */
-    private applyColors() {
+    public applyColors(colors: SchemaDesignerColors) {
         const body = document.getElementsByTagName("body")[0];
-        body.style.setProperty("--sd-toolbar-background-color", this.config.colors.toolbarBackground);
-        body.style.setProperty("--sd-toolbar-foreground-color", this.config.colors.toolbarForeground);
-        body.style.setProperty("--sd-toolbar-hover-background-color", this.config.colors.toolbarHoverBackground);
-        body.style.setProperty("--sd-toolbar-divider-background-color", this.config.colors.toolbarDividerBackground);
+        body.style.setProperty("--sd-toolbar-background-color", colors.toolbarBackground);
+        body.style.setProperty("--sd-toolbar-foreground-color", colors.toolbarForeground);
+        body.style.setProperty("--sd-toolbar-hover-background-color", colors.toolbarHoverBackground);
+        body.style.setProperty("--sd-toolbar-divider-background-color", colors.toolbarDividerBackground);
 
-        body.style.setProperty("--sd-graph-background-color", this.config.colors.graphBackground);
-        body.style.setProperty("--sd-graph-grid-color", this.config.colors.graphGrid);
-        body.style.setProperty("--sd-border-color", this.config.colors.cellBorder);
+        body.style.setProperty("--sd-graph-background-color", colors.graphBackground);
+        body.style.setProperty("--sd-graph-grid-color", colors.graphGrid);
+        body.style.setProperty("--sd-border-color", colors.cellBorder);
 
-        body.style.setProperty("--sd-cell-html-foreground", this.config.colors.cellForeground);
-        body.style.setProperty("--sd-cell-html-hover-column-background", this.config.colors.cellColumnHover);
-        body.style.setProperty("--sd-cell-divider-color", this.config.colors.cellDivider);
-        body.style.setProperty("--sd-graph-background-color", this.config.colors.cellBackground);
+        body.style.setProperty("--sd-cell-html-foreground", colors.cellForeground);
+        body.style.setProperty("--sd-cell-html-hover-column-background", colors.cellColumnHover);
+        body.style.setProperty("--sd-cell-divider-color", colors.cellDivider);
+        body.style.setProperty("--sd-graph-background-color", colors.cellBackground);
 
-        this.mxGraph.getStylesheet().getDefaultVertexStyle()[mx.mxConstants.STYLE_FILLCOLOR] = this.config.colors.cellBackground;
-        this.mxGraph.getStylesheet().getDefaultVertexStyle()['cellHighlightColor'] = this.config.colors.cellHighlight;
+        this.mxGraph.getStylesheet().getDefaultVertexStyle()[mx.mxConstants.STYLE_FILLCOLOR] = colors.cellBackground;
+        this.mxGraph.getStylesheet().getDefaultVertexStyle()['cellHighlightColor'] = colors.cellHighlight;
         this.mxGraph.getStylesheet().getDefaultVertexStyle()['cellHighlightStrokeWidth'] = 3;
 
-        this.mxGraph.getStylesheet().getDefaultEdgeStyle()['cellHighlightColor'] = this.config.colors.cellHighlight;
-        this.mxGraph.getStylesheet().getDefaultEdgeStyle()["strokeColor"] = this.config.colors.edge;
+        this.mxGraph.getStylesheet().getDefaultEdgeStyle()['cellHighlightColor'] = colors.cellHighlight;
+        this.mxGraph.getStylesheet().getDefaultEdgeStyle()["strokeColor"] = colors.edge;
 
-        mx.mxConstants.OUTLINE_HANDLE_FILLCOLOR = this.config.colors.outlineHandleFill
-        mx.mxConstants.OUTLINE_HANDLE_STROKECOLOR = this.config.colors.outlineHandleFill;
-        mx.mxConstants.OUTLINE_COLOR = this.config.colors.outline;
+        mx.mxConstants.OUTLINE_HANDLE_FILLCOLOR = colors.outlineHandleFill
+        mx.mxConstants.OUTLINE_HANDLE_STROKECOLOR = colors.outlineHandleFill;
+        mx.mxConstants.OUTLINE_COLOR = colors.outline;
 
-        this.mxGraph.graphHandler.previewColor = this.config.colors.graphHandlePreview;
+        this.mxGraph.graphHandler.previewColor = colors.graphHandlePreview;
+
+        this.mxGraph.refresh();
+        this.mxGraph.view.refresh();
     }
 
     /**
@@ -187,102 +190,35 @@ export class SchemaDesigner {
 
         this.mxGraph.view.updateFloatingTerminalPoint = function (edge, start, end, source) {
             const next = this.getNextPoint(edge, end, source);
-            if (start?.text?.node === undefined) {
-                // This means that the start cell doesn't have a label.
-                return;
-            }
-
-            const div = start.text.node.getElementsByClassName("sd-table-columns")[0];
+            const div = start.text.node.getElementsByClassName("sd-table-columns")[0] as HTMLElement;
 
             let x = start.x;
             let y = start.getCenterY();
+
             // Checks on which side of the terminal to leave
             if (next.x > x + start.width / 2) {
                 x += start.width;
             }
 
-            if (div !== null && div !== undefined) {
+            if (div !== null) {
                 y = start.getCenterY() - div.scrollTop;
-                if (
-                    edge.cell.value !== undefined &&
-                    !this.graph.isCellCollapsed(start.cell)
-                ) {
-                    const edgeCellValue = edge.cell.value as EdgeCellValue;
+                const edgeCellValue = edge.cell.value as EdgeCellValue;
+
+                if (edgeCellValue !== undefined) {
                     const row = source ? edgeCellValue.sourceRow : edgeCellValue.targetRow;
                     const columns = div.getElementsByClassName("sd-table-column");
                     const column = columns[Math.min(columns.length - 1, row - 1)] as HTMLElement;
-                    // Gets vertical center of source or target row
-                    if (column !== undefined || column !== null) {
+                    if (column !== null) {
                         y = getRowY(start, column);
-                    } else {
-                        return;
                     }
-                }
 
+                }
+                y = Math.min(start.y + start.height, Math.max(start.y, y));
                 if (edge !== null && edge.absolutePoints !== null) {
                     next.y = y;
                 }
-            } else {
-                return;
             }
-
             edge.setAbsoluteTerminalPoint(new mx.mxPoint(x, y), source);
-
-            if (start.cell.value.scrollTop) {
-                div.scrollTop = start.cell.value.scrollTop;
-            }
-
-            // /**
-            //  * Routes multiple incoming edges along common waypoints if the edges
-            //  * have the common target row
-            //  */
-
-            // if (source && edge.cell.value !== undefined && start !== null && end !== null) {
-            //     let edges = this.graph.getEdgesBetween(start.cell, end.cell, true);
-            //     const tmp = [];
-
-            //     // Filters the edges with the same source row
-            //     const row = (edge.cell.value as EdgeCellValue).targetRow;
-
-            //     for (let i = 0; i < edges.length; i++) {
-            //         if (
-            //             edges[i].value !== undefined &&
-            //             (edges[i].value as EdgeCellValue).targetRow === row
-            //         ) {
-            //             tmp.push(edges[i]);
-            //         }
-            //     }
-
-            //     edges = tmp;
-
-            //     if (edges.length > 1 && edge.cell === edges[edges.length - 1]) {
-            //         // Finds the vertical center
-            //         const states = [];
-            //         let y = 0;
-
-            //         for (let i = 0; i < edges.length; i++) {
-            //             states[i] = this.getState(edges[i]);
-            //             y += states[i].absolutePoints[0].y;
-            //         }
-
-            //         y /= edges.length;
-
-            //         for (let i = 0; i < states.length; i++) {
-            //             const x = states[i].absolutePoints[1].x;
-
-            //             if (states[i].absolutePoints.length < 5) {
-            //                 states[i].absolutePoints.splice(2, 0, new mx.mxPoint(x, y));
-            //             } else {
-            //                 states[i].absolutePoints[2] = new mx.mxPoint(x, y);
-            //             }
-
-            //             // Must redraw the previous edges with the changed point
-            //             if (i < states.length - 1) {
-            //                 this.graph.cellRenderer.redraw(states[i]);
-            //             }
-            //         }
-            //     }
-            // }
 
         };
 
@@ -532,7 +468,7 @@ export class SchemaDesigner {
                 this.cellClickListeners.forEach((listener) => listener(cell));
             }
         });
-        this.mxGraph.getStylesheet().getDefaultEdgeStyle()['edgeStyle'] = mx.mxEdgeStyle.ElbowConnector;
+        this.mxGraph.getStylesheet().getDefaultEdgeStyle()['edgeStyle'] = mx.mxEdgeStyle.EntityRelation;
     }
 
     /**
@@ -948,16 +884,10 @@ export class SchemaDesigner {
         const oldTable = state.cell.value as SchemaDesignerTable;
 
         const incomingEdges = this.mxModel.getIncomingEdges(state.cell);
-        const outgoingEdges = this.mxModel.getOutgoingEdges(state.cell);
 
         const incomingEdgesIds = incomingEdges.map((edge) => {
             const edgeValue = edge.value as EdgeCellValue;
             return oldTable.columns[edgeValue.targetRow - 1].id;
-        });
-
-        const outgoingEdgesIds = outgoingEdges.map((edge) => {
-            const edgeValue = edge.value as EdgeCellValue;
-            return oldTable.columns[edgeValue.sourceRow - 1].id;
         });
 
         this.mxGraph.labelChanged(state.cell, {
@@ -990,14 +920,8 @@ export class SchemaDesigner {
             }
         });
 
-        outgoingEdges.forEach((edge, index) => {
-            const outgoingEdgeId = outgoingEdgesIds[index];
-            const edgeValue = edge.value as EdgeCellValue;
-            const column = editedTable.columns.find((column) => column.id === outgoingEdgeId);
-            if (column !== undefined) {
-                edgeValue.columns = [column.name];
-                this.renderForeignKey(edgeValue, editedTable);
-            }
+        editedTable.foreignKeys.forEach((foreignKey) => {
+            this.renderForeignKey(foreignKey, editedTable);
         });
 
         // Update the cell position
