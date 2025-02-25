@@ -4,7 +4,7 @@ import dagre from '@dagrejs/dagre';
 
 export class SchemaDesignerLayout extends mx.mxGraphLayout {
     constructor(graph: mxGraph) {
-        
+
         super(graph);
         this.isEdgeIgnored = (_edge: mxCell) => {
             console.log('edge ignored', _edge.value);
@@ -15,39 +15,45 @@ export class SchemaDesignerLayout extends mx.mxGraphLayout {
     public override execute(parent: mxCell): void {
         const selectedCell = this.graph.getSelectionCell();
         this.graph.getModel().beginUpdate();
-        const g = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
-        g.setGraph({ 
+        const g = new dagre.graphlib.Graph({
+            directed: true,
+            multigraph: true,
+        }).setDefaultEdgeLabel(() => ({}));
+        g.setGraph({
             rankdir: 'LR',
-         });
+            nodesep: 10,
+        });
 
         const dagCells = this.graph.getModel().getChildCells(parent);
 
-        for (let i = 0; i < dagCells.length; i++){
+        for (let i = 0; i < dagCells.length; i++) {
             const currentCell = dagCells[i];
-            if(!currentCell.edge){
+            if (!currentCell.edge) {
                 g.setNode(
                     currentCell.id,
                     {
                         label: currentCell.id,
-                        width: currentCell.geometry.width,
-                        height: currentCell.geometry.height + 30, //padding
+                        width: currentCell.geometry.width + 50, //padding
+                        height: currentCell.geometry.height + 50, //padding
                     }
                 )
             }
         }
 
-        for (let i = 0; i < dagCells.length; i++){
+        for (let i = 0; i < dagCells.length; i++) {
             const currentCell = dagCells[i];
-            if(currentCell.edge){
-                g.setEdge(currentCell.source.id, currentCell.target.id)
+            if (currentCell.edge) {
+                g.setEdge(currentCell.source.id, currentCell.target.id, {
+
+                }, currentCell.id);
             }
         }
 
         dagre.layout(g);
 
-        for (let i = 0; i < dagCells.length; i++){
+        for (let i = 0; i < dagCells.length; i++) {
             const currentCell = dagCells[i];
-            if(!currentCell.edge){
+            if (!currentCell.edge) {
                 const computedNode = g.node(currentCell.id);
                 currentCell.geometry.x = computedNode.x;
                 currentCell.geometry.y = computedNode.y;
@@ -55,10 +61,12 @@ export class SchemaDesignerLayout extends mx.mxGraphLayout {
         }
 
         this.graph.refresh();
-        if(selectedCell){
+
+        if (selectedCell) {
             this.graph.setSelectionCell(selectedCell);
             this.graph.scrollCellToVisible(selectedCell);
         }
+
         this.graph.getModel().endUpdate();
     }
 }

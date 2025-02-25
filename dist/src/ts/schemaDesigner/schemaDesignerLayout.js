@@ -17,9 +17,13 @@ class SchemaDesignerLayout extends mx_1.mxGraphFactory.mxGraphLayout {
     execute(parent) {
         const selectedCell = this.graph.getSelectionCell();
         this.graph.getModel().beginUpdate();
-        const g = new dagre_1.default.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
+        const g = new dagre_1.default.graphlib.Graph({
+            directed: true,
+            multigraph: true,
+        }).setDefaultEdgeLabel(() => ({}));
         g.setGraph({
             rankdir: 'LR',
+            nodesep: 10,
         });
         const dagCells = this.graph.getModel().getChildCells(parent);
         for (let i = 0; i < dagCells.length; i++) {
@@ -27,15 +31,15 @@ class SchemaDesignerLayout extends mx_1.mxGraphFactory.mxGraphLayout {
             if (!currentCell.edge) {
                 g.setNode(currentCell.id, {
                     label: currentCell.id,
-                    width: currentCell.geometry.width,
-                    height: currentCell.geometry.height + 30, //padding
+                    width: currentCell.geometry.width + 50, //padding
+                    height: currentCell.geometry.height + 50, //padding
                 });
             }
         }
         for (let i = 0; i < dagCells.length; i++) {
             const currentCell = dagCells[i];
             if (currentCell.edge) {
-                g.setEdge(currentCell.source.id, currentCell.target.id);
+                g.setEdge(currentCell.source.id, currentCell.target.id, {}, currentCell.id);
             }
         }
         dagre_1.default.layout(g);

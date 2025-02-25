@@ -47218,9 +47218,13 @@ var SchemaDesignerLayout = class extends mxGraphFactory.mxGraphLayout {
   execute(parent) {
     const selectedCell = this.graph.getSelectionCell();
     this.graph.getModel().beginUpdate();
-    const g = new import_dagre.default.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
+    const g = new import_dagre.default.graphlib.Graph({
+      directed: true,
+      multigraph: true
+    }).setDefaultEdgeLabel(() => ({}));
     g.setGraph({
-      rankdir: "LR"
+      rankdir: "LR",
+      nodesep: 10
     });
     const dagCells = this.graph.getModel().getChildCells(parent);
     for (let i = 0; i < dagCells.length; i++) {
@@ -47230,8 +47234,9 @@ var SchemaDesignerLayout = class extends mxGraphFactory.mxGraphLayout {
           currentCell.id,
           {
             label: currentCell.id,
-            width: currentCell.geometry.width,
-            height: currentCell.geometry.height + 30
+            width: currentCell.geometry.width + 50,
+            //padding
+            height: currentCell.geometry.height + 50
             //padding
           }
         );
@@ -47240,7 +47245,7 @@ var SchemaDesignerLayout = class extends mxGraphFactory.mxGraphLayout {
     for (let i = 0; i < dagCells.length; i++) {
       const currentCell = dagCells[i];
       if (currentCell.edge) {
-        g.setEdge(currentCell.source.id, currentCell.target.id);
+        g.setEdge(currentCell.source.id, currentCell.target.id, {}, currentCell.id);
       }
     }
     import_dagre.default.layout(g);
