@@ -42,6 +42,7 @@
     "typescript-eslint": "^8.18.0"
   },
   "dependencies": {
+    "@dagrejs/dagre": "^1.1.4",
     "create-color": "^2.0.6",
     "uuid": "^11.0.5"
   }

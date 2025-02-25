@@ -163,6 +163,18 @@
     "@babel/helper-string-parser" "^7.25.9"
     "@babel/helper-validator-identifier" "^7.25.9"
 
+"@dagrejs/dagre@^1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@dagrejs/dagre/-/dagre-1.1.4.tgz#66f9c0e2b558308f2c268f60e2c28f22ee17e339"
+  integrity sha512-QUTc54Cg/wvmlEUxB+uvoPVKFazM1H18kVHBQNmK2NbrDR5ihOCR6CXLnDSZzMcSQKJtabPUWridBOlJM3WkDg==
+  dependencies:
+    "@dagrejs/graphlib" "2.2.4"
+
+"@dagrejs/graphlib@2.2.4":
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/@dagrejs/graphlib/-/graphlib-2.2.4.tgz#d77bfa9ff49e2307c0c6e6b8b26b5dd3c05816c4"
+  integrity sha512-mepCf/e9+SKYy1d02/UkvSy6+6MoyXhVxP8lLDfA7BPE1X1d4dR0sZznmbM8/XVJ1GPM+Svnx7Xj6ZweByWUkw==
+
 "@esbuild/aix-ppc64@0.24.0":
   version "0.24.0"
   resolved "https://registry.yarnpkg.com/@esbuild/aix-ppc64/-/aix-ppc64-0.24.0.tgz#b57697945b50e99007b4c2521507dc613d4a648c"

@@ -714,6 +714,22 @@ export class SchemaDesigner {
 
                 }
             }
+
+            const cells = this.mxModel.getChildCells(this.mxGraph.getDefaultParent());
+            // select the cell with most edges
+            let max = 0;
+            let cell = cells[0]
+            for (let i = 0; i < cells.length; i++) {
+                const edges = this.mxModel.getEdges(cells[i]);
+                if (edges.length > max) {
+                    console.log(edges.length, cell.value.name);
+                    max = edges.length;
+                    cell = cells[i];
+                }
+            }
+
+            this.mxGraph.setSelectionCell(cell);
+
             this.autoLayout();
             if (cleanUndoManager) {
                 this.mxEditor.undoManager.clear();
