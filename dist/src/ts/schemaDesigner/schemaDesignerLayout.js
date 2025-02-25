@@ -1,97 +1,56 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SchemaDesignerLayout = void 0;
 const mx_1 = require("../mx");
-class SchemaDesignerLayout extends mx_1.mxGraphFactory.mxHierarchicalLayout {
+const dagre_1 = __importDefault(require("@dagrejs/dagre"));
+class SchemaDesignerLayout extends mx_1.mxGraphFactory.mxGraphLayout {
     constructor(graph) {
-        super(graph, mx_1.mxGraphFactory.mxConstants.DIRECTION_EAST, true);
+        super(graph);
         this.isEdgeIgnored = (_edge) => {
             console.log('edge ignored', _edge.value);
             return true;
         };
     }
     execute(parent) {
+        const selectedCell = this.graph.getSelectionCell();
         this.graph.getModel().beginUpdate();
-        this.interHierarchySpacing = 100;
-        this.orientation = mx_1.mxGraphFactory.mxConstants.DIRECTION_WEST;
-        super.execute(parent);
-        // Move all cells to the right by 100px
-        let cells = this.graph.getModel().getChildCells(this.graph.getDefaultParent());
-        this.graph.moveCells(cells, 50, 50, false);
-        cells = cells.filter(cell => !cell.edge);
-        const cellSet = new Set(cells.map(cell => cell.id));
-        // Find all subgraphs
-        const subGraphs = [];
-        for (const cell of cells) {
-            if (cellSet.has(cell.id)) {
-                const subGraph = [];
-                const queue = [cell];
-                cellSet.delete(cell.id);
-                while (queue.length > 0) {
-                    const current = queue.shift();
-                    cellSet.delete(current.id);
-                    subGraph.push(current);
-                    const edges = this.graph.getModel().getEdges(current);
-                    for (const edge of edges) {
-                        let nextNode = undefined;
-                        if (edge.source.id === current.id) {
-                            nextNode = edge.target;
-                        }
-                        else if (edge.target.id === current.id) {
-                            nextNode = edge.source;
-                        }
-                        if (nextNode !== undefined) {
-                            if (cellSet.has(nextNode.id)) {
-                                queue.push(nextNode);
-                                cellSet.delete(nextNode.id);
-                            }
-                        }
-                    }
-                }
-                subGraphs.push(subGraph);
-            }
-        }
-        // Arranging all standalone cells in a grid layout. The grid row width is determined by the width of the biggest subgraph.
-        const boundingBoxes = subGraphs.map(subGraph => {
-            let minX = Number.MAX_VALUE;
-            let minY = Number.MAX_VALUE;
-            let maxX = Number.MIN_VALUE;
-            let maxY = Number.MIN_VALUE;
-            for (const cell of subGraph) {
-                const geo = cell.getGeometry();
-                if (geo) {
-                    minX = Math.min(minX, geo.x);
-                    minY = Math.min(minY, geo.y);
-                    maxX = Math.max(maxX, geo.x + geo.width);
-                    maxY = Math.max(maxY, geo.y + geo.height);
-                }
-            }
-            return { minX, minY, maxX, maxY };
+        const g = new dagre_1.default.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
+        g.setGraph({
+            rankdir: 'LR',
         });
-        const maxX = Math.max(...boundingBoxes.map(box => box.maxX));
-        const standaloneCells = [];
-        for (const subGraph of subGraphs) {
-            if (subGraph.length === 1) {
-                standaloneCells.push(...subGraph);
+        const dagCells = this.graph.getModel().getChildCells(parent);
+        for (let i = 0; i < dagCells.length; i++) {
+            const currentCell = dagCells[i];
+            if (!currentCell.edge) {
+                g.setNode(currentCell.id, {
+                    label: currentCell.id,
+                    width: currentCell.geometry.width,
+                    height: currentCell.geometry.height + 30, //padding
+                });
             }
         }
-        const startX = Math.min(...standaloneCells.map(cell => cell.geometry.x));
-        const startY = Math.min(...standaloneCells.map(cell => cell.geometry.y));
-        const intercellSpacing = 100;
-        let currentX = startX;
-        let currentY = startY;
-        let currentRowMaxHeight = 0;
-        for (let i = 0; i < standaloneCells.length; i++) {
-            if (currentX + intercellSpacing > maxX) {
-                currentX = startX;
-                currentY = currentY + currentRowMaxHeight + intercellSpacing;
-                currentRowMaxHeight = 0;
+        for (let i = 0; i < dagCells.length; i++) {
+            const currentCell = dagCells[i];
+            if (currentCell.edge) {
+                g.setEdge(currentCell.source.id, currentCell.target.id);
             }
-            const cell = standaloneCells[i];
-            cell.geometry.x = currentX;
-            cell.geometry.y = currentY;
-            currentX = currentX + cell.geometry.width + intercellSpacing;
-            currentRowMaxHeight = Math.max(currentRowMaxHeight, cell.geometry.height);
+        }
+        dagre_1.default.layout(g);
+        for (let i = 0; i < dagCells.length; i++) {
+            const currentCell = dagCells[i];
+            if (!currentCell.edge) {
+                const computedNode = g.node(currentCell.id);
+                currentCell.geometry.x = computedNode.x;
+                currentCell.geometry.y = computedNode.y;
+            }
+        }
+        this.graph.refresh();
+        if (selectedCell) {
+            this.graph.setSelectionCell(selectedCell);
+            this.graph.scrollCellToVisible(selectedCell);
         }
         this.graph.getModel().endUpdate();
     }

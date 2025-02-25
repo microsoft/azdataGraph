@@ -140,4 +140,10 @@ export declare class SchemaDesigner {
      */
     updateActiveCellStateTable(editedTable: ITable): void;
     getForeignKeysForTable(tableCell: mxCell): IForeignKey[];
+    exportImage(format: string): Promise<{
+        fileContent: string;
+        format: string;
+        width: number;
+        height: number;
+    }>;
 }
