@@ -469,7 +469,7 @@ export class SchemaDesigner {
                 this.cellClickListeners.forEach((listener) => listener(cell));
             }
         });
-        this.mxGraph.getStylesheet().getDefaultEdgeStyle()['edgeStyle'] = mx.mxEdgeStyle.EntityRelation;
+        this.mxGraph.getStylesheet().getDefaultEdgeStyle()['edgeStyle'] = mx.mxEdgeStyle.EntityRelationPerpendicular;
     }
 
     /**

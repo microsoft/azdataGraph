@@ -99,6 +99,14 @@ declare module 'mxgraph' {
       result: mxPoint[]
     ): void;
 
+    static EntityRelationPerpendicular(
+      state: mxCellState,
+      source: mxCellState,
+      target: mxCellState,
+      points: mxPoint[],
+      result: mxPoint[]
+    ): void;
+
     /**
      * Function: Loop
      *
