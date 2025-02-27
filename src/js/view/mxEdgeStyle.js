@@ -214,7 +214,11 @@ var mxEdgeStyle =
 			}
 			else
 			{
-				result.push(dep);
+				// create a random deltaX to avoid edges overlapping from 2 - 20 px and in gaps of 5px
+				const randomDeltaX = Math.floor(Math.random() * 5) * 4 + 2;
+				arr.x += randomDeltaX;
+				result.push(new mxPoint(arr.x, dep.y));
+				//result.push(dep); azdatagraph edit
 				result.push(arr);
 			}
 		}

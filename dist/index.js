@@ -25123,7 +25123,9 @@ var require_build = __commonJS({
                 result2.push(new mxPoint(arr.x, midY));
                 result2.push(arr);
               } else {
-                result2.push(dep);
+                const randomDeltaX = Math.floor(Math.random() * 5) * 4 + 2;
+                arr.x += randomDeltaX;
+                result2.push(new mxPoint(arr.x, dep.y));
                 result2.push(arr);
               }
             }
