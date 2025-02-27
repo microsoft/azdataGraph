@@ -551,7 +551,15 @@ export class SchemaDesigner {
             this.config.icons.zoomFitIcon,
             "Fit",
             () => {
-                this.mxGraph.fit(undefined!);
+                this.mxGraph.view.rendering = false;
+                while (true) {
+                    this.mxGraph.fit(null!);
+                    if(this.mxGraph.view.scale < 1) {
+                        break;
+                    }
+                }
+                this.mxGraph.view.rendering = true;
+                this.autoLayout();
                 this.updateEditorPosition();
             }
         );
@@ -806,7 +814,9 @@ export class SchemaDesigner {
      * when the graph scales or when the graph is moved
      */
     public updateEditorPosition() {
-        this.config.updateEditorPosition(this._activeCellState.x, this._activeCellState.y, this.mxGraph.view.scale);
+        if (this.activeCellState !== undefined) {
+            this.config.updateEditorPosition(this._activeCellState.x, this._activeCellState.y, this.mxGraph.view.scale);
+        }
     }
 
     /**
