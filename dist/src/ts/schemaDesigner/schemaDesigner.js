@@ -432,7 +432,7 @@ class SchemaDesigner {
                 this.cellClickListeners.forEach((listener) => listener(cell));
             }
         });
-        this.mxGraph.getStylesheet().getDefaultEdgeStyle()['edgeStyle'] = mx_1.mxGraphFactory.mxEdgeStyle.EntityRelation;
+        this.mxGraph.getStylesheet().getDefaultEdgeStyle()['edgeStyle'] = mx_1.mxGraphFactory.mxEdgeStyle.EntityRelationPerpendicular;
     }
     /**
      * Configures the mxGraph outline for the schema designer

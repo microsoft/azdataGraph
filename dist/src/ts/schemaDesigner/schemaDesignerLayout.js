@@ -23,16 +23,18 @@ class SchemaDesignerLayout extends mx_1.mxGraphFactory.mxGraphLayout {
         }).setDefaultEdgeLabel(() => ({}));
         g.setGraph({
             rankdir: 'LR',
-            nodesep: 10,
+            align: 'UL',
+            ranksep: 50,
         });
         const dagCells = this.graph.getModel().getChildCells(parent);
         for (let i = 0; i < dagCells.length; i++) {
             const currentCell = dagCells[i];
             if (!currentCell.edge) {
+                const value = currentCell.value;
                 g.setNode(currentCell.id, {
                     label: currentCell.id,
-                    width: currentCell.geometry.width + 50, //padding
-                    height: currentCell.geometry.height + 50, //padding
+                    width: value.width + 50,
+                    height: value.height + 50,
                 });
             }
         }

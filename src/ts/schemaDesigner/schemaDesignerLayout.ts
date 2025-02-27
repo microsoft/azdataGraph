@@ -1,6 +1,7 @@
 import { mxCell, mxGraph } from "mxgraph";
 import { mxGraphFactory as mx } from '../mx';
 import dagre from '@dagrejs/dagre';
+import { SchemaDesignerTable } from "./schemaDesignerEntity";
 
 export class SchemaDesignerLayout extends mx.mxGraphLayout {
     constructor(graph: mxGraph) {
@@ -21,7 +22,8 @@ export class SchemaDesignerLayout extends mx.mxGraphLayout {
         }).setDefaultEdgeLabel(() => ({}));
         g.setGraph({
             rankdir: 'LR',
-            nodesep: 10,
+            align: 'UL',
+            ranksep: 50,
         });
 
         const dagCells = this.graph.getModel().getChildCells(parent);
@@ -29,12 +31,13 @@ export class SchemaDesignerLayout extends mx.mxGraphLayout {
         for (let i = 0; i < dagCells.length; i++) {
             const currentCell = dagCells[i];
             if (!currentCell.edge) {
+                const value = currentCell.value as SchemaDesignerTable;
                 g.setNode(
                     currentCell.id,
                     {
                         label: currentCell.id,
-                        width: currentCell.geometry.width + 50, //padding
-                        height: currentCell.geometry.height + 50, //padding
+                        width: value.width + 50,
+                        height: value.height + 50,
                     }
                 )
             }

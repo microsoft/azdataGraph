@@ -25123,8 +25123,93 @@ var require_build = __commonJS({
                 result2.push(new mxPoint(arr.x, midY));
                 result2.push(arr);
               } else {
-                const randomDeltaX = Math.floor(Math.random() * 5) * 4 + 2;
-                arr.x += randomDeltaX;
+                result2.push(dep);
+                result2.push(arr);
+              }
+            }
+          },
+          EntityRelationPerpendicular: function(state, source, target, points, result2) {
+            var view = state.view;
+            var graph = view.graph;
+            var segment = mxUtils.getValue(
+              state.style,
+              mxConstants.STYLE_SEGMENT,
+              mxConstants.ENTITY_SEGMENT
+            ) * view.scale;
+            var pts = state.absolutePoints;
+            var p0 = pts[0];
+            var pe = pts[pts.length - 1];
+            var isSourceLeft = false;
+            if (source != null) {
+              var sourceGeometry = graph.getCellGeometry(source.cell);
+              if (sourceGeometry.relative) {
+                isSourceLeft = sourceGeometry.x <= 0.5;
+              } else if (target != null) {
+                isSourceLeft = (pe != null ? pe.x : target.x + target.width) < (p0 != null ? p0.x : source.x);
+              }
+            }
+            if (p0 != null) {
+              source = new mxCellState();
+              source.x = p0.x;
+              source.y = p0.y;
+            } else if (source != null) {
+              var constraint = mxUtils.getPortConstraints(source, state, true, mxConstants.DIRECTION_MASK_NONE);
+              if (constraint != mxConstants.DIRECTION_MASK_NONE && constraint != mxConstants.DIRECTION_MASK_WEST + mxConstants.DIRECTION_MASK_EAST) {
+                isSourceLeft = constraint == mxConstants.DIRECTION_MASK_WEST;
+              }
+            } else {
+              return;
+            }
+            var isTargetLeft = true;
+            if (target != null) {
+              var targetGeometry = graph.getCellGeometry(target.cell);
+              if (targetGeometry.relative) {
+                isTargetLeft = targetGeometry.x <= 0.5;
+              } else if (source != null) {
+                isTargetLeft = (p0 != null ? p0.x : source.x + source.width) < (pe != null ? pe.x : target.x);
+              }
+            }
+            if (pe != null) {
+              target = new mxCellState();
+              target.x = pe.x;
+              target.y = pe.y;
+            } else if (target != null) {
+              var constraint = mxUtils.getPortConstraints(target, state, false, mxConstants.DIRECTION_MASK_NONE);
+              if (constraint != mxConstants.DIRECTION_MASK_NONE && constraint != mxConstants.DIRECTION_MASK_WEST + mxConstants.DIRECTION_MASK_EAST) {
+                isTargetLeft = constraint == mxConstants.DIRECTION_MASK_WEST;
+              }
+            }
+            if (source != null && target != null) {
+              var x0 = isSourceLeft ? source.x : source.x + source.width;
+              var y0 = view.getRoutingCenterY(source);
+              var xe = isTargetLeft ? target.x : target.x + target.width;
+              var ye = view.getRoutingCenterY(target);
+              var seg = segment;
+              var dx = isSourceLeft ? -seg : seg;
+              var dep = new mxPoint(x0 + dx, y0);
+              dx = isTargetLeft ? -seg : seg;
+              var arr = new mxPoint(xe + dx, ye);
+              if (isSourceLeft == isTargetLeft) {
+                var x = isSourceLeft ? Math.min(x0, xe) - segment : Math.max(x0, xe) + segment;
+                result2.push(new mxPoint(x, y0));
+                result2.push(new mxPoint(x, ye));
+              } else if (dep.x < arr.x == isSourceLeft) {
+                var midY = y0 + (ye - y0) / 2;
+                result2.push(dep);
+                result2.push(new mxPoint(dep.x, midY));
+                result2.push(new mxPoint(arr.x, midY));
+                result2.push(arr);
+              } else {
+                let randomDeltaX = Math.floor(Math.random() * 5) * 4 + 2;
+                if (state?.cell?.source?.value?.name) {
+                  const str = state.cell.source.value.name;
+                  let hash = 0;
+                  for (let i = 0; i < str.length; i++) {
+                    hash = (hash * 31 + str.charCodeAt(i)) % 1e6;
+                  }
+                  randomDeltaX = (hash % 5 + 1) * 4;
+                }
+                arr.x += (randomDeltaX - 10) * state.view.getScale();
                 result2.push(new mxPoint(arr.x, dep.y));
                 result2.push(arr);
               }
@@ -47226,20 +47311,20 @@ var SchemaDesignerLayout = class extends mxGraphFactory.mxGraphLayout {
     }).setDefaultEdgeLabel(() => ({}));
     g.setGraph({
       rankdir: "LR",
-      nodesep: 10
+      align: "UL",
+      ranksep: 50
     });
     const dagCells = this.graph.getModel().getChildCells(parent);
     for (let i = 0; i < dagCells.length; i++) {
       const currentCell = dagCells[i];
       if (!currentCell.edge) {
+        const value = currentCell.value;
         g.setNode(
           currentCell.id,
           {
             label: currentCell.id,
-            width: currentCell.geometry.width + 50,
-            //padding
-            height: currentCell.geometry.height + 50
-            //padding
+            width: value.width + 50,
+            height: value.height + 50
           }
         );
       }
@@ -48484,7 +48569,7 @@ var SchemaDesigner = class {
         this.cellClickListeners.forEach((listener) => listener(cell2));
       }
     });
-    this.mxGraph.getStylesheet().getDefaultEdgeStyle()["edgeStyle"] = mxGraphFactory.mxEdgeStyle.EntityRelation;
+    this.mxGraph.getStylesheet().getDefaultEdgeStyle()["edgeStyle"] = mxGraphFactory.mxEdgeStyle.EntityRelationPerpendicular;
   }
   /**
    * Configures the mxGraph outline for the schema designer
