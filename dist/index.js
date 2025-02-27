@@ -48644,7 +48644,15 @@ var SchemaDesigner = class {
       this.config.icons.zoomFitIcon,
       "Fit",
       () => {
-        this.mxGraph.fit(void 0);
+        this.mxGraph.view.rendering = false;
+        while (true) {
+          this.mxGraph.fit(null);
+          if (this.mxGraph.view.scale < 1) {
+            break;
+          }
+        }
+        this.mxGraph.view.rendering = true;
+        this.autoLayout();
         this.updateEditorPosition();
       }
     );
@@ -48876,7 +48884,9 @@ var SchemaDesigner = class {
    * when the graph scales or when the graph is moved
    */
   updateEditorPosition() {
-    this.config.updateEditorPosition(this._activeCellState.x, this._activeCellState.y, this.mxGraph.view.scale);
+    if (this.activeCellState !== void 0) {
+      this.config.updateEditorPosition(this._activeCellState.x, this._activeCellState.y, this.mxGraph.view.scale);
+    }
   }
   /**
    * Gets the relationships of an entity
