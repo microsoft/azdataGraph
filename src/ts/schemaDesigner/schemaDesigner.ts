@@ -543,9 +543,7 @@ export class SchemaDesigner {
             this.config.icons.zoomInIcon,
             "Zoom In",
             () => {
-                this.mxEditor.execute("zoomIn");
-                this.redrawEdges();
-                this.updateEditorPosition();
+                this.zoomIn();
             }
         );
 
@@ -553,9 +551,7 @@ export class SchemaDesigner {
             this.config.icons.zoomOutIcon,
             "Zoom Out",
             () => {
-                this.mxEditor.execute("zoomOut");
-                this.redrawEdges();
-                this.updateEditorPosition();
+                this.zoomOut();
             }
         );
 
@@ -563,16 +559,7 @@ export class SchemaDesigner {
             this.config.icons.zoomFitIcon,
             "Fit",
             () => {
-                this.mxGraph.view.rendering = false;
-                while (true) {
-                    this.mxGraph.fit(null!);
-                    if(this.mxGraph.view.scale < 1) {
-                        break;
-                    }
-                }
-                this.mxGraph.view.rendering = true;
-                this.autoLayout();
-                this.updateEditorPosition();
+                this.zoomToFit();
             }
         );
 
@@ -608,6 +595,62 @@ export class SchemaDesigner {
                 }
             );
         }
+
+        if (this.config.showToolbar === false) {
+            toolbarBelt.style.display = "none";
+        }
+    }
+
+    /**
+     * Zoom in the schema designer
+     */
+    public zoomIn() {
+        this.mxEditor.execute("zoomOut");
+        this.redrawEdges();
+        this.updateEditorPosition();
+    }
+
+    /**
+     * Zoom out the schema designer
+     */
+    public zoomOut() {
+        this.mxEditor.execute("zoomIn");
+        this.redrawEdges();
+        this.updateEditorPosition();
+    }
+
+    /**
+     * Zoom to fit the schema designer
+     */
+    public zoomToFit() {
+        this.mxGraph.view.rendering = false;
+        while (true) {
+            this.mxGraph.fit(null!);
+            if (this.mxGraph.view.scale < 1) {
+                break;
+            }
+        }
+        this.mxGraph.view.rendering = true;
+        this.autoLayout();
+        this.updateEditorPosition();
+    }
+
+    /**
+     * Adds a drag and drop listener for the table
+     * @param element The element to make draggable
+     */
+    public addTableDragAndDropListener(element: HTMLElement) {
+        this.makeElementDraggable(element, (_graph: mxGraph, evt: MouseEvent, _cell: mxCellState) => {
+            this.mxGraph.stopEditing(false);
+            const pt = this.mxGraph.getPointForEvent(evt, true);
+            const entity: ITable = this.createTable();
+            const cell = this.renderTable(entity, pt.x, pt.y);
+            // Get cell state
+            const state = this.mxGraph.view.getState(cell);
+            if (state !== undefined) {
+                (cell.value as SchemaDesignerTable).editTable(state);
+            }
+        })
     }
 
     /**
@@ -984,6 +1027,20 @@ export class SchemaDesigner {
         }, new Map<string, IForeignKey>());
 
         return Array.from(foreignKeyMap.values());
+    }
+
+    public makeElementDraggable(element: HTMLElement, onDragEndCallback?: (graph: mxGraph, evt: MouseEvent, cell: mxCellState) => void) {
+        if (onDragEndCallback) {
+            const dragImage = element.cloneNode(true) as HTMLElement;
+            dragImage.style.backgroundColor = this.config.colors.toolbarBackground;
+            const ds = mx.mxUtils.makeDraggable(
+                element,
+                this.mxGraph,
+                onDragEndCallback,
+                dragImage
+            );
+            ds.highlightDropTargets = true;
+        }
     }
 
     public async exportImage(format: string): Promise<{

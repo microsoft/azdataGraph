@@ -140,6 +140,10 @@ export interface SchemaDesignerConfig {
      * @param model schema model
      */
     publish: (model: ISchema) => void;
+    /**
+     * If the toolbar should be shown
+     */
+    showToolbar: boolean;
 }
 /**
  * Interface for edge cells in schema designer

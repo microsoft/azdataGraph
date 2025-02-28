@@ -486,26 +486,13 @@ class SchemaDesigner {
             this.toolbar.addDivider();
         }
         this.toolbar.addButton(this.config.icons.zoomInIcon, "Zoom In", () => {
-            this.mxEditor.execute("zoomIn");
-            this.redrawEdges();
-            this.updateEditorPosition();
+            this.zoomIn();
         });
         this.toolbar.addButton(this.config.icons.zoomOutIcon, "Zoom Out", () => {
-            this.mxEditor.execute("zoomOut");
-            this.redrawEdges();
-            this.updateEditorPosition();
+            this.zoomOut();
         });
         this.toolbar.addButton(this.config.icons.zoomFitIcon, "Fit", () => {
-            this.mxGraph.view.rendering = false;
-            while (true) {
-                this.mxGraph.fit(null);
-                if (this.mxGraph.view.scale < 1) {
-                    break;
-                }
-            }
-            this.mxGraph.view.rendering = true;
-            this.autoLayout();
-            this.updateEditorPosition();
+            this.zoomToFit();
         });
         this.toolbar.addDivider();
         this.toolbar.addButton(this.config.icons.autoArrangeCellsIcon, "Auto Arrange", () => {
@@ -525,6 +512,57 @@ class SchemaDesigner {
                 this.config.publish(schema);
             });
         }
+        if (this.config.showToolbar === false) {
+            toolbarBelt.style.display = "none";
+        }
+    }
+    /**
+     * Zoom in the schema designer
+     */
+    zoomIn() {
+        this.mxEditor.execute("zoomOut");
+        this.redrawEdges();
+        this.updateEditorPosition();
+    }
+    /**
+     * Zoom out the schema designer
+     */
+    zoomOut() {
+        this.mxEditor.execute("zoomIn");
+        this.redrawEdges();
+        this.updateEditorPosition();
+    }
+    /**
+     * Zoom to fit the schema designer
+     */
+    zoomToFit() {
+        this.mxGraph.view.rendering = false;
+        while (true) {
+            this.mxGraph.fit(null);
+            if (this.mxGraph.view.scale < 1) {
+                break;
+            }
+        }
+        this.mxGraph.view.rendering = true;
+        this.autoLayout();
+        this.updateEditorPosition();
+    }
+    /**
+     * Adds a drag and drop listener for the table
+     * @param element The element to make draggable
+     */
+    addTableDragAndDropListener(element) {
+        this.makeElementDraggable(element, (_graph, evt, _cell) => {
+            this.mxGraph.stopEditing(false);
+            const pt = this.mxGraph.getPointForEvent(evt, true);
+            const entity = this.createTable();
+            const cell = this.renderTable(entity, pt.x, pt.y);
+            // Get cell state
+            const state = this.mxGraph.view.getState(cell);
+            if (state !== undefined) {
+                cell.value.editTable(state);
+            }
+        });
     }
     /**
      * Redraws the edges in the schema designer
@@ -855,6 +893,14 @@ class SchemaDesigner {
             return map;
         }, new Map());
         return Array.from(foreignKeyMap.values());
+    }
+    makeElementDraggable(element, onDragEndCallback) {
+        if (onDragEndCallback) {
+            const dragImage = element.cloneNode(true);
+            dragImage.style.backgroundColor = this.config.colors.toolbarBackground;
+            const ds = mx_1.mxGraphFactory.mxUtils.makeDraggable(element, this.mxGraph, onDragEndCallback, dragImage);
+            ds.highlightDropTargets = true;
+        }
     }
     exportImage(format) {
         return __awaiter(this, void 0, void 0, function* () {

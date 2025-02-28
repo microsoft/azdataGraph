@@ -68,6 +68,23 @@ export declare class SchemaDesigner {
      */
     private initializeToolbar;
     /**
+     * Zoom in the schema designer
+     */
+    zoomIn(): void;
+    /**
+     * Zoom out the schema designer
+     */
+    zoomOut(): void;
+    /**
+     * Zoom to fit the schema designer
+     */
+    zoomToFit(): void;
+    /**
+     * Adds a drag and drop listener for the table
+     * @param element The element to make draggable
+     */
+    addTableDragAndDropListener(element: HTMLElement): void;
+    /**
      * Redraws the edges in the schema designer
      */
     private redrawEdges;
@@ -141,6 +158,7 @@ export declare class SchemaDesigner {
      */
     updateActiveCellStateTable(editedTable: ITable): void;
     getForeignKeysForTable(tableCell: mxCell): IForeignKey[];
+    makeElementDraggable(element: HTMLElement, onDragEndCallback?: (graph: mxGraph, evt: MouseEvent, cell: mxCellState) => void): void;
     exportImage(format: string): Promise<{
         fileContent: string;
         format: string;
