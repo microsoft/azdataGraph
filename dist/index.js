@@ -48597,7 +48597,6 @@ var SchemaDesigner = class {
           this.mxGraph.stopEditing(false);
           const entity = this.createTable();
           const cell2 = this.renderTable(entity, 100, 100);
-          this.autoLayout();
           this.mxGraph.scrollCellToVisible(cell2, true);
           const state = this.mxGraph.view.getState(cell2);
           if (state !== void 0) {
@@ -49035,7 +49034,6 @@ var SchemaDesigner = class {
     editedTable.foreignKeys.forEach((foreignKey) => {
       this.renderForeignKey(foreignKey, editedTable);
     });
-    this.autoLayout();
     this.mxGraph.scrollCellToVisible(state.cell, true);
     this.mxGraph.model.endUpdate();
   }

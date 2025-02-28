@@ -499,7 +499,6 @@ export class SchemaDesigner {
                     this.mxGraph.stopEditing(false);
                     const entity: ITable = this.createTable();
                     const cell = this.renderTable(entity, 100, 100);
-                    this.autoLayout();
                     this.mxGraph.scrollCellToVisible(cell, true);
                     // Get cell state
                     const state = this.mxGraph.view.getState(cell);
@@ -992,9 +991,6 @@ export class SchemaDesigner {
         editedTable.foreignKeys.forEach((foreignKey) => {
             this.renderForeignKey(foreignKey, editedTable);
         });
-
-        // Update the cell position
-        this.autoLayout();
 
         this.mxGraph.scrollCellToVisible(state.cell, true);
 
