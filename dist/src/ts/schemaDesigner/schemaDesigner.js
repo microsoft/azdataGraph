@@ -453,6 +453,18 @@ class SchemaDesigner {
         this.toolbar = new schemaDesignerToolbar_1.SchemaDesignerToolbar(toolbarBelt, this.mxGraph, this.config);
         if (this.config.isEditable) {
             this.toolbar.addButton(this.config.icons.addTableIcon, "Add Table", () => {
+                this.mxModel.beginUpdate();
+                this.mxGraph.stopEditing(false);
+                const entity = this.createTable();
+                const cell = this.renderTable(entity, 100, 100);
+                this.autoLayout();
+                this.mxGraph.scrollCellToVisible(cell, true);
+                // Get cell state
+                const state = this.mxGraph.view.getState(cell);
+                if (state !== undefined) {
+                    cell.value.editTable(state);
+                }
+                this.mxModel.endUpdate();
             }, (_graph, evt, _cell) => {
                 this.mxGraph.stopEditing(false);
                 const pt = this.mxGraph.getPointForEvent(evt, true);
@@ -815,6 +827,7 @@ class SchemaDesigner {
         });
         // Update the cell position
         this.autoLayout();
+        this.mxGraph.scrollCellToVisible(state.cell, true);
         this.mxGraph.model.endUpdate();
     }
     // Gets the foreign keys for a table

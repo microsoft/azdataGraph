@@ -48593,6 +48593,17 @@ var SchemaDesigner = class {
         this.config.icons.addTableIcon,
         "Add Table",
         () => {
+          this.mxModel.beginUpdate();
+          this.mxGraph.stopEditing(false);
+          const entity = this.createTable();
+          const cell2 = this.renderTable(entity, 100, 100);
+          this.autoLayout();
+          this.mxGraph.scrollCellToVisible(cell2, true);
+          const state = this.mxGraph.view.getState(cell2);
+          if (state !== void 0) {
+            cell2.value.editTable(state);
+          }
+          this.mxModel.endUpdate();
         },
         (_graph, evt, _cell) => {
           this.mxGraph.stopEditing(false);
@@ -48988,6 +48999,7 @@ var SchemaDesigner = class {
       this.renderForeignKey(foreignKey, editedTable);
     });
     this.autoLayout();
+    this.mxGraph.scrollCellToVisible(state.cell, true);
     this.mxGraph.model.endUpdate();
   }
   // Gets the foreign keys for a table
