@@ -25208,6 +25208,8 @@ var require_build = __commonJS({
                     hash = (hash * 31 + str.charCodeAt(i)) % 1e6;
                   }
                   randomDeltaX = (hash % 5 + 1) * 4;
+                } else {
+                  randomDeltaX = -10;
                 }
                 arr.x += (randomDeltaX - 10) * state.view.getScale();
                 result2.push(new mxPoint(arr.x, dep.y));
