@@ -48701,6 +48701,9 @@ var SchemaDesigner = class {
       this.mxGraph.view.validate(edge);
     }
   }
+  get activeCellState() {
+    return this._activeCellState;
+  }
   /**
    * Sets the current cell under edit
    */

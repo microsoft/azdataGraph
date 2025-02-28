@@ -71,6 +71,7 @@ export declare class SchemaDesigner {
      * Redraws the edges in the schema designer
      */
     private redrawEdges;
+    get activeCellState(): mxCellState;
     /**
      * Sets the current cell under edit
      */
