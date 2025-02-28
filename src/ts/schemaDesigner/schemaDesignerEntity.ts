@@ -89,7 +89,7 @@ export class SchemaDesignerTable implements ITable {
                 mx.mxEvent.addListener(columnsDiv, "mouseup", updateEdges);
             }
         }
-        const editButton = parentNode.getElementsByClassName("sd-entity-edit-button")[0];
+        const editButton = parentNode.getElementsByClassName("sd-table-edit-button")[0];
         if (editButton !== undefined && editButton !== null) {
             if (editButton.getAttribute('clickHandler') !== null) {
                 return;
@@ -246,7 +246,7 @@ export class SchemaDesignerTable implements ITable {
         if (this.schemaDesignerConfig.isEditable) {
             const button = document.createElement("button");
             button.type = "button";
-            button.classList.add("sd-entity-button", "sd-entity-edit-button");
+            button.classList.add("sd-table-button", "sd-table-edit-button");
             button.title = "Edit";
             button.innerHTML = this.schemaDesignerConfig.icons.editIcon;
             header.appendChild(button);

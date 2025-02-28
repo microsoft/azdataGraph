@@ -102,6 +102,15 @@
   flex-direction: column;
   background-color: var(--sd-graph-background-color);
 }
+.sd-table-button,
+.sd-table-edit-button {
+  background-color: var(--sd-cell-html-background);
+  border: none;
+  color: var(--sd-cell-html-foreground);
+}
+.sd-table-button:hover {
+  background-color: var(--sd-cell-html-hover-column-background);
+}
 .sd-table-color-indicator {
   width: 100%;
   height: 6px;
