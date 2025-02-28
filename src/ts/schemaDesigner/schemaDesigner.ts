@@ -613,6 +613,10 @@ export class SchemaDesigner {
         }
     }
 
+    public get activeCellState(): mxCellState {
+        return this._activeCellState;
+    }
+
     /**
      * Sets the current cell under edit
      */
