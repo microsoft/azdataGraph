@@ -146,6 +146,7 @@ export declare class SchemaDesigner {
         outgoing: mxCell[];
         incoming: mxCell[];
     };
+    addNewTable(): void;
     /**
      * Creates a new entity
      * @returns The new entity

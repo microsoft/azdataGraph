@@ -480,8 +480,8 @@ export class SchemaDesigner {
     private configureMxOutline() {
         this._outlineContainer = document.createElement("div");
         this._outlineContainer.classList.add("sd-outline");
-        this.container.appendChild( this._outlineContainer);
-        new mx.mxOutline(this.mxGraph,  this._outlineContainer);
+        this.container.appendChild(this._outlineContainer);
+        new mx.mxOutline(this.mxGraph, this._outlineContainer);
     }
 
     /**
@@ -497,17 +497,7 @@ export class SchemaDesigner {
                 this.config.icons.addTableIcon,
                 "Add Table",
                 () => {
-                    this.mxModel.beginUpdate();
-                    this.mxGraph.stopEditing(false);
-                    const entity: ITable = this.createTable();
-                    const cell = this.renderTable(entity, 100, 100);
-                    this.mxGraph.scrollCellToVisible(cell, true);
-                    // Get cell state
-                    const state = this.mxGraph.view.getState(cell);
-                    if (state !== undefined) {
-                        (cell.value as SchemaDesignerTable).editTable(state);
-                    }
-                    this.mxModel.endUpdate();
+                    this.addNewTable();
                 },
                 (_graph, evt, _cell) => {
                     this.mxGraph.stopEditing(false);
@@ -905,6 +895,22 @@ export class SchemaDesigner {
             outgoing,
             incoming
         };
+    }
+
+    public addNewTable() {
+        this.mxModel.beginUpdate();
+        this.mxGraph.stopEditing(false);
+        const entity: ITable = this.createTable();
+        const cell = this.renderTable(entity, 100, 100);
+        this.autoLayout();
+        this.mxGraph.setSelectionCell(cell);
+        this.mxGraph.scrollCellToVisible(cell, true);
+        // Get cell state
+        const state = this.mxGraph.view.getState(cell);
+        if (state !== undefined) {
+            (cell.value as SchemaDesignerTable).editTable(state);
+        }
+        this.mxModel.endUpdate();
     }
 
     /**

@@ -48595,16 +48595,7 @@ var SchemaDesigner = class {
         this.config.icons.addTableIcon,
         "Add Table",
         () => {
-          this.mxModel.beginUpdate();
-          this.mxGraph.stopEditing(false);
-          const entity = this.createTable();
-          const cell2 = this.renderTable(entity, 100, 100);
-          this.mxGraph.scrollCellToVisible(cell2, true);
-          const state = this.mxGraph.view.getState(cell2);
-          if (state !== void 0) {
-            cell2.value.editTable(state);
-          }
-          this.mxModel.endUpdate();
+          this.addNewTable();
         },
         (_graph, evt, _cell) => {
           this.mxGraph.stopEditing(false);
@@ -48963,6 +48954,20 @@ var SchemaDesigner = class {
       outgoing,
       incoming
     };
+  }
+  addNewTable() {
+    this.mxModel.beginUpdate();
+    this.mxGraph.stopEditing(false);
+    const entity = this.createTable();
+    const cell2 = this.renderTable(entity, 100, 100);
+    this.autoLayout();
+    this.mxGraph.setSelectionCell(cell2);
+    this.mxGraph.scrollCellToVisible(cell2, true);
+    const state = this.mxGraph.view.getState(cell2);
+    if (state !== void 0) {
+      cell2.value.editTable(state);
+    }
+    this.mxModel.endUpdate();
   }
   /**
    * Creates a new entity
