@@ -1082,8 +1082,8 @@ export class SchemaDesigner {
                     throw new Error('Invalid format');
             }
         });
-        this.mxGraph.setSelectionCells(selectedCells);
         const fileContent = await fileContentPromise;
+        this.mxGraph.setSelectionCells(selectedCells);
         this._outlineContainer.style.visibility = "visible";
         return {
             fileContent,
