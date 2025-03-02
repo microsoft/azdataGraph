@@ -48693,7 +48693,7 @@ var SchemaDesigner = class {
    * Zoom in the schema designer
    */
   zoomIn() {
-    this.mxEditor.execute("zoomOut");
+    this.mxEditor.execute("zoomIn");
     this.redrawEdges();
     this.updateEditorPosition();
   }
@@ -48701,7 +48701,7 @@ var SchemaDesigner = class {
    * Zoom out the schema designer
    */
   zoomOut() {
-    this.mxEditor.execute("zoomIn");
+    this.mxEditor.execute("zoomOut");
     this.redrawEdges();
     this.updateEditorPosition();
   }
