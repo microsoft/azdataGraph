@@ -48577,10 +48577,10 @@ var SchemaDesigner = class {
    * Configures the mxGraph outline for the schema designer
    */
   configureMxOutline() {
-    const outlineContainer = document.createElement("div");
-    outlineContainer.classList.add("sd-outline");
-    this.container.appendChild(outlineContainer);
-    new mxGraphFactory.mxOutline(this.mxGraph, outlineContainer);
+    this._outlineContainer = document.createElement("div");
+    this._outlineContainer.classList.add("sd-outline");
+    this.container.appendChild(this._outlineContainer);
+    new mxGraphFactory.mxOutline(this.mxGraph, this._outlineContainer);
   }
   /**
    * Initializes the toolbar for the schema designer
@@ -49082,6 +49082,7 @@ var SchemaDesigner = class {
     this.mxGraph.setSelectionCells([]);
     const width = this.mxGraph.getGraphBounds().width + 300;
     const height = this.mxGraph.getGraphBounds().height + 300;
+    this._outlineContainer.style.display = "none";
     const fileContentPromise = new Promise((resolve) => {
       switch (format) {
         case "png":
@@ -49113,6 +49114,7 @@ var SchemaDesigner = class {
       }
     });
     this.mxGraph.setSelectionCells(selectedCells);
+    this._outlineContainer.style.display = "";
     return {
       fileContent: await fileContentPromise,
       format,

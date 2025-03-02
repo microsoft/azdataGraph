@@ -34,6 +34,7 @@ export declare class SchemaDesigner {
      * Toolbar for the schema designer
      */
     toolbar: SchemaDesignerToolbar;
+    private _outlineContainer;
     constructor(container: HTMLElement, config: SchemaDesignerConfig);
     /**
      * Sets up the mxGraph instance for the schema designer
