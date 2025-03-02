@@ -49114,9 +49114,10 @@ var SchemaDesigner = class {
       }
     });
     this.mxGraph.setSelectionCells(selectedCells);
+    const fileContent = await fileContentPromise;
     this._outlineContainer.style.visibility = "visible";
     return {
-      fileContent: await fileContentPromise,
+      fileContent,
       format,
       width,
       height
