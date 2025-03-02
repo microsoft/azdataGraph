@@ -49082,7 +49082,7 @@ var SchemaDesigner = class {
     this.mxGraph.setSelectionCells([]);
     const width = this.mxGraph.getGraphBounds().width + 300;
     const height = this.mxGraph.getGraphBounds().height + 300;
-    this._outlineContainer.style.display = "none";
+    this._outlineContainer.style.visibility = "hidden";
     const fileContentPromise = new Promise((resolve) => {
       switch (format) {
         case "png":
@@ -49114,7 +49114,7 @@ var SchemaDesigner = class {
       }
     });
     this.mxGraph.setSelectionCells(selectedCells);
-    this._outlineContainer.style.display = "";
+    this._outlineContainer.style.visibility = "visible";
     return {
       fileContent: await fileContentPromise,
       format,
