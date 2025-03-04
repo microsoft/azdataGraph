@@ -1,10 +1,10 @@
 import { mxCellState, mxGraph, mxGraphModel } from "mxgraph";
-import { IColumn, IForeignKey, ITable, SchemaDesignerConfig } from "./schemaDesignerInterfaces";
+import { Column, ForeignKey, SchemaDesignerConfig, Table } from "./schemaDesignerInterfaces";
 import createColor from "create-color";
 import { mxGraphFactory as mx } from '../mx';
 import { SchemaDesigner } from "./schemaDesigner";
 
-export class SchemaDesignerTable implements ITable {
+export class SchemaDesignerTable implements Table {
     private eventListeners: { target: HTMLElement, eventName: string, callback?: any }[] = [];
     /**
      * The id of the table
@@ -21,7 +21,7 @@ export class SchemaDesignerTable implements ITable {
     /**
      * The columns of the table
      */
-    public columns: IColumn[];
+    public columns: Column[];
     /**
      * Indicates if the table is being edited
      */
@@ -33,7 +33,16 @@ export class SchemaDesignerTable implements ITable {
     /**
      * The foreign keys of the table
      */
-    public foreignKeys: IForeignKey[] = [];
+    public foreignKeys: ForeignKey[] = [];
+    /**
+     * Opacity of the table
+     * @default 1
+     */
+    public opacity: number = 1;
+    /**
+     * Indicates if the table is visible
+     */
+    public isVisible: boolean = true;
 
     /**
      * Creates a new instance of the SchemaDesignerEntity class
@@ -42,7 +51,7 @@ export class SchemaDesignerTable implements ITable {
      * @param mxGraph mxGraph instance
      * @param schemaDesigner schema designer instance
      */
-    constructor(entity: ITable, private schemaDesigner: SchemaDesigner) {
+    constructor(entity: Table, private schemaDesigner: SchemaDesigner) {
         this.id = entity.id;
         this.name = entity.name;
         this.schema = entity.schema;
@@ -109,7 +118,7 @@ export class SchemaDesignerTable implements ITable {
         this.schemaDesigner.activeCellState = state;
         this.editor = true;
         const mxCellTableValue = state.cell.value as SchemaDesignerTable;
-        const table: ITable = {
+        const table: Table = {
             id: mxCellTableValue.id,
             name: mxCellTableValue.name,
             schema: mxCellTableValue.schema,
@@ -185,6 +194,7 @@ export class SchemaDesignerTable implements ITable {
         parent.style.boxShadow = "0px 3px 8px rgba(0, 0, 0, 0.35), 0px 1px 3px rgba(0, 0, 0, 0.5), inset 0px 0.5px 0px rgba(255, 255, 255, 0.08), inset 0px 0px 0.5px rgba(255, 255, 255, 0.3)";
         parent.style.display = "flex";
         parent.style.flexDirection = "column";
+        parent.style.opacity = this.opacity.toString();
         parent.style.backgroundColor = "var(--sd-graph-background-color)";
 
         // Tables are colored based on the schema

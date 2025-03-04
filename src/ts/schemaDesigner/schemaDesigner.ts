@@ -1,8 +1,8 @@
 import './schemaDesigner.css';
 import '../../css/common.css';
 
-import { EdgeCellValue, extendedConnectionHandler, IColumn, IForeignKey, ISchema, ITable, OnAction, SchemaDesignerColors, SchemaDesignerConfig } from './schemaDesignerInterfaces';
-import { mxCell, mxCellState, mxEditor, mxGraph, mxGraphLayout, mxGraphModel } from 'mxgraph';
+import { Column, EdgeCellValue, extendedConnectionHandler, ForeignKey, OnAction, Schema, SchemaDesignerColors, SchemaDesignerConfig, Table } from './schemaDesignerInterfaces';
+import { mxCell, mxCellState, mxEditor, mxGraph, mxGraphLayout, mxGraphModel, mxOutline } from 'mxgraph';
 import { mxGraphFactory as mx } from '../mx';
 import { SchemaDesignerToolbar } from './schemaDesignerToolbar';
 import { getRowY } from './utils';
@@ -30,6 +30,10 @@ export class SchemaDesigner {
      */
     public mxGraph!: mxGraph;
     /**
+     * mxGraph instance for the schema designer
+     */
+    public mxOutline!: mxOutline;
+    /**
      * mxModel instance for the schema designer
      */
     public mxModel!: mxGraphModel;
@@ -44,6 +48,7 @@ export class SchemaDesigner {
 
     private _outlineContainer!: HTMLElement;
 
+    public filteredCellIds: string[] = [];
 
     constructor(
         private container: HTMLElement,
@@ -246,6 +251,18 @@ export class SchemaDesigner {
         this.mxGraph.isCellFoldable = (_cell) => {
             return false;
         }
+        const oldCellIsVisible = this.mxGraph.isCellVisible;
+        this.mxGraph.isCellVisible = (cell) => {
+            const result = oldCellIsVisible.apply(this.mxGraph, [cell]);
+            if (cell.vertex) {
+                const cellValue = cell.value as SchemaDesignerTable;
+                return result && cellValue.isVisible;
+            } else if (cell.edge) {
+                const cellValue = cell.value as EdgeCellValue;
+                return result && cellValue.isVisible;
+            }
+            return result;
+        };
         this.mxGraph.convertValueToString = function (cell) {
             if (cell?.value?.entity?.name !== undefined) {
                 return cell.value.entity.name;
@@ -363,7 +380,8 @@ export class SchemaDesigner {
                 referencedTableName: '',
                 referencedColumns: [],
                 onDeleteAction: OnAction.CASCADE,
-                onUpdateAction: OnAction.CASCADE
+                onUpdateAction: OnAction.CASCADE,
+                isVisible: true
             };
             const edge = this.createEdge(foreignKey);
             const style = this.graph.getCellStyle(edge);
@@ -481,7 +499,6 @@ export class SchemaDesigner {
         this._outlineContainer = document.createElement("div");
         this._outlineContainer.classList.add("sd-outline");
         this.container.appendChild(this._outlineContainer);
-        new mx.mxOutline(this.mxGraph, this._outlineContainer);
     }
 
     /**
@@ -502,7 +519,7 @@ export class SchemaDesigner {
                 (_graph, evt, _cell) => {
                     this.mxGraph.stopEditing(false);
                     const pt = this.mxGraph.getPointForEvent(evt, true);
-                    const entity: ITable = this.createTable();
+                    const entity: Table = this.createTable();
                     const cell = this.renderTable(entity, pt.x, pt.y);
                     // Get cell state
                     const state = this.mxGraph.view.getState(cell);
@@ -585,6 +602,25 @@ export class SchemaDesigner {
                     this.config.publish(schema);
                 }
             );
+            this.toolbar.addButton(
+                this.config.icons.editIcon,
+                "filter",
+                () => {
+                    // Randomly filter the cells
+                    const cells = this.mxModel.getChildCells(this.mxGraph.getDefaultParent());
+                    const filteredCells = cells.filter((cell) => {
+                        if (cell.vertex) {
+                            return Math.random() > 0.3;
+                        } else {
+                            return false;
+                        }
+                    }).map((cell) => {
+                        return cell.value.id;
+                    }
+                    );
+                    this.filterCells(filteredCells);
+                }
+            )
         }
 
         if (this.config.showToolbar === false) {
@@ -634,7 +670,7 @@ export class SchemaDesigner {
         this.makeElementDraggable(element, (_graph: mxGraph, evt: MouseEvent, _cell: mxCellState) => {
             this.mxGraph.stopEditing(false);
             const pt = this.mxGraph.getPointForEvent(evt, true);
-            const entity: ITable = this.createTable();
+            const entity: Table = this.createTable();
             const cell = this.renderTable(entity, pt.x, pt.y);
             // Get cell state
             const state = this.mxGraph.view.getState(cell);
@@ -679,7 +715,7 @@ export class SchemaDesigner {
      * @param schema The schema to render
      * @param cleanUndoManager Whether to clean the undo manager so that the user can't undo the rendering
      */
-    public renderSchema(schema: ISchema, cleanUndoManager: boolean = false) {
+    public renderSchema(schema: Schema, cleanUndoManager: boolean = false) {
         const parent = this.mxGraph.getDefaultParent();
         this.mxModel.beginUpdate();
         try {
@@ -738,7 +774,7 @@ export class SchemaDesigner {
      * @param y the y position to render the entity at
      * @returns The cell that was rendered
      */
-    public renderTable(entity: ITable, x: number, y: number): mxCell {
+    public renderTable(entity: Table, x: number, y: number): mxCell {
         const entityValue = new SchemaDesignerTable(entity, this);
         const entityCell = new mx.mxCell(
             entityValue,
@@ -768,7 +804,7 @@ export class SchemaDesigner {
      * @param relationship The relationship to render
      * @returns The edge that was rendered
      */
-    public renderForeignKey(foreignKey: IForeignKey, sourceTable: ITable): void {
+    public renderForeignKey(foreignKey: ForeignKey, sourceTable: Table): void {
         const cells = this.mxModel.getChildCells(this.mxGraph.getDefaultParent());
         const source = cells.find((cell) => {
             const value = cell.value as SchemaDesignerTable
@@ -787,8 +823,8 @@ export class SchemaDesigner {
 
         // One edge for each column mapping
         for (let i = 0; i < foreignKey.columns.length; i++) {
-            const sourceRowIndex = sourceValue.columns.findIndex((column: IColumn) => column.name === foreignKey.columns[i]) + 1;
-            const targetRowIndex = targetValue.columns.findIndex((column: IColumn) => column.name === foreignKey.referencedColumns[i]) + 1;
+            const sourceRowIndex = sourceValue.columns.findIndex((column: Column) => column.name === foreignKey.columns[i]) + 1;
+            const targetRowIndex = targetValue.columns.findIndex((column: Column) => column.name === foreignKey.referencedColumns[i]) + 1;
             const edgeValue: EdgeCellValue = {
                 sourceRow: sourceRowIndex,
                 targetRow: targetRowIndex,
@@ -799,7 +835,8 @@ export class SchemaDesigner {
                 referencedTableName: targetValue.name,
                 referencedColumns: [foreignKey.referencedColumns[i]],
                 referencedSchemaName: targetValue.schema,
-                id: foreignKey.id
+                id: foreignKey.id,
+                isVisible: true
             };
             this.mxGraph.insertEdge(this.mxGraph.getDefaultParent(), null!, edgeValue, source, target);
         }
@@ -812,15 +849,15 @@ export class SchemaDesigner {
     /**
      * Gets the current schema from the schema designer
      */
-    public get schema(): ISchema {
-        const schema: ISchema = {
+    public get schema(): Schema {
+        const schema: Schema = {
             tables: []
         };
         const cells = this.mxModel.getChildCells(this.mxGraph.getDefaultParent());
         for (let i = 0; i < cells.length; i++) {
             const cell = cells[i];
             if (cell.vertex) {
-                const table: ITable = {
+                const table: Table = {
                     columns: cell.value.columns,
                     name: cell.value.name,
                     schema: cell.value.schema,
@@ -900,7 +937,7 @@ export class SchemaDesigner {
     public addNewTable() {
         this.mxModel.beginUpdate();
         this.mxGraph.stopEditing(false);
-        const entity: ITable = this.createTable();
+        const entity: Table = this.createTable();
         const cell = this.renderTable(entity, 100, 100);
         this.autoLayout();
         this.mxGraph.setSelectionCell(cell);
@@ -917,7 +954,7 @@ export class SchemaDesigner {
      * Creates a new entity
      * @returns The new entity
      */
-    private createTable(): ITable {
+    private createTable(): Table {
         let index = 1;
         let name = `Table${index}`;
         for (this.schema.tables.length; this.schema.tables.find((tables) => tables.name === name); index++) {
@@ -936,6 +973,8 @@ export class SchemaDesigner {
                     dataType: "int",
                     isPrimaryKey: true,
                     isIdentity: true,
+                    isNullable: false,
+                    isUnique: false,
                 }
             ],
             foreignKeys: []
@@ -948,7 +987,7 @@ export class SchemaDesigner {
      * @param editedOutgoingEdges describes the new relationships
      * @returns void
      */
-    public updateActiveCellStateTable(editedTable: ITable) {
+    public updateActiveCellStateTable(editedTable: Table) {
         this.mxGraph.model.beginUpdate();
 
         const state = this._activeCellState;
@@ -1006,10 +1045,10 @@ export class SchemaDesigner {
     }
 
     // Gets the foreign keys for a table
-    public getForeignKeysForTable(tableCell: mxCell): IForeignKey[] {
+    public getForeignKeysForTable(tableCell: mxCell): ForeignKey[] {
         const outgoingEdges = this.mxModel.getOutgoingEdges(tableCell);
 
-        const foreignKeyMap = outgoingEdges.reduce((map: Map<string, IForeignKey>, edge) => {
+        const foreignKeyMap = outgoingEdges.reduce((map: Map<string, ForeignKey>, edge) => {
             const edgeValue = edge.value as EdgeCellValue;
             if (map.has(edgeValue.id)) {
                 const existingForeignKey = map.get(edgeValue.id)!;
@@ -1028,7 +1067,7 @@ export class SchemaDesigner {
                 });
             }
             return map;
-        }, new Map<string, IForeignKey>());
+        }, new Map<string, ForeignKey>());
 
         return Array.from(foreignKeyMap.values());
     }
@@ -1097,6 +1136,85 @@ export class SchemaDesigner {
             width: width,
             height: height
         }
+    }
+
+    public filterCells(tableIds?: string[]) {
+        const cells = this.mxModel.getChildCells(this.mxGraph.getDefaultParent());
+
+        if (tableIds === undefined || tableIds.length === 0) {
+            for (let i = 0; i < cells.length; i++) {
+                const cell = cells[i];
+                cell.value.isVisible = true;
+                cell.value.opacity = 1;
+            }
+            return;
+        }
+
+        const visibleCells: mxCell[] = [];
+        let partiallyVisibleCells: mxCell[] = [];
+        const visibleEdges: mxCell[] = [];
+        let hiddenCells: mxCell[] = [];
+
+        for (let i = 0; i < cells.length; i++) {
+            const cell = cells[i];
+            if (cell.vertex) {
+                const tableValue = cell.value as SchemaDesignerTable;
+                if (tableIds.includes(tableValue.id)) {
+                    visibleCells.push(cell);
+                } else {
+                    hiddenCells.push(cell);
+                }
+            }
+            if (cell.edge) {
+                if (cell.source && cell.target) {
+                    const sourceTableValue = cell.source.value as SchemaDesignerTable;
+                    const targetTableValue = cell.target.value as SchemaDesignerTable;
+                    if (tableIds.includes(sourceTableValue.id)) {
+                        visibleEdges.push(cell);
+                        partiallyVisibleCells.push(cell.target);
+                    }
+                    if (tableIds.includes(targetTableValue.id)) {
+                        visibleEdges.push(cell);
+                        partiallyVisibleCells.push(cell.source);
+                    }
+                }
+            }
+        }
+
+        //remove visible and partially visible cells from hidden cells
+        hiddenCells = hiddenCells.filter((cell) => {
+            return !visibleCells.includes(cell) && !partiallyVisibleCells.includes(cell);
+        });
+        // remove visible cells from partially visible cells
+        partiallyVisibleCells = partiallyVisibleCells.filter((cell) => {
+            return !visibleCells.includes(cell);
+        });
+
+        for (let i = 0; i < visibleCells.length; i++) {
+            const cell = visibleCells[i];
+            cell.value.isVisible = true;
+            cell.value.opacity = 1;
+        }
+
+        for (let i = 0; i < partiallyVisibleCells.length; i++) {
+            const cell = partiallyVisibleCells[i];
+            cell.value.isVisible = true;
+            cell.value.opacity = 0.5;
+        }
+
+        for (let i = 0; i < hiddenCells.length; i++) {
+            const cell = hiddenCells[i];
+            cell.value.isVisible = false;
+        }
+
+        for (let i = 0; i < visibleEdges.length; i++) {
+            const cell = visibleEdges[i];
+            cell.value.isVisible = true;
+        }
+        this.autoLayout();
+        this.mxGraph.refresh();
+        this.mxOutline.destroy();
+        this.configureMxOutline();
     }
 }
 
