@@ -32,6 +32,9 @@ export class SchemaDesignerLayout extends mx.mxGraphLayout {
             const currentCell = dagCells[i];
             if (!currentCell.edge) {
                 const value = currentCell.value as SchemaDesignerTable;
+                if(!value.isVisible) {
+                    continue;
+                }
                 g.setNode(
                     currentCell.id,
                     {
@@ -57,6 +60,9 @@ export class SchemaDesignerLayout extends mx.mxGraphLayout {
         for (let i = 0; i < dagCells.length; i++) {
             const currentCell = dagCells[i];
             if (!currentCell.edge) {
+                if (!currentCell.value.isVisible) {
+                    continue;
+                }
                 const computedNode = g.node(currentCell.id);
                 currentCell.geometry.x = computedNode.x;
                 currentCell.geometry.y = computedNode.y;

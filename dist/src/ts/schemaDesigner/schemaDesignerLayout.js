@@ -31,6 +31,9 @@ class SchemaDesignerLayout extends mx_1.mxGraphFactory.mxGraphLayout {
             const currentCell = dagCells[i];
             if (!currentCell.edge) {
                 const value = currentCell.value;
+                if (!value.isVisible) {
+                    continue;
+                }
                 g.setNode(currentCell.id, {
                     label: currentCell.id,
                     width: value.width + 50,
@@ -48,6 +51,9 @@ class SchemaDesignerLayout extends mx_1.mxGraphFactory.mxGraphLayout {
         for (let i = 0; i < dagCells.length; i++) {
             const currentCell = dagCells[i];
             if (!currentCell.edge) {
+                if (!currentCell.value.isVisible) {
+                    continue;
+                }
                 const computedNode = g.node(currentCell.id);
                 currentCell.geometry.x = computedNode.x;
                 currentCell.geometry.y = computedNode.y;

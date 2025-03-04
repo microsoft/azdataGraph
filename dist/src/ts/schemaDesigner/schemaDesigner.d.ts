@@ -1,7 +1,7 @@
 import './schemaDesigner.css';
 import '../../css/common.css';
-import { IForeignKey, ISchema, ITable, SchemaDesignerColors, SchemaDesignerConfig } from './schemaDesignerInterfaces';
-import { mxCell, mxCellState, mxEditor, mxGraph, mxGraphLayout, mxGraphModel } from 'mxgraph';
+import { ForeignKey, Schema, SchemaDesignerColors, SchemaDesignerConfig, Table } from './schemaDesignerInterfaces';
+import { mxCell, mxCellState, mxEditor, mxGraph, mxGraphLayout, mxGraphModel, mxOutline } from 'mxgraph';
 import { SchemaDesignerToolbar } from './schemaDesignerToolbar';
 export declare class SchemaDesigner {
     private container;
@@ -23,6 +23,10 @@ export declare class SchemaDesigner {
      */
     mxGraph: mxGraph;
     /**
+     * mxGraph instance for the schema designer
+     */
+    mxOutline: mxOutline;
+    /**
      * mxModel instance for the schema designer
      */
     mxModel: mxGraphModel;
@@ -35,6 +39,7 @@ export declare class SchemaDesigner {
      */
     toolbar: SchemaDesignerToolbar;
     private _outlineContainer;
+    filteredCellIds: string[];
     constructor(container: HTMLElement, config: SchemaDesignerConfig);
     /**
      * Sets up the mxGraph instance for the schema designer
@@ -99,7 +104,7 @@ export declare class SchemaDesigner {
      * @param schema The schema to render
      * @param cleanUndoManager Whether to clean the undo manager so that the user can't undo the rendering
      */
-    renderSchema(schema: ISchema, cleanUndoManager?: boolean): void;
+    renderSchema(schema: Schema, cleanUndoManager?: boolean): void;
     /**
      * Renders an entity in the schema designer
      * @param entity The entity to render
@@ -107,17 +112,17 @@ export declare class SchemaDesigner {
      * @param y the y position to render the entity at
      * @returns The cell that was rendered
      */
-    renderTable(entity: ITable, x: number, y: number): mxCell;
+    renderTable(entity: Table, x: number, y: number): mxCell;
     /**
      * Renders a relationship in the schema designer
      * @param relationship The relationship to render
      * @returns The edge that was rendered
      */
-    renderForeignKey(foreignKey: IForeignKey, sourceTable: ITable): void;
+    renderForeignKey(foreignKey: ForeignKey, sourceTable: Table): void;
     /**
      * Gets the current schema from the schema designer
      */
-    get schema(): ISchema;
+    get schema(): Schema;
     /**
      * Automatically arranges the cells in the schema designer
      */
@@ -158,8 +163,8 @@ export declare class SchemaDesigner {
      * @param editedOutgoingEdges describes the new relationships
      * @returns void
      */
-    updateActiveCellStateTable(editedTable: ITable): void;
-    getForeignKeysForTable(tableCell: mxCell): IForeignKey[];
+    updateActiveCellStateTable(editedTable: Table): void;
+    getForeignKeysForTable(tableCell: mxCell): ForeignKey[];
     makeElementDraggable(element: HTMLElement, onDragEndCallback?: (graph: mxGraph, evt: MouseEvent, cell: mxCellState) => void): void;
     exportImage(format: string): Promise<{
         fileContent: string;
@@ -167,4 +172,5 @@ export declare class SchemaDesigner {
         width: number;
         height: number;
     }>;
+    filterCells(tableIds?: string[]): void;
 }

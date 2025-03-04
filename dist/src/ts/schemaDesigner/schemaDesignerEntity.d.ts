@@ -1,7 +1,7 @@
 import { mxCellState, mxGraph, mxGraphModel } from "mxgraph";
-import { IColumn, IForeignKey, ITable, SchemaDesignerConfig } from "./schemaDesignerInterfaces";
+import { Column, ForeignKey, SchemaDesignerConfig, Table } from "./schemaDesignerInterfaces";
 import { SchemaDesigner } from "./schemaDesigner";
-export declare class SchemaDesignerTable implements ITable {
+export declare class SchemaDesignerTable implements Table {
     private schemaDesigner;
     private eventListeners;
     /**
@@ -19,7 +19,7 @@ export declare class SchemaDesignerTable implements ITable {
     /**
      * The columns of the table
      */
-    columns: IColumn[];
+    columns: Column[];
     /**
      * Indicates if the table is being edited
      */
@@ -31,7 +31,16 @@ export declare class SchemaDesignerTable implements ITable {
     /**
      * The foreign keys of the table
      */
-    foreignKeys: IForeignKey[];
+    foreignKeys: ForeignKey[];
+    /**
+     * Opacity of the table
+     * @default 1
+     */
+    opacity: number;
+    /**
+     * Indicates if the table is visible
+     */
+    isVisible: boolean;
     /**
      * Creates a new instance of the SchemaDesignerEntity class
      * @param entity entity to be rendered
@@ -39,7 +48,7 @@ export declare class SchemaDesignerTable implements ITable {
      * @param mxGraph mxGraph instance
      * @param schemaDesigner schema designer instance
      */
-    constructor(entity: ITable, schemaDesigner: SchemaDesigner);
+    constructor(entity: Table, schemaDesigner: SchemaDesigner);
     /**
      * Renders the entity
      * @returns the rendered entity

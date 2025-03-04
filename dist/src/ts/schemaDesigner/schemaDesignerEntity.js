@@ -30,6 +30,15 @@ class SchemaDesignerTable {
          * The foreign keys of the table
          */
         this.foreignKeys = [];
+        /**
+         * Opacity of the table
+         * @default 1
+         */
+        this.opacity = 1;
+        /**
+         * Indicates if the table is visible
+         */
+        this.isVisible = true;
         this.id = entity.id;
         this.name = entity.name;
         this.schema = entity.schema;
@@ -163,6 +172,7 @@ class SchemaDesignerTable {
         parent.style.boxShadow = "0px 3px 8px rgba(0, 0, 0, 0.35), 0px 1px 3px rgba(0, 0, 0, 0.5), inset 0px 0.5px 0px rgba(255, 255, 255, 0.08), inset 0px 0px 0.5px rgba(255, 255, 255, 0.3)";
         parent.style.display = "flex";
         parent.style.flexDirection = "column";
+        parent.style.opacity = this.opacity.toString();
         parent.style.backgroundColor = "var(--sd-graph-background-color)";
         // Tables are colored based on the schema
         const tableColor = (0, create_color_1.default)(this.schema, { format: "hex" });

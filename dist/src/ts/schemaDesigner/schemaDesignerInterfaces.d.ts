@@ -1,9 +1,16 @@
 import { mxCell } from "mxgraph";
 import { mxGraphFactory as mx } from '../mx';
-export interface ISchema {
-    tables: ITable[];
+/**
+ * Represents a schema model
+ * This is the schema model that is used to create the schema designer
+ */
+export interface Schema {
+    /**
+     * Tables in the schema
+     */
+    tables: Table[];
 }
-export interface ITable {
+export interface Table {
     /**
      * Id of the table
      */
@@ -19,13 +26,13 @@ export interface ITable {
     /**
      * Columns of the table
      */
-    columns: IColumn[];
+    columns: Column[];
     /**
      * Foreign keys of the table
      */
-    foreignKeys: IForeignKey[];
+    foreignKeys: ForeignKey[];
 }
-export interface IColumn {
+export interface Column {
     /**
      * Id of the column
      */
@@ -46,8 +53,16 @@ export interface IColumn {
      * Is the column identity
      */
     isIdentity: boolean;
+    /**
+     * Is the column nullable
+     */
+    isNullable: boolean;
+    /**
+     * Unique constraint of the column
+     */
+    isUnique: boolean;
 }
-export interface IForeignKey {
+export interface ForeignKey {
     /**
      * Id of the foreign key
      */
@@ -127,7 +142,7 @@ export interface SchemaDesignerConfig {
      * @param y y coordinate of the editor
      * @param scale scale of the graph
      */
-    editTable: (table: ITable, cell: mxCell, x: number, y: number, scale: number, model: ISchema) => void;
+    editTable: (table: Table, cell: mxCell, x: number, y: number, scale: number, model: Schema) => void;
     /**
      * Update the position of the editor based on changed in the graph
      * @param x x coordinate of the editor
@@ -139,7 +154,7 @@ export interface SchemaDesignerConfig {
      * Callback to publish the schema
      * @param model schema model
      */
-    publish: (model: ISchema) => void;
+    publish: (model: Schema) => void;
     /**
      * If the toolbar should be shown
      */
@@ -148,7 +163,7 @@ export interface SchemaDesignerConfig {
 /**
  * Interface for edge cells in schema designer
  */
-export interface EdgeCellValue extends IForeignKey {
+export interface EdgeCellValue extends ForeignKey {
     /**
      * Source row of the edge
      */
@@ -157,6 +172,10 @@ export interface EdgeCellValue extends IForeignKey {
      * Target row of the edge
      */
     targetRow: number;
+    /**
+     * Source cell of the edge
+     */
+    isVisible: boolean;
 }
 export declare class extendedConnectionHandler extends mx.mxConnectionHandler {
     currentRow?: number;

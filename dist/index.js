@@ -46985,6 +46985,15 @@ var SchemaDesignerTable = class {
      * The foreign keys of the table
      */
     this.foreignKeys = [];
+    /**
+     * Opacity of the table
+     * @default 1
+     */
+    this.opacity = 1;
+    /**
+     * Indicates if the table is visible
+     */
+    this.isVisible = true;
     this.id = entity.id;
     this.name = entity.name;
     this.schema = entity.schema;
@@ -47114,6 +47123,7 @@ var SchemaDesignerTable = class {
     parent.style.boxShadow = "0px 3px 8px rgba(0, 0, 0, 0.35), 0px 1px 3px rgba(0, 0, 0, 0.5), inset 0px 0.5px 0px rgba(255, 255, 255, 0.08), inset 0px 0px 0.5px rgba(255, 255, 255, 0.3)";
     parent.style.display = "flex";
     parent.style.flexDirection = "column";
+    parent.style.opacity = this.opacity.toString();
     parent.style.backgroundColor = "var(--sd-graph-background-color)";
     const tableColor = src_default(this.schema, { format: "hex" });
     const colorIndicator = document.createElement("div");
@@ -47321,6 +47331,9 @@ var SchemaDesignerLayout = class extends mxGraphFactory.mxGraphLayout {
       const currentCell = dagCells[i];
       if (!currentCell.edge) {
         const value = currentCell.value;
+        if (!value.isVisible) {
+          continue;
+        }
         g.setNode(
           currentCell.id,
           {
@@ -47341,6 +47354,9 @@ var SchemaDesignerLayout = class extends mxGraphFactory.mxGraphLayout {
     for (let i = 0; i < dagCells.length; i++) {
       const currentCell = dagCells[i];
       if (!currentCell.edge) {
+        if (!currentCell.value.isVisible) {
+          continue;
+        }
         const computedNode = g.node(currentCell.id);
         currentCell.geometry.x = computedNode.x;
         currentCell.geometry.y = computedNode.y;
@@ -48215,6 +48231,7 @@ var SchemaDesigner = class {
      * Array of registered listeners for cell clicks
      */
     this.cellClickListeners = [];
+    this.filteredCellIds = [];
     this.initializeGraph();
   }
   /**
@@ -48382,6 +48399,18 @@ var SchemaDesigner = class {
     this.mxGraph.isCellFoldable = (_cell) => {
       return false;
     };
+    const oldCellIsVisible = this.mxGraph.isCellVisible;
+    this.mxGraph.isCellVisible = (cell2) => {
+      const result2 = oldCellIsVisible.apply(this.mxGraph, [cell2]);
+      if (cell2.vertex) {
+        const cellValue = cell2.value;
+        return result2 && cellValue.isVisible;
+      } else if (cell2.edge) {
+        const cellValue = cell2.value;
+        return result2 && cellValue.isVisible;
+      }
+      return result2;
+    };
     this.mxGraph.convertValueToString = function(cell2) {
       if (cell2?.value?.entity?.name !== void 0) {
         return cell2.value.entity.name;
@@ -48486,7 +48515,8 @@ var SchemaDesigner = class {
         referencedTableName: "",
         referencedColumns: [],
         onDeleteAction: "0" /* CASCADE */,
-        onUpdateAction: "0" /* CASCADE */
+        onUpdateAction: "0" /* CASCADE */,
+        isVisible: true
       };
       const edge = this.createEdge(foreignKey);
       const style = this.graph.getCellStyle(edge);
@@ -48580,7 +48610,6 @@ var SchemaDesigner = class {
     this._outlineContainer = document.createElement("div");
     this._outlineContainer.classList.add("sd-outline");
     this.container.appendChild(this._outlineContainer);
-    new mxGraphFactory.mxOutline(this.mxGraph, this._outlineContainer);
   }
   /**
    * Initializes the toolbar for the schema designer
@@ -48673,6 +48702,25 @@ var SchemaDesigner = class {
         () => {
           const schema = this.schema;
           this.config.publish(schema);
+        }
+      );
+      this.toolbar.addButton(
+        this.config.icons.editIcon,
+        "filter",
+        () => {
+          const cells = this.mxModel.getChildCells(this.mxGraph.getDefaultParent());
+          const filteredCells = cells.filter((cell2) => {
+            if (cell2.vertex) {
+              return Math.random() > 0.3;
+            } else {
+              return false;
+            }
+          }).map(
+            (cell2) => {
+              return cell2.value.id;
+            }
+          );
+          this.filterCells(filteredCells);
         }
       );
     }
@@ -48867,7 +48915,8 @@ var SchemaDesigner = class {
         referencedTableName: targetValue.name,
         referencedColumns: [foreignKey.referencedColumns[i]],
         referencedSchemaName: targetValue.schema,
-        id: foreignKey.id
+        id: foreignKey.id,
+        isVisible: true
       };
       this.mxGraph.insertEdge(this.mxGraph.getDefaultParent(), null, edgeValue, source, target);
     }
@@ -48990,7 +49039,9 @@ var SchemaDesigner = class {
           name: "column_1",
           dataType: "int",
           isPrimaryKey: true,
-          isIdentity: true
+          isIdentity: true,
+          isNullable: false,
+          isUnique: false
         }
       ],
       foreignKeys: []
@@ -49127,6 +49178,74 @@ var SchemaDesigner = class {
       width,
       height
     };
+  }
+  filterCells(tableIds) {
+    const cells = this.mxModel.getChildCells(this.mxGraph.getDefaultParent());
+    if (tableIds === void 0 || tableIds.length === 0) {
+      for (let i = 0; i < cells.length; i++) {
+        const cell2 = cells[i];
+        cell2.value.isVisible = true;
+        cell2.value.opacity = 1;
+      }
+      return;
+    }
+    const visibleCells = [];
+    let partiallyVisibleCells = [];
+    const visibleEdges = [];
+    let hiddenCells = [];
+    for (let i = 0; i < cells.length; i++) {
+      const cell2 = cells[i];
+      if (cell2.vertex) {
+        const tableValue = cell2.value;
+        if (tableIds.includes(tableValue.id)) {
+          visibleCells.push(cell2);
+        } else {
+          hiddenCells.push(cell2);
+        }
+      }
+      if (cell2.edge) {
+        if (cell2.source && cell2.target) {
+          const sourceTableValue = cell2.source.value;
+          const targetTableValue = cell2.target.value;
+          if (tableIds.includes(sourceTableValue.id)) {
+            visibleEdges.push(cell2);
+            partiallyVisibleCells.push(cell2.target);
+          }
+          if (tableIds.includes(targetTableValue.id)) {
+            visibleEdges.push(cell2);
+            partiallyVisibleCells.push(cell2.source);
+          }
+        }
+      }
+    }
+    hiddenCells = hiddenCells.filter((cell2) => {
+      return !visibleCells.includes(cell2) && !partiallyVisibleCells.includes(cell2);
+    });
+    partiallyVisibleCells = partiallyVisibleCells.filter((cell2) => {
+      return !visibleCells.includes(cell2);
+    });
+    for (let i = 0; i < visibleCells.length; i++) {
+      const cell2 = visibleCells[i];
+      cell2.value.isVisible = true;
+      cell2.value.opacity = 1;
+    }
+    for (let i = 0; i < partiallyVisibleCells.length; i++) {
+      const cell2 = partiallyVisibleCells[i];
+      cell2.value.isVisible = true;
+      cell2.value.opacity = 0.5;
+    }
+    for (let i = 0; i < hiddenCells.length; i++) {
+      const cell2 = hiddenCells[i];
+      cell2.value.isVisible = false;
+    }
+    for (let i = 0; i < visibleEdges.length; i++) {
+      const cell2 = visibleEdges[i];
+      cell2.value.isVisible = true;
+    }
+    this.autoLayout();
+    this.mxGraph.refresh();
+    this.mxOutline.destroy();
+    this.configureMxOutline();
   }
 };
 var export_mx = import_mxgraph2.default;

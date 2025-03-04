@@ -61,6 +61,7 @@ class SchemaDesigner {
          * Array of registered listeners for cell clicks
          */
         this.cellClickListeners = [];
+        this.filteredCellIds = [];
         this.initializeGraph();
     }
     /**
@@ -226,6 +227,19 @@ class SchemaDesigner {
         this.mxGraph.isCellFoldable = (_cell) => {
             return false;
         };
+        const oldCellIsVisible = this.mxGraph.isCellVisible;
+        this.mxGraph.isCellVisible = (cell) => {
+            const result = oldCellIsVisible.apply(this.mxGraph, [cell]);
+            if (cell.vertex) {
+                const cellValue = cell.value;
+                return result && cellValue.isVisible;
+            }
+            else if (cell.edge) {
+                const cellValue = cell.value;
+                return result && cellValue.isVisible;
+            }
+            return result;
+        };
         this.mxGraph.convertValueToString = function (cell) {
             var _a, _b;
             if (((_b = (_a = cell === null || cell === void 0 ? void 0 : cell.value) === null || _a === void 0 ? void 0 : _a.entity) === null || _b === void 0 ? void 0 : _b.name) !== undefined) {
@@ -340,7 +354,8 @@ class SchemaDesigner {
                 referencedTableName: '',
                 referencedColumns: [],
                 onDeleteAction: schemaDesignerInterfaces_1.OnAction.CASCADE,
-                onUpdateAction: schemaDesignerInterfaces_1.OnAction.CASCADE
+                onUpdateAction: schemaDesignerInterfaces_1.OnAction.CASCADE,
+                isVisible: true
             };
             const edge = this.createEdge(foreignKey);
             const style = this.graph.getCellStyle(edge);
@@ -441,7 +456,6 @@ class SchemaDesigner {
         this._outlineContainer = document.createElement("div");
         this._outlineContainer.classList.add("sd-outline");
         this.container.appendChild(this._outlineContainer);
-        new mx_1.mxGraphFactory.mxOutline(this.mxGraph, this._outlineContainer);
     }
     /**
      * Initializes the toolbar for the schema designer
@@ -499,6 +513,21 @@ class SchemaDesigner {
             this.toolbar.addButton(this.config.icons.exportIcon, "Export", () => {
                 const schema = this.schema;
                 this.config.publish(schema);
+            });
+            this.toolbar.addButton(this.config.icons.editIcon, "filter", () => {
+                // Randomly filter the cells
+                const cells = this.mxModel.getChildCells(this.mxGraph.getDefaultParent());
+                const filteredCells = cells.filter((cell) => {
+                    if (cell.vertex) {
+                        return Math.random() > 0.3;
+                    }
+                    else {
+                        return false;
+                    }
+                }).map((cell) => {
+                    return cell.value.id;
+                });
+                this.filterCells(filteredCells);
             });
         }
         if (this.config.showToolbar === false) {
@@ -689,7 +718,8 @@ class SchemaDesigner {
                 referencedTableName: targetValue.name,
                 referencedColumns: [foreignKey.referencedColumns[i]],
                 referencedSchemaName: targetValue.schema,
-                id: foreignKey.id
+                id: foreignKey.id,
+                isVisible: true
             };
             this.mxGraph.insertEdge(this.mxGraph.getDefaultParent(), null, edgeValue, source, target);
         }
@@ -815,6 +845,8 @@ class SchemaDesigner {
                     dataType: "int",
                     isPrimaryKey: true,
                     isIdentity: true,
+                    isNullable: false,
+                    isUnique: false,
                 }
             ],
             foreignKeys: []
@@ -951,6 +983,77 @@ class SchemaDesigner {
                 height: height
             };
         });
+    }
+    filterCells(tableIds) {
+        const cells = this.mxModel.getChildCells(this.mxGraph.getDefaultParent());
+        if (tableIds === undefined || tableIds.length === 0) {
+            for (let i = 0; i < cells.length; i++) {
+                const cell = cells[i];
+                cell.value.isVisible = true;
+                cell.value.opacity = 1;
+            }
+            return;
+        }
+        const visibleCells = [];
+        let partiallyVisibleCells = [];
+        const visibleEdges = [];
+        let hiddenCells = [];
+        for (let i = 0; i < cells.length; i++) {
+            const cell = cells[i];
+            if (cell.vertex) {
+                const tableValue = cell.value;
+                if (tableIds.includes(tableValue.id)) {
+                    visibleCells.push(cell);
+                }
+                else {
+                    hiddenCells.push(cell);
+                }
+            }
+            if (cell.edge) {
+                if (cell.source && cell.target) {
+                    const sourceTableValue = cell.source.value;
+                    const targetTableValue = cell.target.value;
+                    if (tableIds.includes(sourceTableValue.id)) {
+                        visibleEdges.push(cell);
+                        partiallyVisibleCells.push(cell.target);
+                    }
+                    if (tableIds.includes(targetTableValue.id)) {
+                        visibleEdges.push(cell);
+                        partiallyVisibleCells.push(cell.source);
+                    }
+                }
+            }
+        }
+        //remove visible and partially visible cells from hidden cells
+        hiddenCells = hiddenCells.filter((cell) => {
+            return !visibleCells.includes(cell) && !partiallyVisibleCells.includes(cell);
+        });
+        // remove visible cells from partially visible cells
+        partiallyVisibleCells = partiallyVisibleCells.filter((cell) => {
+            return !visibleCells.includes(cell);
+        });
+        for (let i = 0; i < visibleCells.length; i++) {
+            const cell = visibleCells[i];
+            cell.value.isVisible = true;
+            cell.value.opacity = 1;
+        }
+        for (let i = 0; i < partiallyVisibleCells.length; i++) {
+            const cell = partiallyVisibleCells[i];
+            cell.value.isVisible = true;
+            cell.value.opacity = 0.5;
+        }
+        for (let i = 0; i < hiddenCells.length; i++) {
+            const cell = hiddenCells[i];
+            cell.value.isVisible = false;
+        }
+        for (let i = 0; i < visibleEdges.length; i++) {
+            const cell = visibleEdges[i];
+            cell.value.isVisible = true;
+        }
+        this.autoLayout();
+        this.mxGraph.refresh();
+        this.mxOutline.destroy();
+        this.configureMxOutline();
     }
 }
 exports.SchemaDesigner = SchemaDesigner;
