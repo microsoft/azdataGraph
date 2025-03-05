@@ -1,6 +1,5 @@
 import { mxCellState, mxGraph, mxGraphModel } from "mxgraph";
 import { Column, ForeignKey, SchemaDesignerConfig, Table } from "./schemaDesignerInterfaces";
-import createColor from "create-color";
 import { mxGraphFactory as mx } from '../mx';
 import { SchemaDesigner } from "./schemaDesigner";
 
@@ -187,34 +186,35 @@ export class SchemaDesignerTable implements Table {
         const parent = document.createElement("div");
         this.parentDiv = parent;
         parent.classList.add("sd-table");
-        parent.style.width = "400px";
+        parent.style.width = "250px";
         parent.style.height = "100%";
         parent.style.borderRadius = "2px";
         parent.style.color = "var(--sd-cell-html-foreground)";
         parent.style.boxShadow = "0px 3px 8px rgba(0, 0, 0, 0.35), 0px 1px 3px rgba(0, 0, 0, 0.5), inset 0px 0.5px 0px rgba(255, 255, 255, 0.08), inset 0px 0px 0.5px rgba(255, 255, 255, 0.3)";
+        parent.style.border = "1px solid var(--sd-cell-divider-color)";
         parent.style.display = "flex";
         parent.style.flexDirection = "column";
         parent.style.opacity = this.opacity.toString();
         parent.style.backgroundColor = "var(--sd-graph-background-color)";
 
-        // Tables are colored based on the schema
-        const tableColor = createColor(this.schema, { format: "hex" });
+        // // Tables are colored based on the schema
+        // const tableColor = createColor(this.schema, { format: "hex" });
 
-        const colorIndicator = document.createElement("div");
-        colorIndicator.classList.add("sd-table-color-indicator");
-        colorIndicator.style.backgroundColor = tableColor;
-        colorIndicator.style.width = "100%";
-        colorIndicator.style.height = "6px";
-        colorIndicator.style.borderRadius = "2px 2px 0 0";
+        // const colorIndicator = document.createElement("div");
+        // colorIndicator.classList.add("sd-table-color-indicator");
+        // colorIndicator.style.backgroundColor = tableColor;
+        // colorIndicator.style.width = "100%";
+        // colorIndicator.style.height = "6px";
+        // colorIndicator.style.borderRadius = "2px 2px 0 0";
 
-        parent.appendChild(colorIndicator);
+        //parent.appendChild(colorIndicator);
 
         // Table header
         const header = document.createElement("div");
         header.classList.add("sd-table-header");
         header.style.display = "flex";
         header.style.gap = "10px";
-        header.style.height = "40px";
+        header.style.height = "44px";
         header.style.borderBottom = "1px solid var(--sd-cell-divider-color)";
 
         const headerIcon = document.createElement("div");
@@ -401,10 +401,10 @@ export class SchemaDesignerTable implements Table {
     }
 
     public get width(): number {
-        return 400;
+        return 250;
     }
 
     public get height(): number {
-        return Math.min(330, 52 + this.columns.length * 28) + 4;
+        return Math.min(330, 52 + this.columns.length * 28);
     }
 }
