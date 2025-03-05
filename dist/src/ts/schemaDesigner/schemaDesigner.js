@@ -455,7 +455,7 @@ class SchemaDesigner {
     configureMxOutline() {
         this._outlineContainer = document.createElement("div");
         this._outlineContainer.classList.add("sd-outline");
-        this.container.appendChild(this._outlineContainer);
+        this.container.parentElement.appendChild(this._outlineContainer);
         this.mxOutline = new mx_1.mxGraphFactory.mxOutline(this.mxGraph, this._outlineContainer);
     }
     /**
@@ -464,7 +464,6 @@ class SchemaDesigner {
     initializeToolbar() {
         const toolbarBelt = document.createElement("div");
         toolbarBelt.classList.add("sd-toolbar-belt");
-        this.container.parentElement.appendChild(toolbarBelt);
         this.toolbar = new schemaDesignerToolbar_1.SchemaDesignerToolbar(toolbarBelt, this.mxGraph, this.config);
         if (this.config.isEditable) {
             this.toolbar.addButton(this.config.icons.addTableIcon, "Add Table", () => {
@@ -533,6 +532,9 @@ class SchemaDesigner {
         }
         if (this.config.showToolbar === false) {
             toolbarBelt.style.display = "none";
+        }
+        else {
+            this.container.parentElement.appendChild(toolbarBelt);
         }
     }
     /**

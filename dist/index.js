@@ -48538,7 +48538,7 @@ var SchemaDesigner = class {
   configureMxOutline() {
     this._outlineContainer = document.createElement("div");
     this._outlineContainer.classList.add("sd-outline");
-    this.container.appendChild(this._outlineContainer);
+    this.container.parentElement.appendChild(this._outlineContainer);
     this.mxOutline = new mxGraphFactory.mxOutline(this.mxGraph, this._outlineContainer);
   }
   /**
@@ -48547,7 +48547,6 @@ var SchemaDesigner = class {
   initializeToolbar() {
     const toolbarBelt = document.createElement("div");
     toolbarBelt.classList.add("sd-toolbar-belt");
-    this.container.parentElement.appendChild(toolbarBelt);
     this.toolbar = new SchemaDesignerToolbar(toolbarBelt, this.mxGraph, this.config);
     if (this.config.isEditable) {
       this.toolbar.addButton(
@@ -48656,6 +48655,8 @@ var SchemaDesigner = class {
     }
     if (this.config.showToolbar === false) {
       toolbarBelt.style.display = "none";
+    } else {
+      this.container.parentElement.appendChild(toolbarBelt);
     }
   }
   /**

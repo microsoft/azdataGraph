@@ -498,7 +498,7 @@ export class SchemaDesigner {
     private configureMxOutline() {
         this._outlineContainer = document.createElement("div");
         this._outlineContainer.classList.add("sd-outline");
-        this.container.appendChild(this._outlineContainer);
+        (this.container.parentElement as HTMLElement).appendChild(this._outlineContainer);
         this.mxOutline = new mx.mxOutline(this.mxGraph, this._outlineContainer);
     }
 
@@ -508,7 +508,6 @@ export class SchemaDesigner {
     private initializeToolbar() {
         const toolbarBelt = document.createElement("div");
         toolbarBelt.classList.add("sd-toolbar-belt");
-        (this.container.parentElement as HTMLElement).appendChild(toolbarBelt);
         this.toolbar = new SchemaDesignerToolbar(toolbarBelt, this.mxGraph, this.config);
         if (this.config.isEditable) {
             this.toolbar.addButton(
@@ -626,6 +625,8 @@ export class SchemaDesigner {
 
         if (this.config.showToolbar === false) {
             toolbarBelt.style.display = "none";
+        } else {
+            (this.container.parentElement as HTMLElement).appendChild(toolbarBelt);
         }
     }
 
