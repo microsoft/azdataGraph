@@ -89,7 +89,7 @@
   height: 100px;
 }
 .sd-table {
-  width: 400px;
+  width: 250px;
   height: 100%;
   border-radius: 2px;
   color: var(--sd-cell-html-foreground);

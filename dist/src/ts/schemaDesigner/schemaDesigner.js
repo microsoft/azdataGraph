@@ -456,6 +456,7 @@ class SchemaDesigner {
         this._outlineContainer = document.createElement("div");
         this._outlineContainer.classList.add("sd-outline");
         this.container.appendChild(this._outlineContainer);
+        this.mxOutline = new mx_1.mxGraphFactory.mxOutline(this.mxGraph, this._outlineContainer);
     }
     /**
      * Initializes the toolbar for the schema designer
@@ -1052,8 +1053,6 @@ class SchemaDesigner {
         }
         this.autoLayout();
         this.mxGraph.refresh();
-        this.mxOutline.destroy();
-        this.configureMxOutline();
     }
 }
 exports.SchemaDesigner = SchemaDesigner;

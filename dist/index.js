@@ -46902,73 +46902,6 @@ function getRowY(state, column) {
   return y;
 }
 
-// node_modules/create-color/src/hashToHex.js
-var hashToHex = (hash) => {
-  const c = (hash & 16777215).toString(16);
-  return `#${"00000".substring(0, 6 - c.length) + c}`;
-};
-
-// node_modules/create-color/src/hashToHsl.js
-var hashToHsl = (hash) => {
-  const r = ((hash & 16711680) >> 16) / 255;
-  const g = ((hash & 65280) >> 8) / 255;
-  const b = (hash & 255) / 255;
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  let h2 = 0;
-  let s = 0;
-  let l = (max + min) / 2;
-  if (max === min) {
-    h2 = s = 0;
-  } else {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    switch (max) {
-      case r:
-        h2 = (g - b) / d + (g < b ? 6 : 0);
-        break;
-      case g:
-        h2 = (b - r) / d + 2;
-        break;
-      case b:
-        h2 = (r - g) / d + 4;
-        break;
-    }
-    h2 /= 6;
-  }
-  return `hsl(${Math.round(h2 * 360)},${Math.round(s * 100)}%,${Math.round(l * 100)}%)`;
-};
-
-// node_modules/create-color/src/hashToRgb.js
-var hashToRgb = (hash) => `rgb(${(hash & 16711680) >> 16},${(hash & 65280) >> 8},${hash & 255})`;
-
-// node_modules/create-color/src/index.js
-var createColor = (str, params = { format: "hex" }) => {
-  if (str == null) {
-    throw new Error(`[X] You didn't specify an input parameter for the hash`);
-  }
-  const hash = getHash(str);
-  const allFormats = {
-    hex: () => hashToHex(hash),
-    rgb: () => hashToRgb(hash),
-    hsl: () => hashToHsl(hash)
-  };
-  const format = params && params.format;
-  const keys = Object.keys(allFormats);
-  if (!keys.includes(format)) {
-    throw new Error(`
-      [X] Unknown format: ${format}. 
-      The following formats are available: ${keys}
-    `);
-  }
-  return allFormats[format]();
-};
-var getHash = (str) => {
-  const s = JSON.stringify(str);
-  return s.split("").reduce((a, _, i) => a += s.charCodeAt(i) + (a << 5), 0);
-};
-var src_default = createColor;
-
 // src/ts/schemaDesigner/schemaDesignerEntity.ts
 var SchemaDesignerTable = class {
   /**
@@ -47116,28 +47049,21 @@ var SchemaDesignerTable = class {
     const parent = document.createElement("div");
     this.parentDiv = parent;
     parent.classList.add("sd-table");
-    parent.style.width = "400px";
+    parent.style.width = "250px";
     parent.style.height = "100%";
     parent.style.borderRadius = "2px";
     parent.style.color = "var(--sd-cell-html-foreground)";
     parent.style.boxShadow = "0px 3px 8px rgba(0, 0, 0, 0.35), 0px 1px 3px rgba(0, 0, 0, 0.5), inset 0px 0.5px 0px rgba(255, 255, 255, 0.08), inset 0px 0px 0.5px rgba(255, 255, 255, 0.3)";
+    parent.style.border = "1px solid var(--sd-cell-divider-color)";
     parent.style.display = "flex";
     parent.style.flexDirection = "column";
     parent.style.opacity = this.opacity.toString();
     parent.style.backgroundColor = "var(--sd-graph-background-color)";
-    const tableColor = src_default(this.schema, { format: "hex" });
-    const colorIndicator = document.createElement("div");
-    colorIndicator.classList.add("sd-table-color-indicator");
-    colorIndicator.style.backgroundColor = tableColor;
-    colorIndicator.style.width = "100%";
-    colorIndicator.style.height = "6px";
-    colorIndicator.style.borderRadius = "2px 2px 0 0";
-    parent.appendChild(colorIndicator);
     const header = document.createElement("div");
     header.classList.add("sd-table-header");
     header.style.display = "flex";
     header.style.gap = "10px";
-    header.style.height = "40px";
+    header.style.height = "44px";
     header.style.borderBottom = "1px solid var(--sd-cell-divider-color)";
     const headerIcon = document.createElement("div");
     headerIcon.innerHTML = this.schemaDesignerConfig.icons.entityIcon;
@@ -47297,10 +47223,10 @@ var SchemaDesignerTable = class {
     return columnTitle;
   }
   get width() {
-    return 400;
+    return 250;
   }
   get height() {
-    return Math.min(330, 52 + this.columns.length * 28) + 4;
+    return Math.min(330, 52 + this.columns.length * 28);
   }
 };
 
@@ -47324,6 +47250,9 @@ var SchemaDesignerLayout = class extends mxGraphFactory.mxGraphLayout {
     g.setGraph({
       rankdir: "LR",
       align: "UL",
+      marginx: 50,
+      marginy: 50,
+      nodesep: 50,
       ranksep: 50
     });
     const dagCells = this.graph.getModel().getChildCells(parent);
@@ -47338,8 +47267,8 @@ var SchemaDesignerLayout = class extends mxGraphFactory.mxGraphLayout {
           currentCell.id,
           {
             label: currentCell.id,
-            width: value.width + 50,
-            height: value.height + 50
+            width: value.width + 20,
+            height: value.height
           }
         );
       }
@@ -47358,8 +47287,8 @@ var SchemaDesignerLayout = class extends mxGraphFactory.mxGraphLayout {
           continue;
         }
         const computedNode = g.node(currentCell.id);
-        currentCell.geometry.x = computedNode.x;
-        currentCell.geometry.y = computedNode.y;
+        currentCell.geometry.x = computedNode.x - (currentCell.value.width + 20) / 2;
+        currentCell.geometry.y = computedNode.y - currentCell.value.height / 2;
       }
     }
     this.graph.refresh();
@@ -48610,6 +48539,7 @@ var SchemaDesigner = class {
     this._outlineContainer = document.createElement("div");
     this._outlineContainer.classList.add("sd-outline");
     this.container.appendChild(this._outlineContainer);
+    this.mxOutline = new mxGraphFactory.mxOutline(this.mxGraph, this._outlineContainer);
   }
   /**
    * Initializes the toolbar for the schema designer
@@ -49244,8 +49174,6 @@ var SchemaDesigner = class {
     }
     this.autoLayout();
     this.mxGraph.refresh();
-    this.mxOutline.destroy();
-    this.configureMxOutline();
   }
 };
 var export_mx = import_mxgraph2.default;

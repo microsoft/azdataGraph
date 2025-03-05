@@ -24,6 +24,9 @@ class SchemaDesignerLayout extends mx_1.mxGraphFactory.mxGraphLayout {
         g.setGraph({
             rankdir: 'LR',
             align: 'UL',
+            marginx: 50,
+            marginy: 50,
+            nodesep: 50,
             ranksep: 50,
         });
         const dagCells = this.graph.getModel().getChildCells(parent);
@@ -36,8 +39,8 @@ class SchemaDesignerLayout extends mx_1.mxGraphFactory.mxGraphLayout {
                 }
                 g.setNode(currentCell.id, {
                     label: currentCell.id,
-                    width: value.width + 50,
-                    height: value.height + 50,
+                    width: value.width + 20,
+                    height: value.height,
                 });
             }
         }
@@ -55,8 +58,8 @@ class SchemaDesignerLayout extends mx_1.mxGraphFactory.mxGraphLayout {
                     continue;
                 }
                 const computedNode = g.node(currentCell.id);
-                currentCell.geometry.x = computedNode.x;
-                currentCell.geometry.y = computedNode.y;
+                currentCell.geometry.x = computedNode.x - (currentCell.value.width + 20) / 2;
+                currentCell.geometry.y = computedNode.y - (currentCell.value.height) / 2;
             }
         }
         this.graph.refresh();

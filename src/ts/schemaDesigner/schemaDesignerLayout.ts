@@ -23,6 +23,9 @@ export class SchemaDesignerLayout extends mx.mxGraphLayout {
         g.setGraph({
             rankdir: 'LR',
             align: 'UL',
+            marginx: 50,
+            marginy: 50,
+            nodesep: 50,
             ranksep: 50,
         });
 
@@ -32,15 +35,15 @@ export class SchemaDesignerLayout extends mx.mxGraphLayout {
             const currentCell = dagCells[i];
             if (!currentCell.edge) {
                 const value = currentCell.value as SchemaDesignerTable;
-                if(!value.isVisible) {
+                if (!value.isVisible) {
                     continue;
                 }
                 g.setNode(
                     currentCell.id,
                     {
                         label: currentCell.id,
-                        width: value.width + 50,
-                        height: value.height + 50,
+                        width: value.width + 20,
+                        height: value.height,
                     }
                 )
             }
@@ -64,8 +67,8 @@ export class SchemaDesignerLayout extends mx.mxGraphLayout {
                     continue;
                 }
                 const computedNode = g.node(currentCell.id);
-                currentCell.geometry.x = computedNode.x;
-                currentCell.geometry.y = computedNode.y;
+                currentCell.geometry.x = computedNode.x - (currentCell.value.width + 20) / 2;
+                currentCell.geometry.y = computedNode.y - (currentCell.value.height) / 2;
             }
         }
 
