@@ -49118,6 +49118,8 @@ var SchemaDesigner = class {
         cell2.value.isVisible = true;
         cell2.value.opacity = 1;
       }
+      this.autoLayout();
+      this.mxGraph.refresh();
       return;
     }
     const visibleCells = [];

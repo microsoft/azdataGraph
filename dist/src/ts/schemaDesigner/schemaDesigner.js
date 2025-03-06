@@ -995,6 +995,8 @@ class SchemaDesigner {
                 cell.value.isVisible = true;
                 cell.value.opacity = 1;
             }
+            this.autoLayout();
+            this.mxGraph.refresh();
             return;
         }
         const visibleCells = [];
