@@ -48972,7 +48972,11 @@ var SchemaDesigner = class {
           isPrimaryKey: true,
           isIdentity: true,
           isNullable: false,
-          isUnique: false
+          isUnique: false,
+          maxLength: 0,
+          precision: 0,
+          scale: 0,
+          collation: ""
         }
       ],
       foreignKeys: []

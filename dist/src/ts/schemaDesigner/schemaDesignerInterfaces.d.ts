@@ -46,6 +46,18 @@ export interface Column {
      */
     dataType: string;
     /**
+     * Max length of the column
+     */
+    maxLength: number;
+    /**
+     * Precision of the column
+     */
+    precision: number;
+    /**
+     * Scale of the column
+     */
+    scale: number;
+    /**
      * Is the column primary key
      */
     isPrimaryKey: boolean;
@@ -61,6 +73,10 @@ export interface Column {
      * Unique constraint of the column
      */
     isUnique: boolean;
+    /**
+     * Collation of the column
+     */
+    collation: string;
 }
 export interface ForeignKey {
     /**
