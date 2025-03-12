@@ -366,7 +366,11 @@ class SchemaDesigner {
         this.mxGraph.connectionHandler.isValidTarget = function (_cell) {
             return this.currentRowNode !== null;
         };
+        const self = this;
         this.mxGraph.connectionHandler.validateConnection = function (source, target) {
+            if (self.config.isForeignKeyValid(source, target)) {
+                return null;
+            }
             if (this.edgeState === null) {
                 return null;
             }
