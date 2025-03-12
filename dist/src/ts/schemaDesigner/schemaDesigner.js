@@ -63,6 +63,7 @@ class SchemaDesigner {
         this.cellClickListeners = [];
         this.filteredCellIds = [];
         this.initializeGraph();
+        this.isForeignKeyValid = this.config.isForeignKeyValid;
     }
     /**
      * Sets up the mxGraph instance for the schema designer
@@ -368,7 +369,7 @@ class SchemaDesigner {
         };
         const self = this;
         this.mxGraph.connectionHandler.validateConnection = function (source, target) {
-            if (this.edgeState && self.config.isForeignKeyValid !== undefined) {
+            if (this.edgeState && self.isForeignKeyValid !== undefined) {
                 const edgeStateValue = this.edgeState.cell.value;
                 if (self.config.isForeignKeyValid(source, target, edgeStateValue.sourceRow, edgeStateValue.targetRow)) {
                     return null;

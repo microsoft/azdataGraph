@@ -48162,6 +48162,7 @@ var SchemaDesigner = class {
     this.cellClickListeners = [];
     this.filteredCellIds = [];
     this.initializeGraph();
+    this.isForeignKeyValid = this.config.isForeignKeyValid;
   }
   /**
    * Sets up the mxGraph instance for the schema designer
@@ -48458,7 +48459,7 @@ var SchemaDesigner = class {
     };
     const self = this;
     this.mxGraph.connectionHandler.validateConnection = function(source, target) {
-      if (this.edgeState && self.config.isForeignKeyValid !== void 0) {
+      if (this.edgeState && self.isForeignKeyValid !== void 0) {
         const edgeStateValue2 = this.edgeState.cell.value;
         if (self.config.isForeignKeyValid(source, target, edgeStateValue2.sourceRow, edgeStateValue2.targetRow)) {
           return null;

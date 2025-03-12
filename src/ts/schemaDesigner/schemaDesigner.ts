@@ -50,11 +50,14 @@ export class SchemaDesigner {
 
     public filteredCellIds: string[] = [];
 
+    public isForeignKeyValid: (source: mxCell, target: mxCell, sourceColumn: number, targetColumn: number) => boolean;
+
     constructor(
         private container: HTMLElement,
         public config: SchemaDesignerConfig
     ) {
         this.initializeGraph();
+        this.isForeignKeyValid = this.config.isForeignKeyValid;
     }
 
     /**
@@ -396,7 +399,7 @@ export class SchemaDesigner {
 
         const self = this;
         (this.mxGraph.connectionHandler as extendedConnectionHandler).validateConnection = function (source, target) {
-            if (this.edgeState && self.config.isForeignKeyValid !== undefined) {
+            if (this.edgeState && self.isForeignKeyValid !== undefined) {
                 const edgeStateValue = this.edgeState.cell.value as EdgeCellValue;
                 if (self.config.isForeignKeyValid(source, target, edgeStateValue.sourceRow, edgeStateValue.targetRow)) {
                     return null!;

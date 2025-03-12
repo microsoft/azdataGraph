@@ -40,6 +40,7 @@ export declare class SchemaDesigner {
     toolbar: SchemaDesignerToolbar;
     private _outlineContainer;
     filteredCellIds: string[];
+    isForeignKeyValid: (source: mxCell, target: mxCell, sourceColumn: number, targetColumn: number) => boolean;
     constructor(container: HTMLElement, config: SchemaDesignerConfig);
     /**
      * Sets up the mxGraph instance for the schema designer
