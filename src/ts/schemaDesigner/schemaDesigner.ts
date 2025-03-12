@@ -401,7 +401,7 @@ export class SchemaDesigner {
         (this.mxGraph.connectionHandler as extendedConnectionHandler).validateConnection = function (source, target) {
             if (this.edgeState && self.isForeignKeyValid !== undefined) {
                 const edgeStateValue = this.edgeState.cell.value as EdgeCellValue;
-                if (self.config.isForeignKeyValid(source, target, edgeStateValue.sourceRow, edgeStateValue.targetRow)) {
+                if (self.isForeignKeyValid(source, target, edgeStateValue.sourceRow, edgeStateValue.targetRow)) {
                     return null!;
                 }
             }
