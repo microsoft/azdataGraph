@@ -48463,6 +48463,8 @@ var SchemaDesigner = class {
         const edgeStateValue2 = this.edgeState.cell.value;
         if (self.isForeignKeyValid(source, target, edgeStateValue2.sourceRow, edgeStateValue2.targetRow)) {
           return null;
+        } else {
+          return "";
         }
       }
       if (this.edgeState === null) {

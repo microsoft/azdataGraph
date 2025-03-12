@@ -403,6 +403,8 @@ export class SchemaDesigner {
                 const edgeStateValue = this.edgeState.cell.value as EdgeCellValue;
                 if (self.isForeignKeyValid(source, target, edgeStateValue.sourceRow, edgeStateValue.targetRow)) {
                     return null!;
+                } else {
+                    return "";
                 }
             }
 

@@ -374,6 +374,9 @@ class SchemaDesigner {
                 if (self.isForeignKeyValid(source, target, edgeStateValue.sourceRow, edgeStateValue.targetRow)) {
                     return null;
                 }
+                else {
+                    return "";
+                }
             }
             if (this.edgeState === null) {
                 return null;
