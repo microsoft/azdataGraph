@@ -48461,7 +48461,7 @@ var SchemaDesigner = class {
     this.mxGraph.connectionHandler.validateConnection = function(source, target) {
       if (this.edgeState && self.isForeignKeyValid !== void 0) {
         const edgeStateValue2 = this.edgeState.cell.value;
-        if (self.config.isForeignKeyValid(source, target, edgeStateValue2.sourceRow, edgeStateValue2.targetRow)) {
+        if (self.isForeignKeyValid(source, target, edgeStateValue2.sourceRow, edgeStateValue2.targetRow)) {
           return null;
         }
       }
