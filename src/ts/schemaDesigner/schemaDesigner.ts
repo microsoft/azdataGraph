@@ -399,15 +399,7 @@ export class SchemaDesigner {
 
         const self = this;
         (this.mxGraph.connectionHandler as extendedConnectionHandler).validateConnection = function (source, target) {
-            if (this.edgeState && self.isForeignKeyValid !== undefined) {
-                const edgeStateValue = this.edgeState.cell.value as EdgeCellValue;
-                if (self.isForeignKeyValid(source, target, edgeStateValue.sourceRow, edgeStateValue.targetRow)) {
-                    return null!;
-                } else {
-                    return "";
-                }
-            }
-
+            
 
             if (this.edgeState === null) {
                 return null!;
@@ -424,8 +416,18 @@ export class SchemaDesigner {
                 return "";
             }
 
+            if (this.edgeState && self.isForeignKeyValid !== undefined) {
+                const edgeStateValue = this.edgeState.cell.value as EdgeCellValue;
+                if (self.isForeignKeyValid(source, target, edgeStateValue.sourceRow, edgeStateValue.targetRow)) {
+                    return null!;
+                } else {
+                    return "";
+                }
+            }
+
             const edgeState = this.edgeState;
             const edgeStateValue = edgeState.cell.value as EdgeCellValue;
+            console.log(edgeStateValue.sourceRow, edgeStateValue.targetRow);
             const edgeBetweenSourceAndTarget = this.graph.model.getEdgesBetween(source, target);
             for (let i = 0; i < edgeBetweenSourceAndTarget.length; i++) {
                 const edge = edgeBetweenSourceAndTarget[i];
