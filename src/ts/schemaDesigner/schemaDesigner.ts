@@ -394,7 +394,12 @@ export class SchemaDesigner {
             return this.currentRowNode !== null;
         };
 
+        const self = this;
         (this.mxGraph.connectionHandler as extendedConnectionHandler).validateConnection = function (source, target) {
+            if (self.config.isForeignKeyValid(source, target)) {
+                return null!;
+            }
+
             if (this.edgeState === null) {
                 return null!;
             }

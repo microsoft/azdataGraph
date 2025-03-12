@@ -181,6 +181,10 @@ export interface SchemaDesignerConfig {
      * If the toolbar should be shown
      */
     showToolbar: boolean;
+    /**
+     * Validate foreign key
+     */
+    isForeignKeyValid: (source: mxCell, target: mxCell) => boolean;
 }
 
 /**
