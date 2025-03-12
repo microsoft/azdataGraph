@@ -178,7 +178,7 @@ export interface SchemaDesignerConfig {
     /**
      * Validate foreign key
      */
-    isForeignKeyValid: (source: mxCell, target: mxCell) => boolean;
+    isForeignKeyValid: (source: mxCell, target: mxCell, sourceColumn: number, targetColumn: number) => boolean;
 }
 /**
  * Interface for edge cells in schema designer

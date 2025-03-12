@@ -368,8 +368,11 @@ class SchemaDesigner {
         };
         const self = this;
         this.mxGraph.connectionHandler.validateConnection = function (source, target) {
-            if (self.config.isForeignKeyValid(source, target)) {
-                return null;
+            if (this.edgeState && self.config.isForeignKeyValid !== undefined) {
+                const edgeStateValue = this.edgeState.cell.value;
+                if (self.config.isForeignKeyValid(source, target, edgeStateValue.sourceRow, edgeStateValue.targetRow)) {
+                    return null;
+                }
             }
             if (this.edgeState === null) {
                 return null;
