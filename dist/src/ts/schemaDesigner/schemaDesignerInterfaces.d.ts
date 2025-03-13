@@ -66,6 +66,14 @@ export interface Column {
      */
     isIdentity: boolean;
     /**
+     * Seed of the column
+     */
+    identitySeed: number;
+    /**
+     * Increment of the column
+     */
+    identityIncrement: number;
+    /**
      * Is the column nullable
      */
     isNullable: boolean;
