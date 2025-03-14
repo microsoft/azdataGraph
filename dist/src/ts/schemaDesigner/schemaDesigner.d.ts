@@ -74,6 +74,7 @@ export declare class SchemaDesigner {
      * Initializes the toolbar for the schema designer
      */
     private initializeToolbar;
+    private setupKeyboardShortcuts;
     /**
      * Zoom in the schema designer
      */

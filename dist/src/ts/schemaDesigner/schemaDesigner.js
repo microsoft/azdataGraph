@@ -80,6 +80,7 @@ class SchemaDesigner {
         this.applyColors(this.config.colors);
         this.configureMxOutline();
         this.initializeToolbar();
+        this.setupKeyboardShortcuts();
     }
     /**
      * Applies the colors from the config to the schema designer
@@ -549,6 +550,23 @@ class SchemaDesigner {
             this.container.parentElement.appendChild(toolbarBelt);
         }
     }
+    setupKeyboardShortcuts() {
+        const keyHandler = new mx_1.mxGraphFactory.mxDefaultKeyHandler(this.mxEditor);
+        keyHandler.bindAction(8, 'delete');
+        keyHandler.bindAction(46, 'delete');
+        // CTRL + Z or CMD + Z
+        const graphKeyhandler = new mx_1.mxGraphFactory.mxKeyHandler(this.mxGraph);
+        graphKeyhandler.bindKey(90, (evt) => {
+            if (evt.ctrlKey || evt.metaKey) {
+                this.mxEditor.execute("undo");
+            }
+        });
+        graphKeyhandler.bindShiftKey(90, (evt) => {
+            if (evt.ctrlKey || evt.metaKey) {
+                this.mxEditor.execute("redo");
+            }
+        });
+    }
     /**
      * Zoom in the schema designer
      */
@@ -628,7 +646,7 @@ class SchemaDesigner {
      * @param schema The schema to render
      * @param cleanUndoManager Whether to clean the undo manager so that the user can't undo the rendering
      */
-    renderSchema(schema, cleanUndoManager = false) {
+    renderSchema(schema, cleanUndoManager = true) {
         const parent = this.mxGraph.getDefaultParent();
         this.mxModel.beginUpdate();
         try {
