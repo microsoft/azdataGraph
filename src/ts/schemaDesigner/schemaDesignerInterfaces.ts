@@ -69,6 +69,14 @@ export interface Column {
      */
     isIdentity: boolean;
     /**
+     * Seed of the column
+     */
+    identitySeed: number;
+    /**
+     * Increment of the column
+     */
+    identityIncrement: number;
+    /**
      * Is the column nullable
      */
     isNullable: boolean;
@@ -121,7 +129,7 @@ export enum OnAction {
     CASCADE = "0",
     NO_ACTION = "1",
     SET_NULL = "2",
-    SET_DEFAULT = "3",
+    SET_DEFAULT = "3"
 }
 
 export interface SchemaDesignerConfig {

@@ -1018,7 +1018,9 @@ export class SchemaDesigner {
                     maxLength: 0,
                     precision: 0,
                     scale: 0,
-                    collation: ''
+                    collation: '',
+                    identityIncrement: 1,
+                    identitySeed: 1
                 }
             ],
             foreignKeys: []
