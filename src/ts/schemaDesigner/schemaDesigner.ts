@@ -693,9 +693,7 @@ export class SchemaDesigner {
         this.mxGraph.view.rendering = false;
         while (true) {
             this.mxGraph.fit(null!);
-            if (this.mxGraph.view.scale < 1) {
-                break;
-            }
+            this.mxGraph.fit(null!);
         }
         this.mxGraph.view.rendering = true;
         this.autoLayout();
