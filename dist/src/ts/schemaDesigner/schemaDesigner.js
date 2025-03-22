@@ -588,10 +588,8 @@ class SchemaDesigner {
      */
     zoomToFit() {
         this.mxGraph.view.rendering = false;
-        while (true) {
-            this.mxGraph.fit(null);
-            this.mxGraph.fit(null);
-        }
+        this.mxGraph.fit(null);
+        this.mxGraph.fit(null);
         this.mxGraph.view.rendering = true;
         this.autoLayout();
         this.updateEditorPosition();
