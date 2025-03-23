@@ -326,6 +326,12 @@ class SchemaDesigner {
                     const targetCellState = this.currentState;
                     if ((_a = targetCellState === null || targetCellState === void 0 ? void 0 : targetCellState.cell) === null || _a === void 0 ? void 0 : _a.value) {
                         const targetCellValue = targetCellState.cell.value;
+                        // Existing foreign key between source and target
+                        const edgeBetweenSourceAndTarget = this.graph.model.getEdgesBetween(this.previous.cell, targetCellState.cell);
+                        let existingForeignKey = undefined;
+                        if (edgeBetweenSourceAndTarget.length > 0) {
+                            existingForeignKey = edgeBetweenSourceAndTarget[0].value;
+                        }
                         if (cellValue) {
                             const targetColumnName = targetCellValue.columns[this.currentRow - 1].name;
                             cellValue.targetRow = this.currentRow;
@@ -333,6 +339,9 @@ class SchemaDesigner {
                             cellValue.referencedSchemaName = targetCellValue.schema;
                             cellValue.referencedTableName = targetCellValue.name;
                             cellValue.name = `FK_${sourceTableValue.name}_${cellValue.referencedTableName}`;
+                            if (existingForeignKey !== undefined) {
+                                cellValue.id = existingForeignKey.id;
+                            }
                         }
                     }
                 }
@@ -394,7 +403,6 @@ class SchemaDesigner {
             }
             const edgeState = this.edgeState;
             const edgeStateValue = edgeState.cell.value;
-            console.log(edgeStateValue.sourceRow, edgeStateValue.targetRow);
             const edgeBetweenSourceAndTarget = this.graph.model.getEdgesBetween(source, target);
             for (let i = 0; i < edgeBetweenSourceAndTarget.length; i++) {
                 const edge = edgeBetweenSourceAndTarget[i];

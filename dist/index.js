@@ -48417,6 +48417,11 @@ var SchemaDesigner = class {
           const targetCellState = this.currentState;
           if (targetCellState?.cell?.value) {
             const targetCellValue = targetCellState.cell.value;
+            const edgeBetweenSourceAndTarget = this.graph.model.getEdgesBetween(this.previous.cell, targetCellState.cell);
+            let existingForeignKey = void 0;
+            if (edgeBetweenSourceAndTarget.length > 0) {
+              existingForeignKey = edgeBetweenSourceAndTarget[0].value;
+            }
             if (cellValue) {
               const targetColumnName = targetCellValue.columns[this.currentRow - 1].name;
               cellValue.targetRow = this.currentRow;
@@ -48424,6 +48429,9 @@ var SchemaDesigner = class {
               cellValue.referencedSchemaName = targetCellValue.schema;
               cellValue.referencedTableName = targetCellValue.name;
               cellValue.name = `FK_${sourceTableValue.name}_${cellValue.referencedTableName}`;
+              if (existingForeignKey !== void 0) {
+                cellValue.id = existingForeignKey.id;
+              }
             }
           }
         } else {
@@ -48482,7 +48490,6 @@ var SchemaDesigner = class {
       }
       const edgeState = this.edgeState;
       const edgeStateValue = edgeState.cell.value;
-      console.log(edgeStateValue.sourceRow, edgeStateValue.targetRow);
       const edgeBetweenSourceAndTarget = this.graph.model.getEdgesBetween(source, target);
       for (let i = 0; i < edgeBetweenSourceAndTarget.length; i++) {
         const edge = edgeBetweenSourceAndTarget[i];

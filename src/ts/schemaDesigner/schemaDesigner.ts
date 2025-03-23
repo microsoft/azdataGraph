@@ -354,6 +354,12 @@ export class SchemaDesigner {
                     const targetCellState = (this as any).currentState as mxCellState;
                     if (targetCellState?.cell?.value) {
                         const targetCellValue = targetCellState.cell.value as SchemaDesignerTable;
+                        // Existing foreign key between source and target
+                        const edgeBetweenSourceAndTarget = this.graph.model.getEdgesBetween((this as any).previous.cell, targetCellState.cell);
+                        let existingForeignKey: EdgeCellValue | undefined = undefined;
+                        if (edgeBetweenSourceAndTarget.length > 0) {
+                            existingForeignKey = edgeBetweenSourceAndTarget[0].value as EdgeCellValue;
+                        }
                         if (cellValue) {
                             const targetColumnName = targetCellValue.columns[this.currentRow - 1].name;
                             cellValue.targetRow = this.currentRow;
@@ -361,6 +367,9 @@ export class SchemaDesigner {
                             cellValue.referencedSchemaName = targetCellValue.schema;
                             cellValue.referencedTableName = targetCellValue.name;
                             cellValue.name = `FK_${sourceTableValue.name}_${cellValue.referencedTableName}`;
+                            if (existingForeignKey !== undefined) {
+                                cellValue.id = existingForeignKey.id;
+                            }
                         }
                     }
                 } else {
@@ -428,7 +437,6 @@ export class SchemaDesigner {
 
             const edgeState = this.edgeState;
             const edgeStateValue = edgeState.cell.value as EdgeCellValue;
-            console.log(edgeStateValue.sourceRow, edgeStateValue.targetRow);
             const edgeBetweenSourceAndTarget = this.graph.model.getEdgesBetween(source, target);
             for (let i = 0; i < edgeBetweenSourceAndTarget.length; i++) {
                 const edge = edgeBetweenSourceAndTarget[i];
