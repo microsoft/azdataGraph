@@ -35,9 +35,8 @@
     "grunt-contrib-copy": "^1.0.0",
     "http-server": "^14.1.1",
     "load-grunt-tasks": "^3.5.2",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-router-dom": "^7.1.1",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.18.0"
   },
