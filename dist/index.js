@@ -46795,8 +46795,8 @@ var require_dagre = __commonJS({
 });
 
 // src/ts/index.ts
-var ts_exports = {};
-__export(ts_exports, {
+var index_exports = {};
+__export(index_exports, {
   OnAction: () => OnAction,
   SchemaDesigner: () => SchemaDesigner,
   SchemaDesignerTable: () => SchemaDesignerTable,
@@ -46816,7 +46816,7 @@ window.mxResourceExtension = ".txt";
 var mxGraphFactory = (0, import_mxgraph.default)({});
 
 // src/ts/index.ts
-__reExport(ts_exports, __toESM(require_build()));
+__reExport(index_exports, __toESM(require_build()));
 
 // src/ts/schemaDesigner/schemaDesignerInterfaces.ts
 var OnAction = /* @__PURE__ */ ((OnAction2) => {
