@@ -32461,6 +32461,22 @@ var require_build = __commonJS({
         azdataGraph.prototype.insertWeightedInvertedEdge = function(parent, id, value, source, target, style) {
           return this.insertInvertedEdge(parent, id, value, source, target, `strokeWidth=${value.weight.toFixed(1)};` + style);
         };
+        azdataGraph.prototype.escapeTooltipText = function(value) {
+          return String(value ?? "").replace(/[&<>"']/g, (character) => {
+            switch (character) {
+              case "&":
+                return "&amp;";
+              case "<":
+                return "&lt;";
+              case ">":
+                return "&gt;";
+              case '"':
+                return "&quot;";
+              case "'":
+                return "&#39;";
+            }
+          });
+        };
         azdataGraph.prototype.getStyledTooltipForCell = function(cell2) {
           const tooltipWidth = "width: 45em;";
           const justifyContent = "display: flex; justify-content: space-between;";
@@ -32474,10 +32490,10 @@ var require_build = __commonJS({
           if (cell2?.value != null && cell2?.value?.metrics != null) {
             var tooltip = `<div style="${tooltipWidth}">`;
             if (!cell2.edge) {
-              let tooltipTitle = this.truncateTooltipTitle(cell2.value.tooltipTitle);
+              let tooltipTitle = this.escapeTooltipText(this.truncateTooltipTitle(cell2.value.tooltipTitle));
               tooltip += `<div style="${centerText}"><span style="${boldText}">${tooltipTitle}</span></div>`;
               if (cell2.value.description) {
-                tooltip += `<div style="${headerBottomMargin} ${headerTopMargin}"><span>${cell2.value.description}</span></div>`;
+                tooltip += `<div style="${headerBottomMargin} ${headerTopMargin}"><span>${this.escapeTooltipText(cell2.value.description)}</span></div>`;
               }
             }
             let startIndex = cell2.edge ? 0 : 1;
@@ -32487,8 +32503,8 @@ var require_build = __commonJS({
               }
               tooltip += `<div style="${tooltipLineHeight}">`;
               tooltip += `<div style="${justifyContent}">`;
-              tooltip += `<span style="${boldText} ${metricLabelMargin}">${cell2.value.metrics[i].name}</span>`;
-              tooltip += `<span>${cell2.value.metrics[i].value}</span>`;
+              tooltip += `<span style="${boldText} ${metricLabelMargin}">${this.escapeTooltipText(cell2.value.metrics[i].name)}</span>`;
+              tooltip += `<span>${this.escapeTooltipText(cell2.value.metrics[i].value)}</span>`;
               tooltip += "</div>";
               if (i < cell2.value.metrics.length - 1) {
                 tooltip += `<hr />`;
@@ -32498,12 +32514,12 @@ var require_build = __commonJS({
             if (!cell2.edge) {
               cell2.value.metrics.filter((m) => m.isLongString).forEach((m) => {
                 tooltip += "<hr />";
-                tooltip += `<div style="${footerTopMargin}"><span style="${boldText}">${m.name}</span></div>`;
+                tooltip += `<div style="${footerTopMargin}"><span style="${boldText}">${this.escapeTooltipText(m.name)}</span></div>`;
                 let metricLabel = m.value.replace(/(\r\n|\n|\r)/gm, " ");
                 if (metricLabel.length > 103) {
                   metricLabel = metricLabel.substring(0, 100) + "...";
                 }
-                tooltip += `<div><span>${metricLabel}</span></div>`;
+                tooltip += `<div><span>${this.escapeTooltipText(metricLabel)}</span></div>`;
               });
             }
             tooltip += "</div>";

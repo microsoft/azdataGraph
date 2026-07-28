@@ -88,6 +88,31 @@ azdataGraph.prototype.insertWeightedInvertedEdge = function (parent, id, value, 
 };
 
 /**
+ * Function: escapeTooltipText
+ *
+ * Encodes text for safe insertion into tooltip HTML.
+ *
+ * Parameters:
+ * value - Value to encode.
+ */
+azdataGraph.prototype.escapeTooltipText = function (value) {
+    return String(value ?? '').replace(/[&<>"']/g, character => {
+        switch (character) {
+            case '&':
+                return '&amp;';
+            case '<':
+                return '&lt;';
+            case '>':
+                return '&gt;';
+            case '"':
+                return '&quot;';
+            case "'":
+                return '&#39;';
+        }
+    });
+};
+
+/**
  * Function: getStyledTooltipForCell
  * 
  * Returns a string to be used as the tooltip for the given cell. The
@@ -113,10 +138,10 @@ azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
 
         // tooltip heading for vertices only
         if (!cell.edge) {
-            let tooltipTitle = this.truncateTooltipTitle(cell.value.tooltipTitle);
+            let tooltipTitle = this.escapeTooltipText(this.truncateTooltipTitle(cell.value.tooltipTitle));
             tooltip += `<div style=\"${centerText}\"><span style=\"${boldText}\">${tooltipTitle}</span></div>`;
             if (cell.value.description) {
-                tooltip += `<div style=\"${headerBottomMargin} ${headerTopMargin}\"><span>${cell.value.description}</span></div>`;
+                tooltip += `<div style=\"${headerBottomMargin} ${headerTopMargin}\"><span>${this.escapeTooltipText(cell.value.description)}</span></div>`;
             }
         }
 
@@ -129,8 +154,8 @@ azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
             tooltip += `<div style=\"${tooltipLineHeight}\">`;
 
             tooltip += `<div style=\"${justifyContent}\">`;
-            tooltip += `<span style=\"${boldText} ${metricLabelMargin}\">${cell.value.metrics[i].name}</span>`;
-            tooltip += `<span>${cell.value.metrics[i].value}</span>`;
+            tooltip += `<span style=\"${boldText} ${metricLabelMargin}\">${this.escapeTooltipText(cell.value.metrics[i].name)}</span>`;
+            tooltip += `<span>${this.escapeTooltipText(cell.value.metrics[i].value)}</span>`;
             tooltip += '</div>';
 
             if (i < cell.value.metrics.length - 1) {
@@ -144,13 +169,13 @@ azdataGraph.prototype.getStyledTooltipForCell = function (cell) {
         if (!cell.edge) {
             cell.value.metrics.filter(m => m.isLongString).forEach(m => {
                 tooltip += '<hr />';
-                tooltip += `<div style=\"${footerTopMargin}\"><span style=\"${boldText}\">${m.name}</span></div>`;
+                tooltip += `<div style=\"${footerTopMargin}\"><span style=\"${boldText}\">${this.escapeTooltipText(m.name)}</span></div>`;
 
                 let metricLabel = m.value.replace(/(\r\n|\n|\r)/gm, " ");
                 if (metricLabel.length > 103) {
                     metricLabel = metricLabel.substring(0, 100) + '...';
                 }
-                tooltip += `<div><span>${metricLabel}</span></div>`; // Removing all line breaks as they look bad in tooltips
+                tooltip += `<div><span>${this.escapeTooltipText(metricLabel)}</span></div>`; // Removing all line breaks as they look bad in tooltips
             })
         }
 
