@@ -16,8 +16,8 @@
   "types": "./dist/src/ts/index.d.ts",
   "scripts": {
     "compile-mxgraph": "grunt build --base ./ --gruntfile etc/build/Gruntfile.js",
-    "build": "yarn compile-mxgraph && npx tsc && node build.js",
-    "watch": "yarn compile-mxgraph && node build.js --watch",
+    "build": "npm run compile-mxgraph && tsc && node build.js",
+    "watch": "npm run compile-mxgraph && node build.js --watch",
     "examples": "http-server -p 4000",
     "lint": "eslint",
     "test": "node --test test/*.test.js"
