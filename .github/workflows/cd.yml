@@ -1,15 +1,18 @@
 name: Release workflow
 on:
-    schedule:
-      - cron: '0 0 * * *'
-    push:
-      branches:
-        - main
-    workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - package.json
+  workflow_dispatch:
 
 permissions:
   contents: write
-  actions: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
   create_release:
@@ -21,45 +24,53 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Check if tag is present
+        id: release
+        run: |
+          VERSION=$(jq -r '.version' package.json)
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          if git show-ref --verify --quiet "refs/tags/${VERSION}"; then
+            echo "Tag ${VERSION} already exists."
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Tag ${VERSION} does not exist."
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Set up Node.js
+        if: steps.release.outputs.exists == 'false'
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: npm
 
-      - name: Install yarn
-        run: npm install -g yarn
-      
       - name: Install Dependencies
-        run: yarn
+        if: steps.release.outputs.exists == 'false'
+        run: npm ci
       
       - name: Run build
-        run: yarn build
+        if: steps.release.outputs.exists == 'false'
+        run: npm run build
 
       - name: Generate release notes
+        if: steps.release.outputs.exists == 'false'
         run: |
-          git log --pretty=format:"%h - %s (%an)" $(git log -G '"version":' -n 2 --pretty=format:%H -- package.json | sed -n 2p)..HEAD
-          GIT_LOG=$(git log --pretty=format:"%h - %s (%an)" $(git log -G '"version":' -n 2 --pretty=format:%H -- package.json | sed -n 2p)..HEAD)
-          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
-          echo "${GIT_LOG}" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-      
-      - name: Check if tag is present
-        id: tag_check
-        run: |
-          VERSION=$(jq -r '.version' package.json)
-          echo "version=${VERSION}" >> $GITHUB_ENV
-          if git rev-parse "${VERSION}" >/dev/null 2>&1; then
-            echo "Tag v${VERSION} already exists."
-            echo "exists=true" >> $GITHUB_ENV
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 2>/dev/null || true)
+          if [ -n "$PREVIOUS_TAG" ]; then
+            git log --pretty=format:"%h - %s (%an)" "${PREVIOUS_TAG}..HEAD" > "$RUNNER_TEMP/release-notes.md"
           else
-            echo "Tag v${VERSION} does not exist."
-            echo "exists=false" >> $GITHUB_ENV
+            git log --pretty=format:"%h - %s (%an)" HEAD > "$RUNNER_TEMP/release-notes.md"
           fi
 
       - name: Create npm package
-        run: yarn pack
+        id: package
+        if: steps.release.outputs.exists == 'false'
+        run: |
+          PACKAGE_TARBALL=$(npm pack --json | jq -r '.[0].filename')
+          echo "filename=${PACKAGE_TARBALL}" >> "$GITHUB_OUTPUT"
       
       - name: Checkout release branch
+        if: steps.release.outputs.exists == 'false'
         uses: actions/checkout@v4
         with:
           ref: release
@@ -67,46 +78,33 @@ jobs:
           fetch-depth: 0
 
       - name: Extract package contents
-        run: |
-          tar -xzf *.tgz --strip-components=1 -C ./release
+        if: steps.release.outputs.exists == 'false'
+        run: tar -xzf "${{ steps.package.outputs.filename }}" --strip-components=1 -C ./release
 
       - name: Push package contents to a new branch
-        if: env.exists == 'false'
+        id: publish
+        if: steps.release.outputs.exists == 'false'
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           cd ./release
-          git add .
+          git add --all
           CHANGED_FILES=$(git diff-index HEAD)
           if [ -n "$CHANGED_FILES" ]; then
-            echo "Pushing with message: Release v${{ env.version }}"
-            git commit -m "Release v${{ env.version }}"
-            echo "Pushing with message: Release v${{ env.version }}"
+            git commit -m "Release v${{ steps.release.outputs.version }}"
             git push origin release
-            echo "skip_release=false" >> $GITHUB_ENV
+            echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "No changes to push"
-            echo "skip_release=true" >> $GITHUB_ENV
+            echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Printing release notes
-        run: |
-          echo " ${{ env.RELEASE_NOTES }} "
-          echo v${{ env.version }}
-          echo ${{ env.exists }}
-
       - name: Create Release
-        if: env.exists == 'false' && env.skip_release == 'false'
-        uses: actions/create-release@v1
+        if: steps.publish.outputs.changed == 'true'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ env.version }}
-          release_name: Release v${{ env.version }}
-          body: ${{ env.RELEASE_NOTES }}
-          draft: false
-          prerelease: false
-          commitish: release
-
-
-      
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.release.outputs.version }}" \
+            --target release \
+            --title "Release v${{ steps.release.outputs.version }}" \
+            --notes-file "$RUNNER_TEMP/release-notes.md"
